@@ -25,7 +25,8 @@ class StudentSupportController extends Controller
         $tickets = SupportTicket::where('user_id', $user->id)
             ->withCount('replies')
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('student.support.index', compact('student', 'tickets'));
     }
@@ -59,9 +60,9 @@ class StudentSupportController extends Controller
         $user = Auth::user();
 
         $validated = $request->validate([
-            'category' => 'required|string|max:100',
-            'priority' => 'required|in:low,medium,high',
-            'subject' => 'required|string|max:255',
+            'category' => 'required|string|max:50',
+            'priority' => 'required|in:low,medium,high,urgent',
+            'subject' => 'required|string|max:191',
             'description' => 'required|string|max:5000',
             'attachment' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
         ]);

@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Centre;
 
 use App\Http\Controllers\Controller;
+use App\Models\Certificate;
 use App\Models\Centre;
+use App\Models\Course;
 use App\Models\Download;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
@@ -53,6 +55,55 @@ class CentreDownloadController extends Controller
         $centre->load(['state', 'district']);
 
         return view('centre.downloads.certificate', compact('centre'));
+    }
+
+    public function studentCertificates(Request $request)
+    {
+        $centre = $this->getAuthCentre();
+        $query = Certificate::where('centre_id', $centre->id)
+            ->with(['student', 'course', 'examResult']);
+
+        if ($request->filled('search')) {
+            $s = trim($request->search);
+            $query->where(function ($q) use ($s) {
+                $q->where('certificate_no', 'like', "%{$s}%")
+                  ->orWhereHas('student', function ($sq) use ($s) {
+                      $sq->where('full_name', 'like', "%{$s}%")
+                        ->orWhere('roll_no', 'like', "%{$s}%")
+                        ->orWhere('registration_no', 'like', "%{$s}%");
+                  });
+            });
+        }
+
+        if ($request->filled('course_id')) {
+            $query->where('course_id', $request->course_id);
+        }
+
+        if ($request->filled('status')) {
+            $query->where('status', $request->status);
+        }
+
+        $certificates = $query->latest('id')->paginate(15)->withQueryString();
+        $courses = Course::where('status', true)->orderBy('course_name')->get();
+
+        $stats = [
+            'total' => Certificate::where('centre_id', $centre->id)->count(),
+            'active' => Certificate::where('centre_id', $centre->id)->where('status', 'issued')->count(),
+            'revoked' => Certificate::where('centre_id', $centre->id)->where('status', 'revoked')->count(),
+        ];
+
+        return view('centre.downloads.student_certificates', compact('centre', 'certificates', 'courses', 'stats'));
+    }
+
+    public function showStudentCertificate(Certificate $certificate)
+    {
+        $centre = $this->getAuthCentre();
+        if ($certificate->centre_id !== $centre->id) {
+            abort(403, 'Unauthorized access to student certificate.');
+        }
+
+        $certificate->load(['student.user', 'course', 'centre', 'examResult.marksheet']);
+        return view('centre.downloads.student_certificate_show', compact('centre', 'certificate'));
     }
 
     public function downloadFile(Download $download)

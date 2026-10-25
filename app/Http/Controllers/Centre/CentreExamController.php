@@ -56,6 +56,51 @@ class CentreExamController extends Controller
         return view('centre.exams.index', compact('centre', 'exams'));
     }
 
+    public function hallTicketsIndex(Request $request)
+    {
+        $centre = $this->getAuthCentre();
+
+        $exams = Exam::with('course')->orderBy('exam_date', 'desc')->get();
+
+        $selectedExam = null;
+        if ($request->filled('exam_id')) {
+            $selectedExam = Exam::with(['course.subjects'])->find($request->exam_id);
+        } elseif ($exams->isNotEmpty()) {
+            $selectedExam = $exams->first();
+            $selectedExam->load(['course.subjects']);
+        }
+
+        $students = collect();
+        if ($selectedExam) {
+            $studentQuery = Student::where('centre_id', $centre->id)
+                ->whereHas('admissions', function ($q) use ($selectedExam) {
+                    $q->where('course_id', $selectedExam->course_id)
+                      ->where('status', 'active');
+                })
+                ->with(['admissions' => function ($q) use ($selectedExam) {
+                    $q->where('course_id', $selectedExam->course_id);
+                }, 'admissions.batch']);
+
+            if ($request->filled('search')) {
+                $s = trim($request->search);
+                $studentQuery->where(function ($q) use ($s) {
+                    $q->where('full_name', 'like', "%{$s}%")
+                      ->orWhere('roll_no', 'like', "%{$s}%")
+                      ->orWhere('registration_no', 'like', "%{$s}%");
+                });
+            }
+
+            $students = $studentQuery->orderBy('full_name')->get();
+        }
+
+        $stats = [
+            'total_exams' => $exams->count(),
+            'eligible_candidates' => $students->count(),
+        ];
+
+        return view('centre.exams.hall_tickets_index', compact('centre', 'exams', 'selectedExam', 'students', 'stats'));
+    }
+
     public function hallTickets(Exam $exam)
     {
         $centre = $this->getAuthCentre();
@@ -69,10 +114,54 @@ class CentreExamController extends Controller
             })
             ->with(['admissions' => function ($q) use ($exam) {
                 $q->where('course_id', $exam->course_id);
-            }])
+            }, 'admissions.batch'])
+            ->orderBy('full_name')
             ->get();
 
         return view('centre.exams.hall_tickets', compact('centre', 'exam', 'students'));
+    }
+
+    public function singleHallTicket(Exam $exam, Student $student)
+    {
+        $centre = $this->getAuthCentre();
+        if ($student->centre_id !== $centre->id) {
+            abort(403, 'Unauthorized access to student hall ticket.');
+        }
+
+        $exam->load('course.subjects');
+        $student->load(['admissions' => function ($q) use ($exam) {
+            $q->where('course_id', $exam->course_id);
+        }, 'admissions.batch']);
+
+        $students = collect([$student]);
+        return view('centre.exams.hall_tickets', compact('centre', 'exam', 'students'));
+    }
+
+    public function marksIndex(Request $request)
+    {
+        $centre = $this->getAuthCentre();
+
+        if ($request->filled('exam_id')) {
+            $exam = Exam::findOrFail($request->exam_id);
+            return $this->marksForm($request, $exam);
+        }
+
+        $exams = Exam::with(['course'])
+            ->withCount(['results' => function ($q) use ($centre) {
+                $q->where('centre_id', $centre->id);
+            }])
+            ->orderBy('exam_date', 'desc')
+            ->get();
+
+        foreach ($exams as $ex) {
+            $ex->centre_candidates_count = Student::where('centre_id', $centre->id)
+                ->whereHas('admissions', function ($q) use ($ex) {
+                    $q->where('course_id', $ex->course_id);
+                })
+                ->count();
+        }
+
+        return view('centre.exams.marks_index', compact('centre', 'exams'));
     }
 
     public function marksForm(Request $request, Exam $exam)
@@ -92,11 +181,21 @@ class CentreExamController extends Controller
             ->get();
 
         $selectedStudent = null;
+        $existingResult = null;
+        $existingSubjects = collect();
+
         if ($request->filled('student_id')) {
             $selectedStudent = Student::where('centre_id', $centre->id)->findOrFail($request->student_id);
+            $existingResult = ExamResult::with('subjectResults')
+                ->where('exam_id', $exam->id)
+                ->where('student_id', $selectedStudent->id)
+                ->first();
+            if ($existingResult) {
+                $existingSubjects = $existingResult->subjectResults->keyBy('course_subject_id');
+            }
         }
 
-        return view('centre.exams.marks', compact('centre', 'exam', 'students', 'selectedStudent'));
+        return view('centre.exams.marks', compact('centre', 'exam', 'students', 'selectedStudent', 'existingResult', 'existingSubjects'));
     }
 
     public function storeMarks(Request $request, Exam $exam)
@@ -199,14 +298,23 @@ class CentreExamController extends Controller
     public function results(Request $request)
     {
         $centre = $this->getAuthCentre();
-        $query = ExamResult::where('centre_id', $centre->id)->with(['exam', 'student', 'course']);
+        $query = ExamResult::where('centre_id', $centre->id)->with(['exam', 'student', 'course', 'subjectResults.subject']);
 
         if ($request->filled('search')) {
             $s = trim($request->search);
             $query->whereHas('student', function ($sq) use ($s) {
                 $sq->where('full_name', 'like', "%{$s}%")
-                    ->orWhere('roll_no', 'like', "%{$s}%");
+                    ->orWhere('roll_no', 'like', "%{$s}%")
+                    ->orWhere('registration_no', 'like', "%{$s}%");
             });
+        }
+
+        if ($request->filled('exam_id')) {
+            $query->where('exam_id', $request->exam_id);
+        }
+
+        if ($request->filled('course_id')) {
+            $query->where('course_id', $request->course_id);
         }
 
         if ($request->filled('result_status')) {
@@ -221,6 +329,28 @@ class CentreExamController extends Controller
             'failed' => ExamResult::where('centre_id', $centre->id)->where('result_status', 'failed')->count(),
         ];
 
-        return view('centre.exams.results', compact('centre', 'results', 'stats'));
+        $exams = Exam::orderBy('exam_date', 'desc')->get();
+        $courses = Course::where('status', true)->orderBy('course_name')->get();
+
+        return view('centre.exams.results', compact('centre', 'results', 'stats', 'exams', 'courses'));
+    }
+
+    public function marksheet(ExamResult $result)
+    {
+        $centre = $this->getAuthCentre();
+        if ($result->centre_id !== $centre->id) {
+            abort(403, 'Unauthorized access to student marksheet.');
+        }
+
+        $result->load([
+            'student.user',
+            'course',
+            'exam',
+            'centre',
+            'subjectResults.subject',
+            'marksheet',
+        ]);
+
+        return view('centre.exams.marksheet', compact('centre', 'result'));
     }
 }

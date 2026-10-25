@@ -1,6 +1,6 @@
 @extends('layouts.centre')
 
-@section('title', 'Students Directory - TECH ERA COMPUTER')
+@section('title', 'Students Directory - ' . ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER'))
 
 @section('content')
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
@@ -11,7 +11,7 @@
         <p class="text-muted small mb-0">Manage candidates admitted and studying at study centre {{ $centre->centre_name }} ({{ $centre->centre_code }}).</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('centre.students.create') }}" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+        <a href="{{ route('centre.students.create') }}" class="btn btn-primary rounded-2 px-3 fw-semibold shadow-sm">
             <i class="fa-solid fa-user-plus me-1"></i>New Admission Registration
         </a>
     </div>
@@ -20,7 +20,7 @@
 <!-- Stats Strip -->
 <div class="row g-3 mb-4">
     <div class="col-sm-6 col-md-3">
-        <div class="stat-card p-3 bg-white">
+        <div class="stat-card p-3 bg-white border-start border-4 border-dark">
             <div class="text-muted small fw-semibold text-uppercase">Total Enrolled</div>
             <div class="fs-4 fw-bold text-dark my-1">{{ number_format($stats['total']) }}</div>
             <span class="small text-muted">All-time candidates</span>
@@ -86,25 +86,31 @@
 <!-- Students Directory Table -->
 <div class="card border-0 rounded-4 shadow-sm">
     <div class="card-body p-0">
+        @if($students->count() > 0)
+            <div class="table-scroll-hint d-md-none">
+                <i class="fa-solid fa-arrows-left-right text-primary"></i>
+                <span>Scroll horizontally to view all student records</span>
+            </div>
+        @endif
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+            <table class="table-custom table-hover align-middle mb-0" style="min-width: 780px;">
+                <thead>
                     <tr>
-                        <th>Roll No & Reg No</th>
+                        <th class="ps-4">Roll No & Reg No</th>
                         <th>Student Name & Father</th>
                         <th>Course & Batch</th>
                         <th>Mobile</th>
                         <th>State / District</th>
                         <th>Status</th>
-                        <th class="text-end">Actions</th>
+                        <th class="pe-4 text-end">Actions</th>
                     </tr>
                 </thead>
                 <tbody>
                     @forelse($students as $student)
                     @php $adm = $student->admissions->first(); @endphp
                     <tr>
-                        <td>
-                            <span class="badge bg-primary-subtle text-primary font-monospace fw-bold">{{ $student->roll_no }}</span>
+                        <td class="ps-4">
+                            <span class="badge bg-primary-subtle text-primary font-monospace fw-bold rounded-1">{{ $student->roll_no }}</span>
                             <div class="small text-muted font-monospace mt-1" style="font-size: 0.72rem;">{{ $student->registration_no }}</div>
                         </td>
                         <td>
@@ -112,25 +118,25 @@
                             <div class="small text-muted">Father: {{ $student->father_name }}</div>
                         </td>
                         <td>
-                            <span class="badge bg-secondary-subtle text-secondary">{{ $adm?->course?->course_code ?? 'Course' }}</span>
+                            <span class="badge bg-secondary-subtle text-secondary rounded-1">{{ $adm?->course?->course_code ?? 'Course' }}</span>
                             <div class="small text-muted text-truncate" style="max-width: 180px;">{{ $adm?->course?->course_name ?? 'N/A' }}</div>
                             @if($adm?->batch)
                             <div class="small text-info fw-semibold"><i class="fa-solid fa-clock me-1"></i>{{ $adm->batch->batch_name }}</div>
                             @endif
                         </td>
-                        <td>{{ $student->mobile }}</td>
+                        <td class="text-nowrap">{{ $student->mobile }}</td>
                         <td>
-                            <div class="small">{{ $student->city }}</div>
-                            <div class="small text-muted">{{ $student->state?->name }}</div>
+                            <div class="small text-nowrap">{{ $student->city }}</div>
+                            <div class="small text-muted text-nowrap">{{ $student->state?->name }}</div>
                         </td>
-                        <td>
-                            <span class="badge {{ $student->status === 'completed' ? 'bg-success' : ($student->status === 'ongoing' ? 'bg-info' : 'bg-primary') }}">
+                        <td class="text-nowrap">
+                            <span class="badge rounded-1 {{ $student->status === 'completed' ? 'bg-success' : ($student->status === 'ongoing' ? 'bg-info' : 'bg-primary') }}">
                                 {{ ucfirst($student->status) }}
                             </span>
                         </td>
-                        <td class="text-end">
+                        <td class="pe-4 text-end text-nowrap">
                             <div class="dropdown">
-                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle" type="button" data-bs-toggle="dropdown">
+                                <button class="btn btn-sm btn-outline-secondary dropdown-toggle rounded-2" type="button" data-bs-toggle="dropdown">
                                     Manage
                                 </button>
                                 <ul class="dropdown-menu dropdown-menu-end shadow-sm">
@@ -167,7 +173,7 @@
                             <i class="fa-solid fa-user-slash fs-1 text-black-50 d-block mb-3"></i>
                             <h5>No students found</h5>
                             <p class="small text-muted mb-3">No candidates match the specified criteria in this study centre.</p>
-                            <a href="{{ route('centre.students.create') }}" class="btn btn-primary rounded-pill px-4">
+                            <a href="{{ route('centre.students.create') }}" class="btn btn-primary rounded-2 px-4">
                                 <i class="fa-solid fa-user-plus me-1"></i>Register New Student
                             </a>
                         </td>

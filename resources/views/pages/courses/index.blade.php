@@ -19,7 +19,7 @@
     <section class="py-5">
         <div class="container">
             <!-- Filter Bar & Search -->
-            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-light">
+            <div class="card border-0 shadow-sm rounded-3 p-4 mb-4 bg-light">
                 <form action="{{ route('courses.index') }}" method="GET" class="row g-3 align-items-center">
                     <div class="col-lg-5">
                         <div class="input-group">
@@ -61,32 +61,55 @@
             @else
                 <div class="row g-2.5 g-sm-3 g-lg-4">
                     @foreach($courses as $course)
-                        <div class="col-6 col-lg-4">
-                            <div class="dce-modern-course-card h-100">
-                                <div class="dce-course-top">
-                                    <span class="dce-code-pill">{{ $course->course_code }}</span>
-                                    <span class="dce-cat-pill">{{ $course->category->name ?? 'Course' }}</span>
-                                </div>
-                                <div class="dce-course-content">
-                                    <h6 class="dce-course-name">
-                                        <a href="{{ route('courses.show', $course->slug) }}">
-                                            {{ $course->course_name }}
-                                        </a>
-                                    </h6>
-                                    <div class="dce-course-features">
-                                        <span class="dce-feat-tag"><i class="fa-regular fa-clock text-primary me-1"></i>{{ $course->duration }}</span>
-                                        <span class="dce-feat-tag"><i class="fa-solid fa-certificate text-success me-1"></i>ISO Cert</span>
-                                    </div>
-                                </div>
-                                <div class="dce-course-footer">
-                                    <div class="dce-price-box">
-                                        <span class="dce-price-lbl">Fee</span>
-                                        <span class="dce-price-val">₹{{ number_format($course->default_course_fee, 0) }}</span>
-                                    </div>
-                                    <a href="{{ route('courses.show', $course->slug) }}" class="dce-explore-btn">
-                                        <span>Details</span>
-                                        <i class="fa-solid fa-chevron-right" style="font-size: 0.6rem;"></i>
+                        @php
+                            $courseImg = $course->thumbnail 
+                                ? (file_exists(public_path($course->thumbnail)) 
+                                    ? asset($course->thumbnail) 
+                                    : (str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : asset('storage/' . $course->thumbnail))) 
+                                : asset('images/courses/' . strtolower(\Illuminate\Support\Str::slug($course->course_code)) . '.svg');
+                        @endphp
+                        <div class="col-6 col-md-6 col-lg-4">
+                            <div class="dce-course-grid-card">
+                                <!-- Course Thumbnail Image with Floating Badges -->
+                                <div class="dce-course-img-wrap">
+                                    <a href="{{ route('courses.show', $course->slug) }}" class="d-block w-100 h-100">
+                                        <img src="{{ $courseImg }}" 
+                                             alt="{{ $course->course_name }}" 
+                                             class="dce-course-img"
+                                             loading="lazy"
+                                             onerror="this.onerror=null; this.src='{{ asset('images/courses/default-course.svg') }}';">
                                     </a>
+                                    <span class="dce-course-code-badge">{{ $course->course_code }}</span>
+                                    <span class="dce-course-cat-badge">{{ $course->category->name ?? 'Certified' }}</span>
+                                </div>
+
+                                <!-- Course Body -->
+                                <div class="dce-course-body">
+                                    <a href="{{ route('courses.show', $course->slug) }}" 
+                                       class="dce-course-title-clamp" 
+                                       title="{{ $course->course_name }}">
+                                        {{ ucwords(strtolower($course->course_name)) }}
+                                    </a>
+
+                                    <div class="dce-course-meta-row">
+                                        <span class="dce-course-pill">
+                                            <i class="fa-regular fa-clock text-primary"></i> {{ $course->duration }}
+                                        </span>
+                                        <span class="dce-course-pill d-none d-sm-inline-flex">
+                                            <i class="fa-solid fa-laptop-code text-success"></i> Practical
+                                        </span>
+                                    </div>
+
+                                    <div class="dce-course-footer">
+                                        <div class="dce-course-pricing">
+                                            <span class="dce-course-price-lbl">Fee</span>
+                                            <span class="dce-course-price">₹{{ number_format($course->default_course_fee ?? $course->course_fee ?? 0, 0) }}</span>
+                                        </div>
+                                        <a href="{{ route('courses.show', $course->slug) }}" class="btn btn-primary dce-course-btn">
+                                            <span>View Details</span>
+                                            <i class="fa-solid fa-arrow-right small ms-1"></i>
+                                        </a>
+                                    </div>
                                 </div>
                             </div>
                         </div>

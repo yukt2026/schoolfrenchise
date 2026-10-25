@@ -28,6 +28,22 @@ document.addEventListener('DOMContentLoaded', function () {
         });
     });
 
+    // Auto-detect overflowing tables on mobile and insert swipe hint
+    function checkTableScrollHints() {
+        if (window.innerWidth < 992) {
+            document.querySelectorAll('.table-responsive').forEach(function (el) {
+                if (el.scrollWidth > el.clientWidth && !el.previousElementSibling?.classList.contains('table-scroll-hint')) {
+                    const hint = document.createElement('div');
+                    hint.className = 'table-scroll-hint d-lg-none';
+                    hint.innerHTML = '<i class="fa-solid fa-arrows-left-right me-1"></i> Swipe table horizontally';
+                    el.parentNode.insertBefore(hint, el);
+                }
+            });
+        }
+    }
+    checkTableScrollHints();
+    window.addEventListener('resize', checkTableScrollHints);
+
     // Auto-dismiss alert banners after 5 seconds
     setTimeout(function () {
         document.querySelectorAll('.alert.alert-dismissible:not(.alert-important)').forEach(alert => {

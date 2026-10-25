@@ -16,7 +16,7 @@
         </h2>
         <p class="text-muted small mb-0">Submit academic queries, fee assistance requests, or portal issues to the centre administrative staff.</p>
     </div>
-    <a href="{{ route('student.support.create') }}" class="btn btn-primary rounded-3 btn-sm">
+    <a href="{{ route('student.support.create') }}" class="btn btn-primary rounded-2 btn-sm fw-semibold">
         <i class="fa-solid fa-plus me-1"></i> Raise New Ticket
     </a>
 </div>
@@ -29,9 +29,9 @@
 @endphp
 <div class="row g-3 mb-4">
     <div class="col-6 col-md-4">
-        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+        <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-primary">
             <div class="d-flex align-items-center gap-3">
-                <div class="rounded-3 p-3 bg-primary-subtle text-primary">
+                <div class="rounded-2 p-3 bg-primary-subtle text-primary">
                     <i class="fa-solid fa-ticket fs-4"></i>
                 </div>
                 <div>
@@ -42,9 +42,9 @@
         </div>
     </div>
     <div class="col-6 col-md-4">
-        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+        <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-warning">
             <div class="d-flex align-items-center gap-3">
-                <div class="rounded-3 p-3 bg-warning-subtle text-warning">
+                <div class="rounded-2 p-3 bg-warning-subtle text-warning">
                     <i class="fa-solid fa-clock fs-4"></i>
                 </div>
                 <div>
@@ -55,9 +55,9 @@
         </div>
     </div>
     <div class="col-12 col-md-4">
-        <div class="card border-0 shadow-sm rounded-4 p-3 bg-white">
+        <div class="card border-0 shadow-sm rounded-3 p-3 bg-white h-100 border-start border-4 border-success">
             <div class="d-flex align-items-center gap-3">
-                <div class="rounded-3 p-3 bg-success-subtle text-success">
+                <div class="rounded-2 p-3 bg-success-subtle text-success">
                     <i class="fa-solid fa-circle-check fs-4"></i>
                 </div>
                 <div>
@@ -70,88 +70,93 @@
 </div>
 
 <!-- Tickets Table Card -->
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-    <div class="card-header bg-white py-3 px-4 border-bottom">
+<div class="card border border-light-subtle shadow-sm rounded-3 overflow-hidden mb-4 bg-white">
+    <div class="card-header bg-white py-3 px-3 px-md-4 border-bottom">
         <div class="d-flex align-items-center justify-content-between">
             <h5 class="fw-bold fs-6 mb-0 text-dark">
                 <i class="fa-solid fa-list-check text-primary me-2"></i>My Support Tickets
             </h5>
-            <span class="badge bg-light text-muted border px-2 py-1 small">
+            <span class="badge bg-primary-subtle text-primary border px-2 py-1 small rounded-1">
                 Total: {{ $tickets->total() }}
             </span>
         </div>
     </div>
     <div class="card-body p-0">
         @if($tickets->count() > 0)
+            <div class="table-scroll-hint d-md-none">
+                <i class="fa-solid fa-arrows-left-right text-primary"></i>
+                <span>Scroll horizontally to view ticket progress & responses</span>
+            </div>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-muted small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                <table class="table-custom table-hover align-middle mb-0" style="min-width: 680px;">
+                    <thead>
                         <tr>
-                            <th class="ps-4 py-3">Ticket ID & Subject</th>
-                            <th class="py-3">Category</th>
-                            <th class="py-3 text-center">Priority</th>
-                            <th class="py-3 text-center">Status</th>
-                            <th class="py-3 text-center">Responses</th>
-                            <th class="py-3">Date</th>
-                            <th class="pe-4 py-3 text-end">Action</th>
+                            <th class="ps-4">Ticket ID & Subject</th>
+                            <th>Category</th>
+                            <th class="text-center">Priority</th>
+                            <th class="text-center">Status</th>
+                            <th class="text-center">Responses</th>
+                            <th>Date</th>
+                            <th class="pe-4 text-end">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y">
+                    <tbody>
                         @foreach($tickets as $ticket)
                             <tr>
-                                <td class="ps-4 py-3">
+                                <td class="ps-4">
                                     <div class="fw-bold text-dark">{{ $ticket->subject }}</div>
                                     <div class="small text-muted font-monospace">#{{ $ticket->ticket_no }}</div>
                                 </td>
-                                <td class="py-3">
-                                    <span class="badge bg-light text-dark border">{{ $ticket->category }}</span>
+                                <td>
+                                    <span class="badge bg-light text-dark border rounded-1 text-nowrap">{{ $ticket->category }}</span>
                                 </td>
-                                <td class="py-3 text-center">
+                                <td class="text-center text-nowrap">
                                     @if($ticket->priority === 'high')
-                                        <span class="badge bg-danger-subtle text-danger text-uppercase px-2 py-1" style="font-size: 0.7rem;">High</span>
+                                        <span class="badge bg-danger-subtle text-danger text-uppercase px-2 py-1 rounded-1" style="font-size: 0.7rem;">High</span>
                                     @elseif($ticket->priority === 'medium')
-                                        <span class="badge bg-warning-subtle text-warning text-uppercase px-2 py-1" style="font-size: 0.7rem;">Medium</span>
+                                        <span class="badge bg-warning-subtle text-warning text-uppercase px-2 py-1 rounded-1" style="font-size: 0.7rem;">Medium</span>
                                     @else
-                                        <span class="badge bg-light text-muted text-uppercase px-2 py-1" style="font-size: 0.7rem;">Low</span>
+                                        <span class="badge bg-light text-muted text-uppercase px-2 py-1 rounded-1" style="font-size: 0.7rem;">Low</span>
                                     @endif
                                 </td>
-                                <td class="py-3 text-center">
+                                <td class="text-center text-nowrap">
                                     @if($ticket->status === 'open')
-                                        <span class="badge bg-warning-subtle text-warning px-2 py-1">
+                                        <span class="badge bg-warning-subtle text-warning px-2.5 py-1 rounded-1">
                                             <i class="fa-solid fa-clock me-1"></i> Open
                                         </span>
                                     @elseif($ticket->status === 'in_progress')
-                                        <span class="badge bg-info-subtle text-info px-2 py-1">
+                                        <span class="badge bg-info-subtle text-info px-2.5 py-1 rounded-1">
                                             <i class="fa-solid fa-spinner me-1"></i> In Progress
                                         </span>
                                     @elseif($ticket->status === 'waiting_for_student')
-                                        <span class="badge bg-warning text-dark px-2 py-1">
+                                        <span class="badge bg-warning text-dark px-2.5 py-1 rounded-1">
                                             <i class="fa-solid fa-hourglass-half me-1"></i> Waiting for You
                                         </span>
                                     @elseif($ticket->status === 'answered')
-                                        <span class="badge bg-primary-subtle text-primary px-2 py-1">
+                                        <span class="badge bg-primary-subtle text-primary px-2.5 py-1 rounded-1">
                                             <i class="fa-solid fa-reply me-1"></i> Answered
                                         </span>
                                     @elseif($ticket->status === 'resolved')
-                                        <span class="badge bg-success-subtle text-success px-2 py-1">
+                                        <span class="badge bg-success-subtle text-success px-2.5 py-1 rounded-1">
                                             <i class="fa-solid fa-circle-check me-1"></i> Resolved
                                         </span>
                                     @else
-                                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1">
+                                        <span class="badge bg-secondary-subtle text-secondary px-2.5 py-1 rounded-1">
                                             <i class="fa-solid fa-lock me-1"></i> Closed
                                         </span>
                                     @endif
                                 </td>
-                                <td class="py-3 text-center">
-                                    <span class="badge bg-lavender text-primary rounded-pill px-2 py-1">
+                                <td class="text-center text-nowrap">
+                                    <span class="badge bg-primary-subtle text-primary rounded-1 px-2 py-1">
                                         <i class="fa-regular fa-comment me-1"></i> {{ $ticket->replies_count ?? 0 }}
                                     </span>
                                 </td>
-                                <td class="py-3 text-muted small">
+                                <td class="text-muted small text-nowrap">
+                                    <i class="fa-regular fa-calendar me-1 text-primary"></i>
                                     {{ $ticket->created_at->format('d M, Y') }}
                                 </td>
-                                <td class="pe-4 py-3 text-end">
-                                    <a href="{{ route('student.support.show', $ticket->id) }}" class="btn btn-sm btn-outline-primary rounded-3">
+                                <td class="pe-4 text-end text-nowrap">
+                                    <a href="{{ route('student.support.show', $ticket->id) }}" class="btn btn-sm btn-outline-primary rounded-2 fw-semibold text-nowrap">
                                         <i class="fa-regular fa-eye me-1"></i> View Thread
                                     </a>
                                 </td>
@@ -174,7 +179,7 @@
                 <p class="text-muted small mb-3" style="max-width: 400px; margin: 0 auto;">
                     Have questions about your fee receipt, syllabus, examinations, or batch timing? You can raise a support query directly with your centre coordinators.
                 </p>
-                <a href="{{ route('student.support.create') }}" class="btn btn-primary btn-sm rounded-3">
+                <a href="{{ route('student.support.create') }}" class="btn btn-primary btn-sm rounded-2 fw-semibold px-3">
                     <i class="fa-solid fa-plus me-1"></i> Raise Your First Ticket
                 </a>
             </div>

@@ -1,23 +1,23 @@
 @extends('layouts.centre')
 
-@section('title', 'Ticket #' . $ticket->ticket_no . ' - Support Desk')
+@section('title', 'Ticket #' . $ticket->ticket_no . ' - ' . ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER'))
 
 @section('content')
 <div class="mb-4">
-    <a href="{{ route('centre.support.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill mb-2">
+    <a href="{{ route('centre.support.index') }}" class="btn btn-outline-secondary btn-sm rounded-2 mb-2">
         <i class="fa-solid fa-arrow-left me-1"></i>Back to Support Desk
     </a>
     <div class="d-flex flex-wrap justify-content-between align-items-center gap-2">
         <div>
             <h3 class="fw-bold text-dark mb-1">{{ $ticket->subject }}</h3>
-            <span class="badge bg-secondary-subtle text-dark font-monospace fw-bold">{{ $ticket->ticket_no }}</span>
-            <span class="badge bg-light text-muted border text-capitalize">{{ str_replace('_', ' ', $ticket->category) }}</span>
-            <span class="badge {{ $ticket->priority === 'urgent' ? 'bg-danger' : ($ticket->priority === 'high' ? 'bg-warning text-dark' : 'bg-secondary-subtle text-secondary') }} text-uppercase">
+            <span class="badge bg-secondary-subtle text-dark font-monospace fw-bold rounded-2">{{ $ticket->ticket_no }}</span>
+            <span class="badge bg-light text-muted border text-capitalize rounded-2">{{ str_replace('_', ' ', $ticket->category) }}</span>
+            <span class="badge {{ $ticket->priority === 'urgent' ? 'bg-danger' : ($ticket->priority === 'high' ? 'bg-warning text-dark' : 'bg-secondary-subtle text-secondary') }} text-uppercase rounded-2">
                 {{ $ticket->priority }}
             </span>
         </div>
         <div>
-            <span class="badge fs-6 {{ $ticket->status === 'resolved' ? 'bg-success' : ($ticket->status === 'in_progress' ? 'bg-info' : 'bg-warning text-dark') }}">
+            <span class="badge fs-6 {{ $ticket->status === 'resolved' ? 'bg-success' : ($ticket->status === 'in_progress' ? 'bg-info' : 'bg-warning text-dark') }} rounded-2">
                 Status: {{ ucfirst(str_replace('_', ' ', $ticket->status)) }}
             </span>
         </div>
@@ -27,7 +27,7 @@
 <div class="row g-4">
     <div class="col-lg-8">
         <!-- Original Inquiry Card -->
-        <div class="card border-0 rounded-4 shadow-sm mb-4">
+        <div class="card border-0 rounded-3 shadow-sm mb-4">
             <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
                 <div class="fw-bold text-dark">
                     <i class="fa-solid fa-user-tie text-primary me-2"></i>{{ $centre->director_name ?? 'Centre Director' }}
@@ -44,14 +44,14 @@
         @if($ticket->replies->isNotEmpty())
         <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-comments text-info me-2"></i>Discussion Thread</h6>
         @foreach($ticket->replies as $reply)
-        <div class="card border-0 rounded-4 shadow-sm mb-3 {{ $reply->is_staff_reply ? 'border-start border-4 border-primary bg-light' : '' }}">
+        <div class="card border-0 rounded-3 shadow-sm mb-3 {{ $reply->is_staff_reply ? 'border-start border-4 border-primary bg-light' : '' }}">
             <div class="card-header bg-transparent py-2 px-4 border-bottom d-flex justify-content-between align-items-center">
                 <div>
                     @if($reply->is_staff_reply)
-                    <span class="badge bg-primary me-1"><i class="fa-solid fa-shield-halved me-1"></i>Head Office Staff</span>
+                    <span class="badge bg-primary me-1 rounded-2"><i class="fa-solid fa-shield-halved me-1"></i>Head Office Staff</span>
                     <span class="fw-bold text-dark">{{ $reply->user?->name ?? 'Central Support' }}</span>
                     @else
-                    <span class="badge bg-secondary me-1">Centre Reply</span>
+                    <span class="badge bg-secondary me-1 rounded-2">Centre Reply</span>
                     <span class="fw-bold text-dark">{{ $reply->user?->name ?? $centre->director_name }}</span>
                     @endif
                 </div>
@@ -62,7 +62,7 @@
 
                 @if($reply->attachment_path)
                 <div class="mt-2 pt-2 border-top">
-                    <a href="{{ asset('storage/' . $reply->attachment_path) }}" class="btn btn-sm btn-outline-secondary" target="_blank">
+                    <a href="{{ asset('storage/' . $reply->attachment_path) }}" class="btn btn-sm btn-outline-secondary rounded-2" target="_blank">
                         <i class="fa-solid fa-paperclip me-1"></i>View Attachment
                     </a>
                 </div>
@@ -73,7 +73,7 @@
         @endif
 
         <!-- Reply Form -->
-        <div class="card border-0 rounded-4 shadow-sm mt-4">
+        <div class="card border-0 rounded-3 shadow-sm mt-4">
             <div class="card-header bg-white py-3 border-bottom">
                 <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-reply text-success me-2"></i>Post Reply</h6>
             </div>
@@ -82,15 +82,15 @@
                     @csrf
 
                     <div class="mb-3">
-                        <textarea name="message" class="form-control" rows="3" placeholder="Write your response or follow-up question here..." required></textarea>
+                        <textarea name="message" class="form-control rounded-2" rows="3" placeholder="Write your response or follow-up question here..." required></textarea>
                     </div>
 
                     <div class="row align-items-center g-3">
                         <div class="col-md-7">
-                            <input type="file" name="attachment" class="form-control form-control-sm" accept=".pdf,image/*,.doc,.docx">
+                            <input type="file" name="attachment" class="form-control form-control-sm rounded-2" accept=".pdf,image/*,.doc,.docx">
                         </div>
                         <div class="col-md-5 text-md-end">
-                            <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                            <button type="submit" class="btn btn-primary rounded-2 px-4 fw-bold">
                                 <i class="fa-solid fa-paper-plane me-1"></i>Send Reply
                             </button>
                         </div>
@@ -102,7 +102,7 @@
 
     <!-- Right Sidebar Info -->
     <div class="col-lg-4">
-        <div class="card border-0 rounded-4 shadow-sm mb-4">
+        <div class="card border-0 rounded-3 shadow-sm mb-4">
             <div class="card-header bg-white py-3 border-bottom">
                 <h6 class="fw-bold mb-0 text-dark"><i class="fa-solid fa-circle-info text-info me-2"></i>Ticket Information</h6>
             </div>
@@ -122,7 +122,7 @@
                     </li>
                     <li class="py-2 border-bottom d-flex justify-content-between">
                         <span class="text-muted">Status:</span>
-                        <span class="badge {{ $ticket->status === 'resolved' ? 'bg-success' : 'bg-warning text-dark' }}">{{ ucfirst($ticket->status) }}</span>
+                        <span class="badge {{ $ticket->status === 'resolved' ? 'bg-success' : 'bg-warning text-dark' }} rounded-2">{{ ucfirst($ticket->status) }}</span>
                     </li>
                     <li class="py-2 border-bottom d-flex justify-content-between">
                         <span class="text-muted">Submitted Date:</span>

@@ -166,10 +166,10 @@
 </head>
 <body>
     <div class="no-print mb-4 d-flex gap-2">
-        <button onclick="window.print()" class="btn btn-primary px-4 rounded-pill shadow-sm">
+        <button onclick="window.print()" class="btn btn-primary px-4 rounded-2 shadow-sm">
             <i class="fa-solid fa-print me-1"></i>Print ID Card
         </button>
-        <button onclick="window.close()" class="btn btn-outline-secondary px-3 rounded-pill">
+        <button onclick="window.close()" class="btn btn-outline-secondary px-3 rounded-2">
             <i class="fa-solid fa-xmark me-1"></i>Close Window
         </button>
     </div>

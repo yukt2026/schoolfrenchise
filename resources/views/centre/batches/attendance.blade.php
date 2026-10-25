@@ -1,11 +1,11 @@
 @extends('layouts.centre')
 
-@section('title', 'Daily Attendance Sheet - ' . $batch->batch_name)
+@section('title', 'Daily Attendance Sheet - ' . $batch->batch_name . ' | ' . ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER'))
 
 @section('content')
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <a href="{{ route('centre.batches.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill mb-2">
+        <a href="{{ route('centre.batches.index') }}" class="btn btn-outline-secondary btn-sm rounded-2 mb-2">
             <i class="fa-solid fa-arrow-left me-1"></i>Back to Batches
         </a>
         <h3 class="fw-bold text-dark mb-1">
@@ -20,7 +20,7 @@
         <!-- Date Selector Form -->
         <form method="GET" action="{{ route('centre.batches.attendance', $batch->id) }}" class="d-flex align-items-center gap-2">
             <label class="fw-semibold small text-muted text-nowrap">Attendance Date:</label>
-            <input type="date" name="date" class="form-control form-control-sm" value="{{ $attendanceDate }}" onchange="this.form.submit()">
+            <input type="date" name="date" class="form-control form-control-sm rounded-2" value="{{ $attendanceDate }}" onchange="this.form.submit()">
         </form>
     </div>
 </div>
@@ -30,26 +30,29 @@
     @csrf
     <input type="hidden" name="attendance_date" value="{{ $attendanceDate }}">
 
-    <div class="card border-0 rounded-4 shadow-sm mb-4">
+    <div class="card border-0 rounded-3 shadow-sm mb-4">
         <div class="card-header bg-white py-3 border-bottom d-flex flex-wrap justify-content-between align-items-center gap-2">
             <div class="fw-bold text-dark">
                 <i class="fa-solid fa-calendar-day text-info me-1"></i>
-                Date: <span class="badge bg-primary-subtle text-primary font-monospace">{{ \Carbon\Carbon::parse($attendanceDate)->format('d F, Y (l)') }}</span>
+                Date: <span class="badge bg-primary-subtle text-primary font-monospace rounded-2">{{ \Carbon\Carbon::parse($attendanceDate)->format('d F, Y (l)') }}</span>
             </div>
             <!-- Quick Mark Buttons -->
             <div class="btn-group btn-group-sm">
-                <button type="button" class="btn btn-outline-success" onclick="markAll('present')">
+                <button type="button" class="btn btn-outline-success rounded-start-2" onclick="markAll('present')">
                     <i class="fa-solid fa-check-double me-1"></i>Mark All Present
                 </button>
-                <button type="button" class="btn btn-outline-danger" onclick="markAll('absent')">
+                <button type="button" class="btn btn-outline-danger rounded-end-2" onclick="markAll('absent')">
                     <i class="fa-solid fa-xmark me-1"></i>Mark All Absent
                 </button>
             </div>
         </div>
         <div class="card-body p-0">
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light">
+                <div class="table-scroll-hint d-md-none text-muted small px-3 py-1 bg-light border-bottom">
+                    <i class="fa-solid fa-arrows-left-right me-1 text-primary"></i> Scroll horizontally to view complete sheet
+                </div>
+                <table class="table table-custom align-middle mb-0" style="min-width: 680px;">
+                    <thead>
                         <tr>
                             <th style="width: 50px;">#</th>
                             <th>Roll No & Reg No</th>
@@ -68,7 +71,7 @@
                         <tr>
                             <td class="text-muted fw-bold">{{ $idx + 1 }}</td>
                             <td>
-                                <span class="badge bg-primary-subtle text-primary font-monospace fw-bold">{{ $student->roll_no }}</span>
+                                <span class="badge bg-primary-subtle text-primary font-monospace fw-bold rounded-2">{{ $student->roll_no }}</span>
                                 <div class="small text-muted font-monospace" style="font-size: 0.72rem;">{{ $student->registration_no }}</div>
                             </td>
                             <td>
@@ -91,7 +94,7 @@
                                 </div>
                             </td>
                             <td>
-                                <input type="text" name="remarks[{{ $student->id }}]" class="form-control form-control-sm" placeholder="Optional notes" value="{{ $currentRemarks }}">
+                                <input type="text" name="remarks[{{ $student->id }}]" class="form-control form-control-sm rounded-2" placeholder="Optional notes" value="{{ $currentRemarks }}">
                             </td>
                         </tr>
                         @empty
@@ -110,7 +113,7 @@
             @if($batch->admissions->isNotEmpty())
             <div class="card-footer bg-white p-3 border-top d-flex justify-content-between align-items-center">
                 <span class="small text-muted">Total: {{ $batch->admissions->count() }} enrolled candidates in this shift</span>
-                <button type="submit" class="btn btn-primary rounded-pill px-4 fw-bold">
+                <button type="submit" class="btn btn-primary rounded-2 px-4 fw-bold">
                     <i class="fa-solid fa-cloud-arrow-up me-1"></i>Save Attendance
                 </button>
             </div>

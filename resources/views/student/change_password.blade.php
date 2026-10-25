@@ -17,14 +17,14 @@
         </h2>
         <p class="text-muted small mb-0">Update your student portal login credentials to keep your profile and academic documents secure.</p>
     </div>
-    <a href="{{ route('student.profile') }}" class="btn btn-outline-secondary btn-sm rounded-3">
+    <a href="{{ route('student.profile') }}" class="btn btn-outline-secondary btn-sm rounded-2 fw-semibold">
         <i class="fa-solid fa-arrow-left me-1"></i> Back to Profile
     </a>
 </div>
 
 <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
-        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="card border border-light-subtle shadow-sm rounded-3 p-4 p-md-5 bg-white">
             <form action="{{ route('student.change-password.update') }}" method="POST">
                 @csrf
 

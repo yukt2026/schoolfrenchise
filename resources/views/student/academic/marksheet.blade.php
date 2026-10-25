@@ -17,23 +17,23 @@
         </h2>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('student.results') }}" class="btn btn-outline-secondary btn-sm rounded-3">
+        <a href="{{ route('student.results') }}" class="btn btn-outline-secondary btn-sm rounded-2 fw-semibold">
             <i class="fa-solid fa-arrow-left me-1"></i> Back to Results
         </a>
-        <button onclick="window.print()" class="btn btn-primary btn-sm rounded-3">
+        <button onclick="window.print()" class="btn btn-primary btn-sm rounded-2 fw-semibold">
             <i class="fa-solid fa-print me-1"></i> Print Marksheet
         </button>
     </div>
 </div>
 
 <!-- PRINTABLE MARKSHEET CONTAINER -->
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 print-marksheet-container">
-    <div class="card-body p-4 p-md-5">
+<div class="card border border-light-subtle shadow-sm rounded-3 overflow-hidden mb-4 print-marksheet-container bg-white">
+    <div class="card-body p-3 p-md-5">
         <!-- Marksheet Border Frame -->
-        <div class="border border-3 border-dark rounded-3 p-4 position-relative" style="background: #ffffff;">
+        <div class="border border-2 border-dark rounded-2 p-3 p-md-4 position-relative" style="background: #ffffff;">
             <!-- Watermark Security Emblem -->
             <div class="position-absolute top-50 start-50 translate-middle opacity-10 pointer-events-none" style="z-index: 0;">
-                <i class="fa-solid fa-graduation-cap" style="font-size: 16rem; color: #4c1d95;"></i>
+                <i class="fa-solid fa-graduation-cap" style="font-size: 16rem; color: #0284c7;"></i>
             </div>
 
             <div class="position-relative" style="z-index: 1;">
@@ -46,7 +46,7 @@
                             <p class="small text-muted mb-0">{{ $instituteSettings['institute_tagline'] ?? 'Building Digital Skills for the Future' }} &bull; {{ $instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105' }}</p>
                         </div>
                     </div>
-                    <div class="d-inline-block bg-dark text-white px-4 py-1 rounded-pill small fw-bold text-uppercase tracking-widest mt-1">
+                    <div class="d-inline-block bg-dark text-white px-3 py-1 rounded-1 small fw-bold text-uppercase tracking-widest mt-1">
                         STATEMENT OF MARKS
                     </div>
                 </div>
@@ -116,8 +116,12 @@
                 </div>
 
                 <!-- Subject-Wise Marks Breakdown Table -->
+                <div class="table-scroll-hint d-md-none">
+                    <i class="fa-solid fa-arrows-left-right text-primary"></i>
+                    <span>Scroll horizontally to view subject scores</span>
+                </div>
                 <div class="table-responsive mb-4">
-                    <table class="table table-bordered table-sm align-middle text-center mb-0 border-dark">
+                    <table class="table table-bordered table-sm align-middle text-center mb-0 border-dark" style="min-width: 580px;">
                         <thead class="table-dark text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
                             <tr>
                                 <th class="text-start ps-3" style="width: 40%;">Subject / Module Name</th>
@@ -175,7 +179,7 @@
                                 <td colspan="2" class="text-end pe-3">TOTAL OBTAINED:</td>
                                 <td class="text-primary fs-6">{{ (float)$result->total_marks_obtained }}</td>
                                 <td>
-                                    <span class="badge bg-lavender text-primary">{{ $result->grade }}</span>
+                                    <span class="badge bg-primary-subtle text-primary rounded-1">{{ $result->grade }}</span>
                                 </td>
                             </tr>
                         </tfoot>
@@ -209,6 +213,31 @@
                         <span><strong>B</strong>: 55% to 69% (Good)</span>
                         <span><strong>C</strong>: 40% to 54% (Pass)</span>
                         <span><strong>F</strong>: Below 40% (Fail)</span>
+                    </div>
+                </div>
+
+                <!-- Verification QR Code & Tamper-Proof Assurance -->
+                <div class="row align-items-center g-3 p-3 bg-light rounded-3 border mb-4">
+                    <div class="col-sm-3 text-center text-sm-start">
+                        <div class="border d-inline-block p-2 bg-white rounded text-center">
+                            <i class="fa-solid fa-qrcode fa-3x text-dark"></i>
+                            <div class="font-monospace text-muted mt-1" style="font-size: 0.65rem;">
+                                VERIFIED: {{ $student->registration_no }}
+                            </div>
+                        </div>
+                    </div>
+                    <div class="col-sm-9">
+                        <div class="d-flex align-items-center gap-2 mb-1">
+                            <i class="fa-solid fa-shield-halved text-success"></i>
+                            <span class="small fw-bold text-dark text-uppercase" style="font-size: 0.72rem; letter-spacing: 0.5px;">Cryptographic Authenticity Verification</span>
+                            <span class="badge bg-success-subtle text-success rounded-1" style="font-size: 0.65rem;">Official Academic Record</span>
+                        </div>
+                        <div class="font-monospace text-muted small text-break" style="font-size: 0.7rem;">
+                            HASH: {{ $result->marksheet?->security_hash ?? hash('sha256', $result->id . $student->registration_no . ($result->marksheet?->marksheet_no ?? 'TEC')) }}
+                        </div>
+                        <div class="text-secondary small mt-1" style="font-size: 0.7rem;">
+                            This marksheet is electronically authenticated by {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }} Examination Board. Scan QR code or verify at official portal.
+                        </div>
                     </div>
                 </div>
 

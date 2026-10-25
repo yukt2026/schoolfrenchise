@@ -82,7 +82,8 @@ class AdminFeeController extends Controller
     public function dues(Request $request)
     {
         $query = Admission::with(['student.centre', 'course', 'centre', 'studentFees'])
-            ->whereIn('status', ['active', 'enrolled']);
+            ->whereIn('status', ['active', 'enrolled'])
+            ->whereRaw('(net_fee - total_paid) > 0');
 
         if ($request->filled('search')) {
             $s = trim($request->search);
@@ -101,14 +102,8 @@ class AdminFeeController extends Controller
             $query->where('centre_id', $request->centre_id);
         }
 
-        // Fetch admissions and filter those having pending balance
-        $admissions = $query->latest()->get()->filter(function ($adm) {
-            return ((float) $adm->net_fee - (float) $adm->total_paid) > 0;
-        });
-
-        $totalOutstanding = $admissions->sum(function ($adm) {
-            return (float) $adm->net_fee - (float) $adm->total_paid;
-        });
+        $totalOutstanding = (float) (clone $query)->sum(DB::raw('net_fee - total_paid'));
+        $admissions = $query->latest()->paginate(15)->withQueryString();
 
         $courses = Course::where('status', true)->orderBy('course_name')->get();
         $centres = Centre::where('status', 'active')->orderBy('centre_name')->get();
@@ -238,7 +233,8 @@ class AdminFeeController extends Controller
     {
         $structures = FeeStructure::with(['course', 'centre'])
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return view('admin.fees.structures', compact('structures'));
     }

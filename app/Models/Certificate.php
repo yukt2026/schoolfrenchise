@@ -30,6 +30,11 @@ class Certificate extends Model
         return $this->belongsTo(ExamResult::class, 'exam_result_id');
     }
 
+    public function examResult()
+    {
+        return $this->belongsTo(ExamResult::class, 'exam_result_id');
+    }
+
     public function student()
     {
         return $this->belongsTo(Student::class);

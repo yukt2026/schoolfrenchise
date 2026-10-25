@@ -13,7 +13,7 @@
             <div class="text-muted small">Manage your personal records, contact details and identity information</div>
         </div>
         <div>
-            <a href="{{ route('student.id-card') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3">
+            <a href="{{ route('student.id-card') }}" class="btn btn-outline-primary btn-sm rounded-2 px-3 fw-semibold">
                 <i class="fa-solid fa-id-card me-1"></i> View ID Card
             </a>
         </div>
@@ -24,7 +24,7 @@
         <div class="row g-4">
             <!-- Left Column: Photo & Official Enrolment Badges -->
             <div class="col-12 col-lg-4">
-                <div class="card border-0 shadow-sm rounded-4 bg-white p-4 text-center mb-4">
+                <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 text-center mb-4">
                     <div class="position-relative d-inline-block mx-auto mb-3">
                         <div class="rounded-circle bg-light border border-3 border-primary shadow-sm overflow-hidden d-flex align-items-center justify-content-center mx-auto" style="width: 130px; height: 130px;">
                             @if($student->photo_path && file_exists(public_path('storage/' . $student->photo_path)))
@@ -39,10 +39,10 @@
                     <div class="text-muted small mb-2">{{ $student->email }}</div>
 
                     <div class="d-flex justify-content-center gap-2 mb-3">
-                        <span class="badge bg-primary-subtle text-primary font-monospace px-3 py-1">
+                        <span class="badge bg-primary-subtle text-primary font-monospace px-3 py-1 rounded-1">
                             ROLL: {{ $student->roll_no ?? 'Pending' }}
                         </span>
-                        <span class="badge bg-secondary-subtle text-secondary font-monospace px-3 py-1">
+                        <span class="badge bg-secondary-subtle text-secondary font-monospace px-3 py-1 rounded-1">
                             REG: {{ $student->registration_no }}
                         </span>
                     </div>
@@ -59,7 +59,7 @@
                 </div>
 
                 <!-- Academic Affiliation Card -->
-                <div class="card border-0 shadow-sm rounded-4 bg-white p-4">
+                <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4">
                     <h6 class="fw-bold text-dark mb-3"><i class="fa-solid fa-building-columns text-primary me-2"></i>Institutional Record</h6>
                     <ul class="list-unstyled small mb-0">
                         <li class="py-2 border-bottom border-light d-flex justify-content-between">
@@ -88,7 +88,7 @@
 
             <!-- Right Column: Personal & Contact Information -->
             <div class="col-12 col-lg-8">
-                <div class="card border-0 shadow-sm rounded-4 bg-white p-4 mb-4">
+                <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 mb-4">
                     <h5 class="fw-bold text-dark mb-3">
                         <i class="fa-solid fa-address-card text-primary me-2"></i> Personal Information
                     </h5>
@@ -181,7 +181,7 @@
                     </div>
 
                     <div class="text-end mt-4 pt-2">
-                        <button type="submit" class="btn btn-primary rounded-pill px-4 fw-semibold shadow-sm">
+                        <button type="submit" class="btn btn-primary rounded-2 px-4 fw-semibold shadow-sm">
                             <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
                         </button>
                     </div>

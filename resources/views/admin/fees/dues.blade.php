@@ -34,7 +34,7 @@
             <div>
                 <div class="text-uppercase small fw-semibold opacity-75">Cumulative Outstanding Receivables</div>
                 <h2 class="fw-bold my-1">₹{{ number_format($totalOutstanding, 2) }}</h2>
-                <div class="small opacity-75">Across {{ $admissions->count() }} active candidate accounts</div>
+                <div class="small opacity-75">Across {{ $admissions->total() }} active candidate accounts</div>
             </div>
             <div>
                 <a href="{{ route('admin.fees.create') }}" class="btn btn-light btn-lg text-primary fw-bold shadow-sm">
@@ -90,7 +90,7 @@
     <div class="card border-0 shadow-sm rounded-3">
         <div class="card-header bg-white py-3 border-0">
             <h6 class="fw-bold mb-0 text-dark">
-                <i class="fa-solid fa-list-ol me-2 text-warning"></i>Accounts with Pending Balances ({{ $admissions->count() }})
+                <i class="fa-solid fa-list-ol me-2 text-warning"></i>Accounts with Pending Balances ({{ $admissions->total() }})
             </h6>
         </div>
         <div class="table-responsive">
@@ -159,6 +159,11 @@
                 </tbody>
             </table>
         </div>
+        @if($admissions->hasPages())
+        <div class="card-footer bg-white py-3 border-top">
+            {{ $admissions->links('pagination::bootstrap-5') }}
+        </div>
+        @endif
     </div>
 </div>
 @endsection

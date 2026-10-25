@@ -90,7 +90,7 @@
                                             <h2 class="fw-bold text-primary font-monospace mb-1">{{ $application->convertedStudent->roll_no }}</h2>
                                             <div class="font-monospace text-secondary small">REG NO: {{ $application->convertedStudent->registration_no }}</div>
                                             <div class="mt-3">
-                                                <a href="{{ route('student.login') }}" class="btn btn-primary rounded-pill px-4">
+                                                <a href="{{ route('student.login') }}" class="btn btn-primary rounded-2 px-4">
                                                     <i class="fa-solid fa-right-to-bracket me-1"></i> Login to Student Portal
                                                 </a>
                                             </div>
@@ -144,13 +144,13 @@
                                 <!-- Acknowledgement Slip & Portal Action Bar -->
                                 <div class="mt-4 pt-3 border-top d-flex flex-wrap justify-content-between align-items-center gap-2">
                                     <div>
-                                        <a href="{{ route('admission.acknowledgement', $application->application_no) }}" target="_blank" class="btn btn-outline-primary rounded-pill px-4 shadow-sm fw-semibold">
+                                        <a href="{{ route('admission.acknowledgement', $application->application_no) }}" target="_blank" class="btn btn-outline-primary rounded-2 px-4 shadow-sm fw-semibold">
                                             <i class="fa-solid fa-print me-1"></i> Print Acknowledgement Slip
                                         </a>
                                     </div>
                                     @if($application->status === 'approved' && $application->convertedStudent)
                                         <div>
-                                            <a href="{{ route('student.login') }}" class="btn btn-primary rounded-pill px-4 shadow-sm">
+                                            <a href="{{ route('student.login') }}" class="btn btn-primary rounded-2 px-4 shadow-sm">
                                                 <i class="fa-solid fa-right-to-bracket me-1"></i> Student Portal Login
                                             </a>
                                         </div>
@@ -159,12 +159,12 @@
                             </div>
                         </div>
                     @else
-                        <div class="card border-0 shadow-sm rounded-4 p-5 bg-white text-center">
+                        <div class="card border-0 shadow-sm rounded-3 p-5 bg-white text-center">
                             <i class="fa-regular fa-file-circle-question fa-3x text-secondary opacity-50 mb-3"></i>
                             <h5 class="fw-bold text-dark">No Application Found</h5>
                             <p class="text-muted mb-4">We could not locate any admission application matching "<strong>{{ request('application_no') }}</strong>". Please verify the application number or mobile number.</p>
                             <div>
-                                <a href="{{ route('admission.apply') }}" class="btn btn-outline-primary rounded-pill px-4">
+                                <a href="{{ route('admission.apply') }}" class="btn btn-outline-primary rounded-2 px-4">
                                     <i class="fa-solid fa-plus me-1"></i> Apply for New Admission
                                 </a>
                             </div>

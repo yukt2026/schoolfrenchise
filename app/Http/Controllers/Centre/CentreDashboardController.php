@@ -57,7 +57,7 @@ class CentreDashboardController extends Controller
             ->get();
 
         $recentPayments = FeePayment::where('centre_id', $centre->id)
-            ->with(['student', 'admission.course'])
+            ->with(['student', 'admission.course', 'paymentReceipt'])
             ->latest()
             ->take(6)
             ->get();

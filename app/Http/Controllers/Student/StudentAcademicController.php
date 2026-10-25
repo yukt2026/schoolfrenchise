@@ -99,6 +99,14 @@ class StudentAcademicController extends Controller
             if (file_exists(public_path($material->file_path))) {
                 return response()->download(public_path($material->file_path));
             }
+
+            if (file_exists(storage_path('app/public/' . $material->file_path))) {
+                return response()->download(storage_path('app/public/' . $material->file_path));
+            }
+
+            if (file_exists(public_path('storage/' . $material->file_path))) {
+                return response()->download(public_path('storage/' . $material->file_path));
+            }
         }
 
         return back()->with('error', 'The requested file could not be located on the server.');
@@ -120,11 +128,14 @@ class StudentAcademicController extends Controller
                 $q->where('course_id', $courseId)
                   ->orWhereNull('course_id');
             });
+        } else {
+            $examsQuery->whereNull('course_id');
         }
 
         $exams = $examsQuery->with('course')
             ->orderBy('exam_date', 'desc')
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         $admitCards = AdmitCard::where('student_id', $student->id)
             ->pluck('id', 'exam_id')
@@ -178,7 +189,8 @@ class StudentAcademicController extends Controller
             })
             ->with(['exam', 'course', 'centre'])
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('student.academic.results', compact('student', 'admission', 'results'));
     }
@@ -217,7 +229,8 @@ class StudentAcademicController extends Controller
         $certificates = Certificate::where('student_id', $student->id)
             ->with(['course', 'centre', 'result'])
             ->latest()
-            ->paginate(10);
+            ->paginate(10)
+            ->withQueryString();
 
         return view('student.academic.certificates', compact('student', 'admission', 'certificates'));
     }

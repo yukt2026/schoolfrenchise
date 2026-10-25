@@ -5,12 +5,14 @@ namespace Tests\Feature;
 use App\Models\Admission;
 use App\Models\Attendance;
 use App\Models\Batch;
+use App\Models\Certificate;
 use App\Models\Centre;
 use App\Models\CentreWallet;
 use App\Models\CentreWalletTransaction;
 use App\Models\Course;
 use App\Models\CourseSubject;
 use App\Models\District;
+use App\Models\Download;
 use App\Models\Exam;
 use App\Models\ExamResult;
 use App\Models\FeePayment;
@@ -731,5 +733,159 @@ class CentrePortalModuleTest extends TestCase
         $response = $this->actingAs($this->superAdmin)->get(route('centre.dashboard'));
         $response->assertStatus(200);
         $response->assertSee('AUTHORIZED STUDY CENTRE PORTAL');
+    }
+
+    public function test_all_centre_pages_and_reports_render_successfully(): void
+    {
+        // Create sample batch
+        $batch = Batch::create([
+            'centre_id' => $this->centreA->id,
+            'course_id' => $this->course->id,
+            'batch_name' => 'Report Testing Batch',
+            'start_time' => '10:00',
+            'end_time' => '12:00',
+            'days' => 'Mon-Sat',
+            'status' => 'active',
+        ]);
+
+        $student = Student::create([
+            'centre_id' => $this->centreA->id,
+            'registration_no' => 'DCE/2026/' . $this->centreA->centre_code . '/333',
+            'roll_no' => 'DCE26' . rand(10000, 99999),
+            'full_name' => 'Testing Candidate All',
+            'father_name' => 'Father Testing',
+            'dob' => '2004-05-10',
+            'gender' => 'male',
+            'mobile' => '9876543209',
+            'state_id' => $this->state->id,
+            'district_id' => $this->district->id,
+            'city' => 'Patna',
+            'address' => 'Station Road',
+            'pincode' => '800001',
+            'status' => 'enrolled',
+        ]);
+
+        $admission = Admission::create([
+            'student_id' => $student->id,
+            'centre_id' => $this->centreA->id,
+            'course_id' => $this->course->id,
+            'batch_id' => $batch->id,
+            'admission_date' => now()->toDateString(),
+            'course_fee' => 7500.00,
+            'discount_amount' => 0.00,
+            'net_fee' => 7500.00,
+            'total_paid' => 3000.00,
+            'status' => 'active',
+        ]);
+
+        $payment = FeePayment::create([
+            'student_id' => $student->id,
+            'admission_id' => $admission->id,
+            'centre_id' => $this->centreA->id,
+            'receipt_no' => 'RCP-2026-TEST-' . rand(1000, 9999),
+            'payment_date' => now()->toDateString(),
+            'amount' => 3000.00,
+            'payment_mode' => 'cash',
+        ]);
+
+        $receipt = PaymentReceipt::create([
+            'fee_payment_id' => $payment->id,
+            'receipt_no' => $payment->receipt_no,
+            'student_id' => $student->id,
+            'admission_id' => $admission->id,
+            'centre_id' => $this->centreA->id,
+            'amount' => 3000.00,
+            'payment_mode' => 'cash',
+            'receipt_date' => now()->toDateString(),
+            'qr_token' => 'qr_test_all',
+        ]);
+
+        $exam = Exam::create([
+            'course_id' => $this->course->id,
+            'exam_title' => 'Test All Exam 2026',
+            'exam_code' => 'EXM-TEST-' . rand(1000, 9999),
+            'session_name' => 'Session 2026 Test',
+            'exam_date' => now()->addDays(10)->toDateString(),
+            'status' => 'scheduled',
+        ]);
+
+        $examResult = ExamResult::create([
+            'exam_id' => $exam->id,
+            'student_id' => $student->id,
+            'centre_id' => $this->centreA->id,
+            'course_id' => $this->course->id,
+            'total_marks_obtained' => 85.0,
+            'total_max_marks' => 100.0,
+            'percentage' => 85.0,
+            'grade' => 'A+',
+            'result_status' => 'passed',
+        ]);
+
+        $certificate = Certificate::create([
+            'exam_result_id' => $examResult->id,
+            'student_id' => $student->id,
+            'centre_id' => $this->centreA->id,
+            'course_id' => $this->course->id,
+            'certificate_no' => 'CERT-2026-TEST-' . rand(1000, 9999),
+            'issue_date' => now()->toDateString(),
+            'status' => 'issued',
+        ]);
+
+        $ticket = SupportTicket::create([
+            'ticket_no' => 'TCK-2026-ALLTEST',
+            'user_id' => $this->centreUserA->id,
+            'centre_id' => $this->centreA->id,
+            'category' => 'general',
+            'priority' => 'low',
+            'subject' => 'General Inquiry All Test',
+            'description' => 'Test description',
+            'status' => 'open',
+        ]);
+
+        $routesToTest = [
+            route('centre.dashboard'),
+            route('centre.students.index'),
+            route('centre.students.create'),
+            route('centre.students.show', $student->id),
+            route('centre.students.id-card', $student->id),
+            route('centre.students.admission-form', $student->id),
+            route('centre.batches.index'),
+            route('centre.batches.create'),
+            route('centre.batches.edit', $batch->id),
+            route('centre.batches.attendance', $batch->id),
+            route('centre.batches.attendance.report'),
+            route('centre.batches.attendance.report', ['batch_id' => $batch->id, 'month' => date('Y-m')]),
+            route('centre.exams.index'),
+            route('centre.exams.hall-tickets.index'),
+            route('centre.exams.hall-tickets.index', ['exam_id' => $exam->id]),
+            route('centre.exams.hall-tickets', $exam->id),
+            route('centre.exams.hall-tickets.single', [$exam->id, $student->id]),
+            route('centre.exams.marks.index'),
+            route('centre.exams.marks.index', ['exam_id' => $exam->id]),
+            route('centre.exams.marks', $exam->id),
+            route('centre.exams.marks', ['exam' => $exam->id, 'student_id' => $student->id]),
+            route('centre.exams.results'),
+            route('centre.exams.results.marksheet', $examResult->id),
+            route('centre.fees.index'),
+            route('centre.fees.create'),
+            route('centre.fees.create', ['admission_id' => $admission->id]),
+            route('centre.fees.receipt', $receipt->id),
+            route('centre.fees.dues'),
+            route('centre.wallet.index'),
+            route('centre.wallet.topup'),
+            route('centre.downloads.index'),
+            route('centre.downloads.student-certificates'),
+            route('centre.downloads.student-certificates.show', $certificate->id),
+            route('centre.downloads.certificate'),
+            route('centre.support.index'),
+            route('centre.support.create'),
+            route('centre.support.show', $ticket->id),
+            route('centre.profile.show'),
+        ];
+
+        foreach ($routesToTest as $uri) {
+            $res = $this->actingAs($this->centreUserA)->get($uri);
+            $this->assertEquals(200, $res->status(), "Failed asserting that {$uri} returns 200 OK.");
+        }
     }
 }

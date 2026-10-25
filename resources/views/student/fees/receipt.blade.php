@@ -12,17 +12,17 @@
             <div class="text-muted small">Official tax & fee payment confirmation issued by {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
         </div>
         <div class="d-flex gap-2">
-            <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 btn-sm">
+            <button onclick="window.print()" class="btn btn-primary rounded-2 px-4 btn-sm fw-semibold">
                 <i class="fa-solid fa-print me-1"></i> Print / Download PDF
             </button>
-            <a href="{{ route('student.fees.history') }}" class="btn btn-outline-secondary rounded-pill px-3 btn-sm">
+            <a href="{{ route('student.fees.history') }}" class="btn btn-outline-secondary rounded-2 px-3 btn-sm fw-semibold">
                 <i class="fa-solid fa-arrow-left me-1"></i> Back to History
             </a>
         </div>
     </div>
 
     <!-- Official Printable Receipt Container -->
-    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5 mx-auto receipt-card" style="max-width: 800px; border: 1px solid #e2e8f0;">
+    <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-3 p-md-5 mx-auto receipt-card" style="max-width: 800px;">
         <!-- Header -->
         <div class="border-bottom pb-4 mb-4 text-center">
             <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
@@ -89,27 +89,29 @@
 
         <!-- Payment Breakdown Table -->
         <h6 class="fw-bold text-dark border-bottom pb-2 mb-3">Transaction Details</h6>
-        <table class="table table-bordered mb-4 small">
-            <thead class="table-light">
-                <tr>
-                    <th>Item Description</th>
-                    <th class="text-end">Amount (INR)</th>
-                </tr>
-            </thead>
-            <tbody>
-                <tr>
-                    <td>
-                        <div class="fw-semibold text-dark">Course Fee Installment Payment</div>
-                        <div class="text-muted small">{{ $payment->notes ?? 'Fee credit towards ongoing academic session' }}</div>
-                    </td>
-                    <td class="text-end fw-bold text-success fs-6">₹{{ number_format($payment->amount, 2) }}</td>
-                </tr>
-                <tr class="table-light">
-                    <th class="text-end">Total Amount Received:</th>
-                    <th class="text-end text-success fs-5">₹{{ number_format($payment->amount, 2) }}</th>
-                </tr>
-            </tbody>
-        </table>
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered mb-0 small">
+                <thead class="table-light">
+                    <tr>
+                        <th>Item Description</th>
+                        <th class="text-end">Amount (INR)</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                        <td>
+                            <div class="fw-semibold text-dark">Course Fee Installment Payment</div>
+                            <div class="text-muted small">{{ $payment->notes ?? 'Fee credit towards ongoing academic session' }}</div>
+                        </td>
+                        <td class="text-end fw-bold text-success fs-6">₹{{ number_format($payment->amount, 2) }}</td>
+                    </tr>
+                    <tr class="table-light">
+                        <th class="text-end">Total Amount Received:</th>
+                        <th class="text-end text-success fs-5">₹{{ number_format($payment->amount, 2) }}</th>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
 
         <!-- Verification QR Code & Signatures -->
         <div class="row align-items-center g-3 pt-3 border-top mt-4">

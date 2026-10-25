@@ -114,4 +114,24 @@ class Student extends Model
     {
         return $this->hasMany(AdmissionApplication::class, 'converted_student_id');
     }
+
+    public function getPhoneAttribute(): ?string
+    {
+        return $this->mobile;
+    }
+
+    public function getDateOfBirthAttribute(): ?\Illuminate\Support\Carbon
+    {
+        return $this->dob;
+    }
+
+    public function getAcademicSessionAttribute(): string
+    {
+        $admission = $this->admissions->first() ?? $this->admissions()->latest('admission_date')->first();
+        if ($admission && $admission->admission_date) {
+            $year = (int) $admission->admission_date->format('Y');
+            return $year . '-' . substr((string)($year + 1), -2);
+        }
+        return date('Y') . '-' . substr((string)(date('Y') + 1), -2);
+    }
 }

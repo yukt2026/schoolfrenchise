@@ -14,9 +14,9 @@ class PublicController extends Controller
 {
     public function home()
     {
-        $featuredCourses = Course::where('status', true)->where('is_popular', true)->take(6)->get();
-        if ($featuredCourses->isEmpty()) {
-            $featuredCourses = Course::where('status', true)->take(6)->get();
+        $featuredCourses = Course::where('status', true)->where('is_popular', true)->take(12)->get();
+        if ($featuredCourses->count() < 12) {
+            $featuredCourses = Course::where('status', true)->take(12)->get();
         }
 
         $allCourses = Course::where('status', true)->get();

@@ -26,9 +26,9 @@
             <!-- Categories Badges -->
             @if($categories->isNotEmpty())
             <div class="d-flex justify-content-center flex-wrap gap-2 mb-5">
-                <button type="button" class="btn btn-primary btn-sm rounded-pill px-4 filter-btn active" data-filter="all">All Photos</button>
+                <button type="button" class="btn btn-primary btn-sm rounded-2 px-4 filter-btn active" data-filter="all">All Photos</button>
                 @foreach($categories as $cat)
-                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-4 filter-btn" data-filter="{{ Str::slug($cat) }}">{{ $cat }}</button>
+                    <button type="button" class="btn btn-outline-secondary btn-sm rounded-2 px-4 filter-btn" data-filter="{{ Str::slug($cat) }}">{{ $cat }}</button>
                 @endforeach
             </div>
             @endif

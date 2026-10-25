@@ -12,17 +12,17 @@
             <div class="text-muted small">Verified admission record and student enrolment dossier</div>
         </div>
         <div class="d-flex gap-2">
-            <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 btn-sm">
+            <button onclick="window.print()" class="btn btn-primary rounded-2 px-4 btn-sm">
                 <i class="fa-solid fa-print me-1"></i> Print / Save PDF
             </button>
-            <a href="{{ route('student.dashboard') }}" class="btn btn-outline-secondary rounded-pill px-3 btn-sm">
+            <a href="{{ route('student.dashboard') }}" class="btn btn-outline-secondary rounded-2 px-3 btn-sm">
                 <i class="fa-solid fa-arrow-left me-1"></i> Back
             </a>
         </div>
     </div>
 
     <!-- Official Printable Admission Form Document -->
-    <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5 mx-auto" style="max-width: 900px;">
+    <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-3 p-md-5 mx-auto" style="max-width: 900px;">
         <!-- Header / Letterhead -->
         <div class="border-bottom pb-4 mb-4 text-center position-relative">
             <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
@@ -153,34 +153,36 @@
         <h6 class="fw-bold text-uppercase text-primary border-bottom pb-2 mb-3" style="letter-spacing: 0.5px;">
             3. Fee Assessment Summary
         </h6>
-        <table class="table table-bordered small mb-4">
-            <thead class="table-light">
-                <tr>
-                    <th>Gross Fee</th>
-                    <th>Concession / Discount</th>
-                    <th>Net Applicable Fee</th>
-                    <th>Fee Paid to Date</th>
-                    <th>Outstanding Dues</th>
-                </tr>
-            </thead>
-            <tbody>
-                @if($admission)
+        <div class="table-responsive mb-4">
+            <table class="table table-bordered small mb-0">
+                <thead class="table-light">
                     <tr>
-                        <td>₹{{ number_format($admission->course_fee, 2) }}</td>
-                        <td class="text-danger">₹{{ number_format($admission->discount_amount, 2) }}</td>
-                        <td class="fw-bold text-dark">₹{{ number_format($admission->net_fee, 2) }}</td>
-                        <td class="fw-bold text-success">₹{{ number_format($admission->total_paid, 2) }}</td>
-                        <td class="fw-bold {{ ($admission->net_fee - $admission->total_paid) > 0 ? 'text-danger' : 'text-success' }}">
-                            ₹{{ number_format(max(0, $admission->net_fee - $admission->total_paid), 2) }}
-                        </td>
+                        <th>Gross Fee</th>
+                        <th>Concession / Discount</th>
+                        <th>Net Applicable Fee</th>
+                        <th>Fee Paid to Date</th>
+                        <th>Outstanding Dues</th>
                     </tr>
-                @else
-                    <tr>
-                        <td colspan="5" class="text-center text-muted">No admission fee structure linked.</td>
-                    </tr>
-                @endif
-            </tbody>
-        </table>
+                </thead>
+                <tbody>
+                    @if($admission)
+                        <tr>
+                            <td>₹{{ number_format($admission->course_fee, 2) }}</td>
+                            <td class="text-danger">₹{{ number_format($admission->discount_amount, 2) }}</td>
+                            <td class="fw-bold text-dark">₹{{ number_format($admission->net_fee, 2) }}</td>
+                            <td class="fw-bold text-success">₹{{ number_format($admission->total_paid, 2) }}</td>
+                            <td class="fw-bold {{ ($admission->net_fee - $admission->total_paid) > 0 ? 'text-danger' : 'text-success' }}">
+                                ₹{{ number_format(max(0, $admission->net_fee - $admission->total_paid), 2) }}
+                            </td>
+                        </tr>
+                    @else
+                        <tr>
+                            <td colspan="5" class="text-center text-muted">No admission fee structure linked.</td>
+                        </tr>
+                    @endif
+                </tbody>
+            </table>
+        </div>
 
         <!-- Signatures & Declaration -->
         <div class="mt-5 pt-4 border-top">

@@ -251,7 +251,7 @@
         <!-- Action Toolbar (Hidden during print) -->
         <div class="d-flex flex-wrap justify-content-between align-items-center mb-3 no-print" style="max-width: 920px; margin: 0 auto;">
             <div class="d-flex align-items-center gap-2">
-                <a href="{{ route('admission.status', ['application_no' => $application->application_no]) }}" class="btn btn-outline-secondary btn-sm rounded-pill px-3 shadow-sm">
+                <a href="{{ route('admission.status', ['application_no' => $application->application_no]) }}" class="btn btn-outline-secondary btn-sm rounded-2 px-3 shadow-sm">
                     <i class="fa-solid fa-arrow-left me-1"></i> Back to Status
                 </a>
                 <a href="{{ route('home') }}" class="btn btn-link btn-sm text-decoration-none text-muted">Home</a>
@@ -259,7 +259,7 @@
                 <a href="{{ route('admission.apply') }}" class="btn btn-link btn-sm text-decoration-none text-muted">Apply Another</a>
             </div>
             <div class="d-flex gap-2">
-                <button onclick="window.print()" class="btn btn-primary btn-sm rounded-pill px-4 shadow-sm fw-semibold">
+                <button onclick="window.print()" class="btn btn-primary btn-sm rounded-2 px-4 shadow-sm fw-semibold">
                     <i class="fa-solid fa-print me-1"></i> Print Acknowledgement Slip
                 </button>
             </div>

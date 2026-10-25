@@ -75,7 +75,7 @@
                             <input type="hidden" name="gateway_payment_id" value="{{ $testPaymentId }}">
                             <input type="hidden" name="signature" value="{{ $validSignature }}">
 
-                            <button type="submit" class="btn btn-success w-100 py-3 fw-bold fs-6 rounded-pill shadow-sm">
+                            <button type="submit" class="btn btn-success w-100 py-3 fw-bold fs-6 rounded-2 shadow-sm">
                                 <i class="fa-solid fa-circle-check me-2"></i> Confirm & Authorize Payment (₹{{ number_format($order['amount'], 2) }})
                             </button>
                         </form>
@@ -87,7 +87,7 @@
                             <input type="hidden" name="gateway_payment_id" value="{{ $testPaymentId }}">
                             <input type="hidden" name="signature" value="INVALID_SIGNATURE_TAMPER_TEST">
 
-                            <button type="submit" class="btn btn-outline-danger w-100 py-2 rounded-pill small">
+                            <button type="submit" class="btn btn-outline-danger w-100 py-2 rounded-2 small">
                                 <i class="fa-solid fa-triangle-exclamation me-1"></i> Simulate Signature Mismatch (Security Test)
                             </button>
                         </form>

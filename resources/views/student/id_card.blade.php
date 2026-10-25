@@ -12,10 +12,10 @@
             <div class="text-muted small">Official digital student identity credential issued by {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
         </div>
         <div class="d-flex gap-2">
-            <button onclick="window.print()" class="btn btn-primary rounded-pill px-4 btn-sm">
+            <button onclick="window.print()" class="btn btn-primary rounded-2 px-4 btn-sm fw-semibold">
                 <i class="fa-solid fa-print me-1"></i> Print / Save ID Card
             </button>
-            <a href="{{ route('student.dashboard') }}" class="btn btn-outline-secondary rounded-pill px-3 btn-sm">
+            <a href="{{ route('student.dashboard') }}" class="btn btn-outline-secondary rounded-2 px-3 btn-sm fw-semibold">
                 <i class="fa-solid fa-arrow-left me-1"></i> Back
             </a>
         </div>
@@ -24,7 +24,7 @@
     <!-- Dual-Sided ID Card Container -->
     <div class="d-flex flex-wrap justify-content-center gap-4 py-3">
         <!-- FRONT SIDE -->
-        <div class="id-card-wrap shadow-lg rounded-4 overflow-hidden bg-white position-relative" style="width: 340px; height: 530px; border: 2px solid #0284c7;">
+        <div class="id-card-wrap shadow-lg rounded-3 overflow-hidden bg-white position-relative" style="width: 340px; max-width: 100%; height: 530px; border: 2px solid #0284c7;">
             <!-- Header -->
             <div class="text-center py-2 px-2 text-white" style="background: linear-gradient(135deg, #0a192f, #0284c7);">
                 <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
@@ -92,7 +92,7 @@
         </div>
 
         <!-- BACK SIDE -->
-        <div class="id-card-wrap shadow-lg rounded-4 overflow-hidden bg-white position-relative" style="width: 340px; height: 530px; border: 2px solid #0284c7;">
+        <div class="id-card-wrap shadow-lg rounded-3 overflow-hidden bg-white position-relative" style="width: 340px; max-width: 100%; height: 530px; border: 2px solid #0284c7;">
             <!-- Header -->
             <div class="text-center py-2 px-2 text-white" style="background: #0a192f;">
                 <div class="fw-bold" style="font-size: 0.75rem; letter-spacing: 0.5px;">TERMS & CONDITIONS</div>

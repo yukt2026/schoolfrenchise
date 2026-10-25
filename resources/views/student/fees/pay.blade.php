@@ -12,7 +12,7 @@
             <div class="text-muted small">Secure payment gateway integration with instantaneous digital receipt issuance</div>
         </div>
         <div>
-            <a href="{{ route('student.fees') }}" class="btn btn-outline-secondary rounded-pill px-3 btn-sm">
+            <a href="{{ route('student.fees') }}" class="btn btn-outline-secondary rounded-2 px-3 btn-sm fw-semibold">
                 <i class="fa-solid fa-arrow-left me-1"></i> Back to Fees
             </a>
         </div>
@@ -21,10 +21,10 @@
     <div class="row justify-content-center">
         <div class="col-12 col-lg-8">
             <!-- Dues Banner -->
-            <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 text-white" style="background: linear-gradient(135deg, #4c1d95, #6d28d9);">
+            <div class="card border-0 shadow-sm rounded-3 p-4 mb-4 text-white" style="background: linear-gradient(135deg, #0b1329 0%, #0f172a 60%, #0284c7 100%);">
                 <div class="row align-items-center g-3">
                     <div class="col-md-7">
-                        <span class="badge bg-warning text-dark font-monospace mb-1 px-3 py-1 fw-bold">
+                        <span class="badge bg-warning text-dark font-monospace mb-1 px-3 py-1 fw-bold rounded-1">
                             ROLL NO: {{ $student->roll_no ?? 'UNASSIGNED' }}
                         </span>
                         <h4 class="fw-bold text-white mb-1">{{ $admission->course?->course_name }}</h4>
@@ -40,7 +40,7 @@
             </div>
 
             <!-- Payment Form Card -->
-            <div class="card border-0 shadow-sm rounded-4 bg-white p-4 p-md-5 mb-4">
+            <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 p-md-5 mb-4">
                 @if(config('services.payment.mode', 'sandbox') === 'sandbox')
                     <div class="alert alert-warning border-0 rounded-3 mb-4 d-flex align-items-center gap-3">
                         <i class="fa-solid fa-flask-vial fs-4 text-warning"></i>
@@ -117,7 +117,7 @@
                     </div>
 
                     <div class="text-center">
-                        <button type="submit" class="btn btn-primary rounded-pill px-5 py-3 fw-bold fs-6 shadow">
+                        <button type="submit" class="btn btn-primary rounded-2 px-5 py-3 fw-bold fs-6 shadow">
                             <i class="fa-solid fa-lock me-2"></i> Proceed to Authorize Payment
                         </button>
                     </div>
@@ -135,13 +135,13 @@
     cursor: pointer;
 }
 .payment-option-card:hover {
-    border-color: #5b21b6 !important;
-    background: #fbf9ff;
+    border-color: #0284c7 !important;
+    background: #f0f9ff;
 }
 .payment-option-card:has(input:checked) {
-    border-color: #5b21b6 !important;
-    background: #f5f3ff;
-    box-shadow: 0 0 0 2px #5b21b6;
+    border-color: #0284c7 !important;
+    background: #e0f2fe;
+    box-shadow: 0 0 0 2px #0284c7;
 }
 </style>
 @endpush

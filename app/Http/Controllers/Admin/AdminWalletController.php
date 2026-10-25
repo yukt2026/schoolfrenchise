@@ -249,7 +249,8 @@ class AdminWalletController extends Controller
         $transactions = CentreWalletTransaction::with('approver')
             ->where('centre_id', $centre->id)
             ->latest('id')
-            ->paginate(50);
+            ->paginate(50)
+            ->withQueryString();
 
         $stats = [
             'current_balance' => (float) ($centre->wallet?->balance ?? 0.00),

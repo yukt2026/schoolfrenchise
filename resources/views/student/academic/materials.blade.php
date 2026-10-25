@@ -17,14 +17,14 @@
         <p class="text-muted small mb-0">Access approved notes, syllabi, practical guides, and reference documents for your enrolled course.</p>
     </div>
     @if($admission && $admission->course)
-        <span class="badge bg-lavender text-primary px-3 py-2 rounded-pill fs-7">
+        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-1 fs-7">
             <i class="fa-solid fa-graduation-cap me-1"></i> {{ $admission->course->course_name }}
         </span>
     @endif
 </div>
 
 <!-- Search & Filter Bar -->
-<div class="card border-0 shadow-sm rounded-4 mb-4">
+<div class="card border border-light-subtle shadow-sm rounded-3 mb-4">
     <div class="card-body p-3">
         <form method="GET" action="{{ route('student.study-materials') }}" class="row g-2 align-items-center">
             <div class="col-12 col-md-5">
@@ -44,11 +44,11 @@
                 </select>
             </div>
             <div class="col-6 col-md-3 d-flex gap-2">
-                <button type="submit" class="btn btn-sm btn-primary rounded-3 w-100">
+                <button type="submit" class="btn btn-sm btn-primary rounded-2 w-100 fw-semibold">
                     <i class="fa-solid fa-filter me-1"></i> Filter
                 </button>
                 @if(request('search') || request('type'))
-                    <a href="{{ route('student.study-materials') }}" class="btn btn-sm btn-outline-secondary rounded-3" title="Clear Filters">
+                    <a href="{{ route('student.study-materials') }}" class="btn btn-sm btn-outline-secondary rounded-2" title="Clear Filters">
                         <i class="fa-solid fa-rotate-left"></i>
                     </a>
                 @endif
@@ -62,10 +62,10 @@
     <div class="row g-2 g-md-4">
         @foreach($materials as $material)
             <div class="col-6 col-md-6 col-lg-4">
-                <div class="card h-100 border-0 shadow-sm rounded-4 hover-shadow transition-all">
+                <div class="card h-100 border border-light-subtle shadow-sm rounded-3 hover-shadow transition-all bg-white">
                     <div class="card-body p-2.5 p-sm-3 p-md-4 d-flex flex-column">
                         <div class="d-flex align-items-start justify-content-between mb-2 mb-md-3">
-                            <div class="rounded-3 p-2 p-md-3 {{ $material->material_type === 'video' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary' }}">
+                            <div class="rounded-2 p-2 p-md-3 {{ $material->material_type === 'video' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary' }}">
                                 @if($material->material_type === 'video')
                                     <i class="fa-brands fa-youtube fs-5 fs-md-4"></i>
                                 @elseif($material->material_type === 'assignment')
@@ -76,7 +76,7 @@
                                     <i class="fa-solid fa-file-pdf fs-5 fs-md-4"></i>
                                 @endif
                             </div>
-                            <span class="badge {{ $material->material_type === 'video' ? 'bg-danger-subtle text-danger' : 'bg-lavender text-primary' }} text-uppercase px-1.5 px-md-2 py-0.5 py-md-1" style="font-size: 0.65rem;">
+                            <span class="badge {{ $material->material_type === 'video' ? 'bg-danger-subtle text-danger' : 'bg-primary-subtle text-primary' }} text-uppercase px-1.5 px-md-2 py-0.5 py-md-1 rounded-1" style="font-size: 0.65rem;">
                                 {{ $material->material_type ?? 'Document' }}
                             </span>
                         </div>
@@ -105,11 +105,11 @@
 
                             <div class="d-grid">
                                 @if($material->external_url && empty($material->file_path))
-                                    <a href="{{ $material->external_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary rounded-3 py-1" style="font-size: 0.75rem;">
+                                    <a href="{{ $material->external_url }}" target="_blank" rel="noopener noreferrer" class="btn btn-sm btn-outline-primary rounded-2 py-1 fw-semibold" style="font-size: 0.75rem;">
                                         <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Open Link
                                     </a>
                                 @else
-                                    <a href="{{ route('student.study-materials.download', $material->id) }}" class="btn btn-sm btn-primary rounded-3 py-1" style="font-size: 0.75rem;">
+                                    <a href="{{ route('student.study-materials.download', $material->id) }}" class="btn btn-sm btn-primary rounded-2 py-1 fw-semibold" style="font-size: 0.75rem;">
                                         <i class="fa-solid fa-cloud-arrow-down me-1"></i> Download
                                     </a>
                                 @endif
@@ -126,7 +126,7 @@
         {{ $materials->links() }}
     </div>
 @else
-    <div class="card border-0 shadow-sm rounded-4 text-center py-5">
+    <div class="card border border-light-subtle shadow-sm rounded-3 text-center py-5 bg-white">
         <div class="card-body">
             <div class="bg-light rounded-circle mx-auto p-4 mb-3 d-inline-flex align-items-center justify-content-center" style="width: 80px; height: 80px;">
                 <i class="fa-regular fa-folder-open text-muted fs-2"></i>
@@ -140,7 +140,7 @@
                 @endif
             </p>
             @if(request('search') || request('type'))
-                <a href="{{ route('student.study-materials') }}" class="btn btn-sm btn-primary rounded-3">
+                <a href="{{ route('student.study-materials') }}" class="btn btn-sm btn-primary rounded-2 fw-semibold px-3">
                     <i class="fa-solid fa-rotate-left me-1"></i> View All Materials
                 </a>
             @endif

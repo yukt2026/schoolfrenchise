@@ -11,9 +11,17 @@ trait HasStudentContext
     /**
      * Retrieve the authenticated student record with multi-tenant security.
      */
-    protected function getStudent(): Student
+    protected function getStudent(mixed $request = null): Student
     {
         $user = Auth::user();
+
+        // Convenience fallback for Super Admin reviewing specific student
+        if ($user && $user->isSuperAdmin() && request()->filled('student_id')) {
+            $specificStudent = Student::find(request('student_id'));
+            if ($specificStudent) {
+                return $specificStudent;
+            }
+        }
 
         if ($user->student) {
             return $user->student;

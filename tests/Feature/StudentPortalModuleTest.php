@@ -251,14 +251,23 @@ class StudentPortalModuleTest extends TestCase
         $response->assertSee('Mahesh Prasad');
         $response->assertSee($this->student->registration_no);
 
-        // Update contact details
+        // Update contact & personal details
         $updateResp = $this->actingAs($this->studentUser)->post(route('student.profile.update'), [
+            'father_name'      => 'Mahesh Prasad Upgraded',
+            'mother_name'      => 'Sunita Devi Upgraded',
+            'phone'            => '9811223344',
+            'date_of_birth'    => '2004-03-25',
+            'gender'           => 'female',
             'alternate_mobile' => '9876598765',
             'address'          => 'House 14B, New Rajendra Nagar, Patna',
         ]);
 
         $updateResp->assertRedirect();
         $this->student->refresh();
+        $this->assertEquals('Mahesh Prasad Upgraded', $this->student->father_name);
+        $this->assertEquals('Sunita Devi Upgraded', $this->student->mother_name);
+        $this->assertEquals('9811223344', $this->student->mobile);
+        $this->assertEquals('9811223344', $this->student->phone);
         $this->assertEquals('9876598765', $this->student->alternate_mobile);
         $this->assertEquals('House 14B, New Rajendra Nagar, Patna', $this->student->address);
     }
@@ -370,10 +379,10 @@ class StudentPortalModuleTest extends TestCase
         $response->assertStatus(200);
         $response->assertSee('7,000.00'); // Total Dues
 
-        // Submit fee payment of 3500.00
+        // Submit fee payment of 3500.00 via card
         $payResp = $this->actingAs($this->studentUser)->post(route('student.fees.pay.submit'), [
             'amount'       => 3500.00,
-            'payment_mode' => 'upi',
+            'payment_mode' => 'card',
         ]);
 
         $payResp->assertRedirect();
@@ -386,10 +395,26 @@ class StudentPortalModuleTest extends TestCase
         $fee2 = StudentFee::where('admission_id', $this->admission->id)->where('installment_no', 2)->first();
         $this->assertEquals('paid', $fee2->status);
 
-        // Check fee payment record created
+        // Check fee payment record created with card
         $payment = FeePayment::where('student_id', $this->student->id)->where('amount', 3500.00)->latest()->first();
         $this->assertNotNull($payment);
+        $this->assertEquals('card', $payment->payment_mode);
         $this->assertStringStartsWith('RCP-', $payment->receipt_no);
+
+        // Verify receipt view renders successfully for card payment
+        $receiptResp = $this->actingAs($this->studentUser)->get(route('student.fees.receipt', $payment->id));
+        $receiptResp->assertStatus(200);
+        $receiptResp->assertSee('card');
+
+        // Submit remaining payment of 1000.00 via net_banking
+        $payResp2 = $this->actingAs($this->studentUser)->post(route('student.fees.pay.submit'), [
+            'amount'       => 1000.00,
+            'payment_mode' => 'net_banking',
+        ]);
+        $payResp2->assertRedirect();
+        $payment2 = FeePayment::where('student_id', $this->student->id)->where('amount', 1000.00)->latest()->first();
+        $this->assertNotNull($payment2);
+        $this->assertEquals('net_banking', $payment2->payment_mode);
     }
 
     /**
@@ -688,5 +713,65 @@ class StudentPortalModuleTest extends TestCase
 
         $this->studentUser->refresh();
         $this->assertTrue(Hash::check('BrandNewSecret@2026', $this->studentUser->password));
+    }
+
+    /**
+     * Test 17: All student modules render dynamically and safely without active admission/batch (Empty State Resiliency).
+     */
+    public function test_all_student_modules_render_dynamically_without_active_admission(): void
+    {
+        $freshUser = User::create([
+            'name'      => 'Fresh Registered Student',
+            'email'     => 'fresh.student.' . uniqid() . '@example.com',
+            'password'  => Hash::make('Password@123'),
+            'role'      => 'student',
+            'is_active' => true,
+        ]);
+        $freshUser->roles()->syncWithoutDetaching([Role::where('name', 'student')->first()->id]);
+
+        $freshStudent = Student::create([
+            'user_id'         => $freshUser->id,
+            'centre_id'       => $this->centre->id,
+            'registration_no' => 'REG-FRESH-' . rand(1000, 9999),
+            'roll_no'         => 'ROL-FRESH-' . rand(1000, 9999),
+            'full_name'       => 'Fresh Registered Student',
+            'father_name'     => 'Father Name',
+            'mother_name'     => 'Mother Name',
+            'mobile'          => '9988776655',
+            'gender'          => 'female',
+            'dob'             => '2004-06-15',
+            'state_id'        => $this->centre->state_id,
+            'district_id'     => $this->centre->district_id,
+            'city'            => 'Patna',
+            'address'         => 'Boring Road',
+            'pincode'         => '800001',
+            'status'          => 'enrolled',
+        ]);
+
+        $routesToVerify = [
+            route('student.dashboard'),
+            route('student.profile'),
+            route('student.admission-form'),
+            route('student.id-card'),
+            route('student.course'),
+            route('student.schedule'),
+            route('student.attendance'),
+            route('student.change-password'),
+            route('student.fees'),
+            route('student.fees.history'),
+            route('student.study-materials'),
+            route('student.exams'),
+            route('student.results'),
+            route('student.certificates'),
+            route('student.support'),
+            route('student.support.create'),
+            route('student.notifications'),
+        ];
+
+        foreach ($routesToVerify as $url) {
+            $response = $this->actingAs($freshUser)->get($url);
+            $redirectTarget = $response->headers->get('Location');
+            $this->assertEquals(200, $response->getStatusCode(), "Route {$url} failed with status {$response->getStatusCode()}, redirect: {$redirectTarget}");
+        }
     }
 }

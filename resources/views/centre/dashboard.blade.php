@@ -1,6 +1,6 @@
 @extends('layouts.centre')
 
-@section('title', 'Centre Director Dashboard - TECH ERA COMPUTER')
+@section('title', 'Centre Director Dashboard - ' . ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER'))
 
 @section('content')
 <!-- Header Banner Card -->
@@ -162,7 +162,7 @@
     <div class="col-lg-8">
         <!-- Recent Students Table -->
         <div class="card border-0 rounded-4 shadow-sm mb-4">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="card-header bg-white py-3 px-3 px-md-4 border-bottom d-flex justify-content-between align-items-center">
                 <h6 class="fw-bold mb-0 text-dark">
                     <i class="fa-solid fa-users text-primary me-2"></i>Recently Enrolled Candidates
                 </h6>
@@ -171,24 +171,30 @@
                 </a>
             </div>
             <div class="card-body p-0">
+                @if($recentStudents->count() > 0)
+                    <div class="table-scroll-hint d-md-none">
+                        <i class="fa-solid fa-arrows-left-right text-primary"></i>
+                        <span>Scroll horizontally to view candidates</span>
+                    </div>
+                @endif
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small">
+                    <table class="table-custom table-hover align-middle mb-0" style="min-width: 680px;">
+                        <thead>
                             <tr>
-                                <th>Roll No / Reg No</th>
+                                <th class="ps-4">Roll No / Reg No</th>
                                 <th>Student Name</th>
                                 <th>Course</th>
                                 <th>Mobile</th>
                                 <th>Status</th>
-                                <th class="text-end">Actions</th>
+                                <th class="pe-4 text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($recentStudents as $s)
                             @php $adm = $s->admissions->first(); @endphp
                             <tr>
-                                <td>
-                                    <span class="badge bg-primary-subtle text-primary font-monospace fw-bold">{{ $s->roll_no }}</span>
+                                <td class="ps-4">
+                                    <span class="badge bg-primary-subtle text-primary font-monospace fw-bold rounded-1">{{ $s->roll_no }}</span>
                                     <div class="small text-muted font-monospace" style="font-size: 0.72rem;">{{ $s->registration_no }}</div>
                                 </td>
                                 <td>
@@ -196,20 +202,20 @@
                                     <div class="small text-muted">S/O, D/O: {{ $s->father_name }}</div>
                                 </td>
                                 <td>
-                                    <span class="badge bg-secondary-subtle text-secondary">{{ $adm?->course?->course_code ?? 'Course' }}</span>
+                                    <span class="badge bg-secondary-subtle text-secondary rounded-1">{{ $adm?->course?->course_code ?? 'Course' }}</span>
                                     <div class="small text-muted text-truncate" style="max-width: 150px;">{{ $adm?->course?->course_name }}</div>
                                 </td>
-                                <td>{{ $s->mobile }}</td>
+                                <td class="text-nowrap">{{ $s->mobile }}</td>
                                 <td>
-                                    <span class="badge bg-success-subtle text-success">{{ ucfirst($s->status) }}</span>
+                                    <span class="badge bg-success-subtle text-success rounded-1 text-nowrap">{{ ucfirst($s->status) }}</span>
                                 </td>
-                                <td class="text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ route('centre.students.show', $s->id) }}" class="btn btn-outline-secondary" title="View Profile">
-                                            <i class="fa-solid fa-eye"></i>
+                                <td class="pe-4 text-end text-nowrap">
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="{{ route('centre.students.show', $s->id) }}" class="btn btn-sm btn-outline-secondary rounded-2" title="View Profile">
+                                            <i class="fa-solid fa-eye me-1"></i>Profile
                                         </a>
-                                        <a href="{{ route('centre.students.id-card', $s->id) }}" class="btn btn-outline-secondary" title="ID Card" target="_blank">
-                                            <i class="fa-solid fa-id-card"></i>
+                                        <a href="{{ route('centre.students.id-card', $s->id) }}" class="btn btn-sm btn-outline-primary rounded-2" title="ID Card" target="_blank">
+                                            <i class="fa-solid fa-id-card me-1"></i>Card
                                         </a>
                                     </div>
                                 </td>
@@ -230,7 +236,7 @@
 
         <!-- Recent Fee Collections Table -->
         <div class="card border-0 rounded-4 shadow-sm">
-            <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
+            <div class="card-header bg-white py-3 px-3 px-md-4 border-bottom d-flex justify-content-between align-items-center">
                 <h6 class="fw-bold mb-0 text-dark">
                     <i class="fa-solid fa-receipt text-success me-2"></i>Recent Computerized Fee Receipts
                 </h6>
@@ -239,37 +245,44 @@
                 </a>
             </div>
             <div class="card-body p-0">
+                @if($recentPayments->count() > 0)
+                    <div class="table-scroll-hint d-md-none">
+                        <i class="fa-solid fa-arrows-left-right text-primary"></i>
+                        <span>Scroll horizontally to view fee receipts</span>
+                    </div>
+                @endif
                 <div class="table-responsive">
-                    <table class="table table-hover align-middle mb-0">
-                        <thead class="table-light small">
+                    <table class="table-custom table-hover align-middle mb-0" style="min-width: 620px;">
+                        <thead>
                             <tr>
-                                <th>Receipt No</th>
+                                <th class="ps-4">Receipt No</th>
                                 <th>Student</th>
                                 <th>Date</th>
                                 <th>Mode</th>
                                 <th>Amount</th>
-                                <th class="text-end">Print</th>
+                                <th class="pe-4 text-end">Print</th>
                             </tr>
                         </thead>
                         <tbody>
                             @forelse($recentPayments as $p)
                             <tr>
-                                <td>
-                                    <span class="badge bg-secondary-subtle text-dark font-monospace">{{ $p->receipt_no }}</span>
+                                <td class="ps-4 text-nowrap">
+                                    <span class="badge bg-secondary-subtle text-dark font-monospace rounded-1">{{ $p->receipt_no }}</span>
                                 </td>
                                 <td>
                                     <div class="fw-bold text-dark">{{ $p->student?->full_name }}</div>
-                                    <div class="small text-muted">{{ $p->student?->roll_no }}</div>
+                                    <div class="small text-muted font-monospace">{{ $p->student?->roll_no }}</div>
                                 </td>
-                                <td>{{ $p->payment_date ? $p->payment_date->format('d M, Y') : 'N/A' }}</td>
-                                <td><span class="badge bg-info-subtle text-info">{{ strtoupper($p->payment_mode) }}</span></td>
-                                <td class="fw-bold text-success">₹{{ number_format($p->amount, 2) }}</td>
-                                <td class="text-end">
-                                    @if($p->paymentReceipt)
-                                    <a href="{{ route('centre.fees.receipt', $p->paymentReceipt->id) }}" class="btn btn-sm btn-outline-success" target="_blank">
+                                <td class="text-nowrap small text-muted">
+                                    <i class="fa-regular fa-calendar me-1 text-primary"></i>
+                                    {{ $p->payment_date ? $p->payment_date->format('d M, Y') : 'N/A' }}
+                                </td>
+                                <td><span class="badge bg-info-subtle text-info rounded-1 text-nowrap">{{ strtoupper(str_replace('_', ' ', $p->payment_mode)) }}</span></td>
+                                <td class="fw-bold text-success text-nowrap">₹{{ number_format($p->amount, 2) }}</td>
+                                <td class="pe-4 text-end text-nowrap">
+                                    <a href="{{ route('centre.fees.receipt', $p->paymentReceipt?->id ?? $p->id) }}" class="btn btn-sm btn-outline-success rounded-2 fw-semibold text-nowrap" target="_blank">
                                         <i class="fa-solid fa-print me-1"></i>Receipt
                                     </a>
-                                    @endif
                                 </td>
                             </tr>
                             @empty

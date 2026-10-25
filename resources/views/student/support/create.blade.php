@@ -17,14 +17,14 @@
         </h2>
         <p class="text-muted small mb-0">Describe your query or technical issue. The centre administration will review and respond promptly.</p>
     </div>
-    <a href="{{ route('student.support') }}" class="btn btn-outline-secondary btn-sm rounded-3">
+    <a href="{{ route('student.support') }}" class="btn btn-outline-secondary btn-sm rounded-2 fw-semibold">
         <i class="fa-solid fa-arrow-left me-1"></i> Back to Tickets
     </a>
 </div>
 
 <div class="row justify-content-center">
     <div class="col-12 col-lg-8">
-        <div class="card border-0 shadow-sm rounded-4 p-4 p-md-5 bg-white">
+        <div class="card border border-light-subtle shadow-sm rounded-3 p-4 p-md-5 bg-white">
             <form action="{{ route('student.support.store') }}" method="POST" enctype="multipart/form-data">
                 @csrf
 
@@ -97,8 +97,8 @@
 
                 <!-- Submit Buttons -->
                 <div class="d-flex justify-content-end gap-2">
-                    <a href="{{ route('student.support') }}" class="btn btn-outline-secondary rounded-3 px-4">Cancel</a>
-                    <button type="submit" class="btn btn-primary rounded-3 px-4">
+                    <a href="{{ route('student.support') }}" class="btn btn-outline-secondary rounded-2 px-4 fw-semibold">Cancel</a>
+                    <button type="submit" class="btn btn-primary rounded-2 px-4 fw-semibold">
                         <i class="fa-solid fa-paper-plane me-1"></i> Submit Ticket
                     </button>
                 </div>

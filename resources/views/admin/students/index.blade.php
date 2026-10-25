@@ -24,6 +24,65 @@
     </div>
 </div>
 
+<!-- KPI Status Summary Cards -->
+<div class="row g-2 g-md-3 mb-4">
+    <div class="col-6 col-sm-4 col-md-3 col-xl">
+        <a href="{{ route('admin.students.index', request()->except('status')) }}" class="text-decoration-none">
+            <div class="card dce-stat-card border-start border-4 border-dark h-100 {{ !request('status') ? 'bg-light shadow-sm' : '' }}">
+                <div class="card-body p-2.5 p-md-3">
+                    <div class="text-muted small fw-semibold text-uppercase" style="font-size: 0.68rem;">All Students</div>
+                    <div class="h4 fw-bold mb-0 text-dark">{{ number_format($counts['all'] ?? 0) }}</div>
+                    <div class="text-muted small mt-1" style="font-size: 11px;">Total registered</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-sm-4 col-md-3 col-xl">
+        <a href="{{ route('admin.students.index', array_merge(request()->query(), ['status' => 'enrolled'])) }}" class="text-decoration-none">
+            <div class="card dce-stat-card border-start border-4 border-info h-100 {{ request('status') === 'enrolled' ? 'bg-light shadow-sm' : '' }}">
+                <div class="card-body p-2.5 p-md-3">
+                    <div class="text-muted small fw-semibold text-uppercase" style="font-size: 0.68rem;">Enrolled</div>
+                    <div class="h4 fw-bold mb-0 text-info">{{ number_format($counts['enrolled'] ?? 0) }}</div>
+                    <div class="text-muted small mt-1" style="font-size: 11px;">Fresh admissions</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-sm-4 col-md-3 col-xl">
+        <a href="{{ route('admin.students.index', array_merge(request()->query(), ['status' => 'ongoing'])) }}" class="text-decoration-none">
+            <div class="card dce-stat-card border-start border-4 border-primary h-100 {{ request('status') === 'ongoing' ? 'bg-light shadow-sm' : '' }}">
+                <div class="card-body p-2.5 p-md-3">
+                    <div class="text-muted small fw-semibold text-uppercase" style="font-size: 0.68rem;">Ongoing</div>
+                    <div class="h4 fw-bold mb-0 text-primary">{{ number_format($counts['ongoing'] ?? 0) }}</div>
+                    <div class="text-muted small mt-1" style="font-size: 11px;">Attending classes</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-6 col-sm-6 col-md-3 col-xl">
+        <a href="{{ route('admin.students.index', array_merge(request()->query(), ['status' => 'completed'])) }}" class="text-decoration-none">
+            <div class="card dce-stat-card border-start border-4 border-success h-100 {{ request('status') === 'completed' ? 'bg-light shadow-sm' : '' }}">
+                <div class="card-body p-2.5 p-md-3">
+                    <div class="text-muted small fw-semibold text-uppercase" style="font-size: 0.68rem;">Completed</div>
+                    <div class="h4 fw-bold mb-0 text-success">{{ number_format($counts['completed'] ?? 0) }}</div>
+                    <div class="text-muted small mt-1" style="font-size: 11px;">Graduated students</div>
+                </div>
+            </div>
+        </a>
+    </div>
+    <div class="col-12 col-sm-6 col-md-3 col-xl">
+        <a href="{{ route('admin.students.index', array_merge(request()->query(), ['status' => 'dropped'])) }}" class="text-decoration-none">
+            <div class="card dce-stat-card border-start border-4 border-danger h-100 {{ request('status') === 'dropped' ? 'bg-light shadow-sm' : '' }}">
+                <div class="card-body p-2.5 p-md-3">
+                    <div class="text-muted small fw-semibold text-uppercase" style="font-size: 0.68rem;">Dropped</div>
+                    <div class="h4 fw-bold mb-0 text-danger">{{ number_format($counts['dropped'] ?? 0) }}</div>
+                    <div class="text-muted small mt-1" style="font-size: 11px;">Discontinued</div>
+                </div>
+            </div>
+        </a>
+    </div>
+</div>
+
 <!-- Status Tab Filters -->
 <div class="card dce-table-card mb-4">
     <div class="card-body p-3">

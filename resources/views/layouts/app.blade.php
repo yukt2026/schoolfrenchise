@@ -368,7 +368,7 @@
                     <p class="mb-0 text-light opacity-75">Connect directly with TECH ERA COMPUTER Helpdesk for prompt assistance.</p>
                 </div>
                 <div class="col-lg-4 mt-3 mt-lg-0">
-                    <a href="tel:{{ $instituteSettings['contact_phone'] ?? '9162384660' }}" class="btn btn-warning text-dark btn-lg fw-bold px-4 rounded-pill shadow-sm">
+                    <a href="tel:{{ $instituteSettings['contact_phone'] ?? '9162384660' }}" class="btn btn-warning text-dark btn-lg fw-bold px-4 rounded-2 shadow-sm">
                         <i class="fa-solid fa-phone-volume me-2"></i> {{ $instituteSettings['contact_phone'] ?? '9162384660' }}
                     </a>
                 </div>

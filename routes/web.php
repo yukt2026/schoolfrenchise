@@ -343,12 +343,16 @@ Route::middleware(['role:super_admin,centre,staff', 'centre.active'])->prefix('c
     Route::post('/batches/{batch}/attendance', [CentreBatchController::class, 'markAttendance'])->name('batches.attendance.mark');
     Route::get('/batches/attendance/report', [CentreBatchController::class, 'attendanceReport'])->name('batches.attendance.report');
 
-    // Exams & Marks Entry
+    // Exams, Hall Tickets, Marks Entry & Results
     Route::get('/exams', [CentreExamController::class, 'index'])->name('exams.index');
+    Route::get('/exams/hall-tickets', [CentreExamController::class, 'hallTicketsIndex'])->name('exams.hall-tickets.index');
     Route::get('/exams/{exam}/hall-tickets', [CentreExamController::class, 'hallTickets'])->name('exams.hall-tickets');
+    Route::get('/exams/{exam}/hall-tickets/student/{student}', [CentreExamController::class, 'singleHallTicket'])->name('exams.hall-tickets.single');
+    Route::get('/exams/marks', [CentreExamController::class, 'marksIndex'])->name('exams.marks.index');
     Route::get('/exams/{exam}/marks', [CentreExamController::class, 'marksForm'])->name('exams.marks');
     Route::post('/exams/{exam}/marks', [CentreExamController::class, 'storeMarks'])->name('exams.marks.store');
     Route::get('/exams/results', [CentreExamController::class, 'results'])->name('exams.results');
+    Route::get('/exams/results/{result}/marksheet', [CentreExamController::class, 'marksheet'])->name('exams.results.marksheet');
 
     // Fee Collections, Receipts & Dues
     Route::get('/fees', [CentreFeeController::class, 'index'])->name('fees.index');
@@ -362,8 +366,10 @@ Route::middleware(['role:super_admin,centre,staff', 'centre.active'])->prefix('c
     Route::get('/wallet/topup', [CentreWalletController::class, 'topupForm'])->name('wallet.topup');
     Route::post('/wallet/topup', [CentreWalletController::class, 'storeTopup'])->name('wallet.topup.store');
 
-    // Downloads & Affiliation Certificate
+    // Downloads & Certificates
     Route::get('/downloads', [CentreDownloadController::class, 'index'])->name('downloads.index');
+    Route::get('/downloads/student-certificates', [CentreDownloadController::class, 'studentCertificates'])->name('downloads.student-certificates');
+    Route::get('/downloads/student-certificates/{certificate}', [CentreDownloadController::class, 'showStudentCertificate'])->name('downloads.student-certificates.show');
     Route::get('/downloads/certificate', [CentreDownloadController::class, 'certificate'])->name('downloads.certificate');
     Route::get('/downloads/{download}/file', [CentreDownloadController::class, 'downloadFile'])->name('downloads.file');
 

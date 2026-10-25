@@ -1,11 +1,11 @@
 @extends('layouts.centre')
 
-@section('title', 'Attendance Analytics & Monthly Report - TECH ERA COMPUTER')
+@section('title', 'Attendance Analytics & Monthly Report - ' . ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER'))
 
 @section('content')
 <div class="d-flex flex-wrap justify-content-between align-items-center gap-3 mb-4">
     <div>
-        <a href="{{ route('centre.batches.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill mb-2">
+        <a href="{{ route('centre.batches.index') }}" class="btn btn-outline-secondary btn-sm rounded-2 mb-2">
             <i class="fa-solid fa-arrow-left me-1"></i>Back to Batches
         </a>
         <h3 class="fw-bold text-dark mb-1">
@@ -16,11 +16,11 @@
 </div>
 
 <!-- Filter Card -->
-<div class="card border-0 rounded-4 shadow-sm mb-4">
+<div class="card border-0 rounded-3 shadow-sm mb-4">
     <div class="card-body p-3">
         <form method="GET" action="{{ route('centre.batches.attendance.report') }}" class="row g-2 align-items-center">
             <div class="col-md-5">
-                <select name="batch_id" class="form-select" required>
+                <select name="batch_id" class="form-select rounded-2" required>
                     <option value="">Select Batch / Shift</option>
                     @foreach($batches as $b)
                     <option value="{{ $b->id }}" {{ $selectedBatchId == $b->id ? 'selected' : '' }}>
@@ -30,10 +30,10 @@
                 </select>
             </div>
             <div class="col-md-4">
-                <input type="month" name="month" class="form-control" value="{{ $month }}">
+                <input type="month" name="month" class="form-control rounded-2" value="{{ $month }}">
             </div>
             <div class="col-md-3">
-                <button type="submit" class="btn btn-primary w-100 fw-semibold">
+                <button type="submit" class="btn btn-primary w-100 fw-semibold rounded-2">
                     <i class="fa-solid fa-filter me-1"></i>Generate Report
                 </button>
             </div>
@@ -42,20 +42,23 @@
 </div>
 
 @if($reportData)
-<div class="card border-0 rounded-4 shadow-sm">
+<div class="card border-0 rounded-3 shadow-sm">
     <div class="card-header bg-white py-3 border-bottom d-flex justify-content-between align-items-center">
         <h6 class="fw-bold mb-0 text-dark">
             <i class="fa-solid fa-calendar-check text-success me-2"></i>
             {{ $reportData['batch']->batch_name }} &mdash; {{ \Carbon\Carbon::parse($month . '-01')->format('F Y') }}
         </h6>
-        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary">
+        <button onclick="window.print()" class="btn btn-sm btn-outline-secondary rounded-2">
             <i class="fa-solid fa-print me-1"></i>Print Report
         </button>
     </div>
     <div class="card-body p-0">
         <div class="table-responsive">
-            <table class="table table-hover align-middle mb-0">
-                <thead class="table-light">
+            <div class="table-scroll-hint d-md-none text-muted small px-3 py-1 bg-light border-bottom">
+                <i class="fa-solid fa-arrows-left-right me-1 text-primary"></i> Scroll horizontally to view complete report
+            </div>
+            <table class="table table-custom align-middle mb-0" style="min-width: 680px;">
+                <thead>
                     <tr>
                         <th>#</th>
                         <th>Roll No</th>
@@ -78,7 +81,7 @@
                     @endphp
                     <tr>
                         <td class="text-muted fw-bold">{{ $idx + 1 }}</td>
-                        <td><span class="badge bg-primary-subtle text-primary font-monospace">{{ $student->roll_no }}</span></td>
+                        <td><span class="badge bg-primary-subtle text-primary font-monospace rounded-2">{{ $student->roll_no }}</span></td>
                         <td class="fw-bold text-dark">{{ $student->full_name }}</td>
                         <td class="text-center text-success fw-bold">{{ $present }}</td>
                         <td class="text-center text-danger fw-bold">{{ $absent }}</td>

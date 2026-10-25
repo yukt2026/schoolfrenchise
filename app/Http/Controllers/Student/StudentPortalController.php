@@ -120,6 +120,10 @@ class StudentPortalController extends Controller
         $student = $this->getStudent();
 
         $validated = $request->validate([
+            'father_name'      => ['nullable', 'string', 'max:191'],
+            'mother_name'      => ['nullable', 'string', 'max:191'],
+            'date_of_birth'    => ['nullable', 'date'],
+            'gender'           => ['nullable', 'in:male,female,other'],
             'alternate_mobile' => ['nullable', 'string', 'max:20'],
             'phone'            => ['nullable', 'string', 'max:20'],
             'mobile'           => ['nullable', 'string', 'max:20'],
@@ -136,6 +140,19 @@ class StudentPortalController extends Controller
             $student->photo_path = $photoPath;
         }
 
+        if (isset($validated['father_name'])) {
+            $student->father_name = $validated['father_name'];
+        }
+        if (isset($validated['mother_name'])) {
+            $student->mother_name = $validated['mother_name'];
+        }
+        if (!empty($validated['date_of_birth'])) {
+            $student->dob = $validated['date_of_birth'];
+        }
+        if (!empty($validated['gender'])) {
+            $student->gender = $validated['gender'];
+        }
+
         $student->alternate_mobile = $validated['alternate_mobile'] ?? $student->alternate_mobile;
         if (!empty($validated['phone']) || !empty($validated['mobile'])) {
             $student->mobile = $validated['phone'] ?? $validated['mobile'];
@@ -147,7 +164,7 @@ class StudentPortalController extends Controller
         $student->district_id = $validated['district_id'] ?? $student->district_id;
         $student->save();
 
-        return back()->with('success', 'Your contact profile has been updated successfully.');
+        return back()->with('success', 'Your contact profile and personal particulars have been updated successfully.');
     }
 
     /**
@@ -211,7 +228,8 @@ class StudentPortalController extends Controller
         $attendances = Attendance::where('student_id', $student->id)
             ->with('batch')
             ->latest('attendance_date')
-            ->paginate(20);
+            ->paginate(20)
+            ->withQueryString();
 
         $totalSessions = Attendance::where('student_id', $student->id)->count();
         $presentSessions = Attendance::where('student_id', $student->id)->where('status', 'present')->count();

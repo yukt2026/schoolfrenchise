@@ -17,39 +17,43 @@
         <p class="text-muted small mb-0">Check upcoming exam schedules, download official admit cards, and review conducted test papers.</p>
     </div>
     @if($admission && $admission->course)
-        <span class="badge bg-lavender text-primary px-3 py-2 rounded-pill fs-7">
+        <span class="badge bg-primary-subtle text-primary px-3 py-2 rounded-1 fs-7">
             <i class="fa-solid fa-graduation-cap me-1"></i> {{ $admission->course->course_name }}
         </span>
     @endif
 </div>
 
 <!-- Exam Table Card -->
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4">
-    <div class="card-header bg-white py-3 px-4 border-bottom">
+<div class="card border border-light-subtle shadow-sm rounded-3 overflow-hidden mb-4 bg-white">
+    <div class="card-header bg-white py-3 px-3 px-md-4 border-bottom">
         <div class="d-flex align-items-center justify-content-between">
             <h5 class="fw-bold fs-6 mb-0 text-dark">
                 <i class="fa-solid fa-calendar-check text-primary me-2"></i>Exam Schedule & Hall Tickets
             </h5>
-            <span class="badge bg-light text-muted border px-2 py-1 small">
+            <span class="badge bg-primary-subtle text-primary border px-2 py-1 small rounded-1">
                 Total Exams: {{ $exams->total() }}
             </span>
         </div>
     </div>
     <div class="card-body p-0">
         @if($exams->count() > 0)
+            <div class="table-scroll-hint d-md-none">
+                <i class="fa-solid fa-arrows-left-right text-primary"></i>
+                <span>Scroll horizontally to view exam dates & admit cards</span>
+            </div>
             <div class="table-responsive">
-                <table class="table table-hover align-middle mb-0">
-                    <thead class="table-light text-muted small text-uppercase" style="font-size: 0.75rem; letter-spacing: 0.5px;">
+                <table class="table-custom table-hover align-middle mb-0" style="min-width: 680px;">
+                    <thead>
                         <tr>
-                            <th class="ps-4 py-3">Exam Name & Code</th>
-                            <th class="py-3">Course / Subject</th>
-                            <th class="py-3">Date & Time</th>
-                            <th class="py-3 text-center">Marks</th>
-                            <th class="py-3 text-center">Status</th>
-                            <th class="pe-4 py-3 text-end">Action</th>
+                            <th class="ps-4">Exam Name & Code</th>
+                            <th>Course / Subject</th>
+                            <th>Date & Time</th>
+                            <th class="text-center">Marks</th>
+                            <th class="text-center">Status</th>
+                            <th class="pe-4 text-end">Action</th>
                         </tr>
                     </thead>
-                    <tbody class="divide-y">
+                    <tbody>
                         @foreach($exams as $exam)
                             @php
                                 $examDate = \Carbon\Carbon::parse($exam->exam_date);
@@ -58,49 +62,49 @@
                                 $hasResult = isset($results[$exam->id]);
                             @endphp
                             <tr>
-                                <td class="ps-4 py-3">
+                                <td class="ps-4">
                                     <div class="fw-bold text-dark">{{ $exam->title ?? $exam->exam_title }}</div>
                                     <div class="small text-muted font-monospace">{{ $exam->exam_code ?? 'EXAM-'.$exam->id }}</div>
                                 </td>
-                                <td class="py-3">
-                                    <span class="badge bg-light text-dark border">{{ $exam->course->course_name ?? 'Universal' }}</span>
+                                <td>
+                                    <span class="badge bg-light text-dark border rounded-1">{{ $exam->course->course_name ?? 'Universal' }}</span>
                                 </td>
-                                <td class="py-3">
-                                    <div class="small fw-semibold text-dark">
+                                <td>
+                                    <div class="small fw-semibold text-dark text-nowrap">
                                         <i class="fa-regular fa-calendar me-1 text-primary"></i> {{ $examDate->format('d M, Y') }}
                                     </div>
-                                    <div class="small text-muted">
+                                    <div class="small text-muted text-nowrap">
                                         <i class="fa-regular fa-clock me-1"></i> {{ $exam->start_time ? \Carbon\Carbon::parse($exam->start_time)->format('h:i A') : 'TBA' }} 
                                         @if($exam->duration_minutes) ({{ $exam->duration_minutes }} Mins) @endif
                                     </div>
                                 </td>
-                                <td class="py-3 text-center">
-                                    <span class="badge bg-lavender text-primary px-2 py-1">
+                                <td class="text-center text-nowrap">
+                                    <span class="badge bg-primary-subtle text-primary px-2.5 py-1 rounded-1">
                                         Max: {{ $exam->total_marks ?? 100 }} | Pass: {{ $exam->passing_marks ?? 40 }}
                                     </span>
                                 </td>
-                                <td class="py-3 text-center">
+                                <td class="text-center text-nowrap">
                                     @if($hasResult)
-                                        <span class="badge bg-success-subtle text-success px-2 py-1">
+                                        <span class="badge bg-success-subtle text-success px-2.5 py-1 rounded-1">
                                             <i class="fa-solid fa-circle-check me-1"></i> Result Declared
                                         </span>
                                     @elseif($isPast)
-                                        <span class="badge bg-secondary-subtle text-secondary px-2 py-1">
+                                        <span class="badge bg-secondary-subtle text-secondary px-2.5 py-1 rounded-1">
                                             <i class="fa-solid fa-clock-rotate-left me-1"></i> Concluded
                                         </span>
                                     @else
-                                        <span class="badge bg-info-subtle text-info px-2 py-1">
+                                        <span class="badge bg-info-subtle text-info px-2.5 py-1 rounded-1">
                                             <i class="fa-solid fa-calendar-day me-1"></i> Upcoming
                                         </span>
                                     @endif
                                 </td>
-                                <td class="pe-4 py-3 text-end">
-                                    <div class="btn-group btn-group-sm">
-                                        <a href="{{ route('student.admit-card', $exam->id) }}" class="btn btn-outline-primary rounded-start-3" title="View & Print Admit Card">
+                                <td class="pe-4 text-end text-nowrap">
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="{{ route('student.admit-card', $exam->id) }}" class="btn btn-sm btn-outline-primary rounded-2 fw-semibold text-nowrap" title="View & Print Admit Card">
                                             <i class="fa-solid fa-id-card-clip me-1"></i> Admit Card
                                         </a>
                                         @if($hasResult)
-                                            <a href="{{ route('student.results') }}" class="btn btn-primary rounded-end-3" title="View Result">
+                                            <a href="{{ route('student.results') }}" class="btn btn-sm btn-primary rounded-2 fw-semibold text-nowrap" title="View Result">
                                                 <i class="fa-solid fa-square-poll-vertical me-1"></i> Result
                                             </a>
                                         @endif
@@ -131,7 +135,7 @@
 </div>
 
 <!-- Examination Instructions Card -->
-<div class="card border-0 shadow-sm rounded-4 bg-light">
+<div class="card border border-light-subtle shadow-sm rounded-3 bg-light">
     <div class="card-body p-4">
         <h6 class="fw-bold text-dark mb-2">
             <i class="fa-solid fa-circle-info text-primary me-2"></i>Key Examination Rules & Guidelines

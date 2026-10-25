@@ -1,10 +1,10 @@
 @extends('layouts.centre')
 
-@section('title', 'Direct Student Admission Registration - TECH ERA COMPUTER')
+@section('title', 'Direct Student Admission Registration - ' . ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER'))
 
 @section('content')
 <div class="mb-4">
-    <a href="{{ route('centre.students.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill mb-2">
+    <a href="{{ route('centre.students.index') }}" class="btn btn-outline-secondary btn-sm rounded-2 mb-2">
         <i class="fa-solid fa-arrow-left me-1"></i>Back to Directory
     </a>
     <h3 class="fw-bold text-dark mb-1">
@@ -191,7 +191,7 @@
                         The student login credentials will be generated immediately. Default password is the mobile number.
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-pill fw-bold shadow-sm">
+                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-2 fw-bold shadow-sm">
                         <i class="fa-solid fa-check-circle me-1"></i>Confirm & Register Candidate
                     </button>
                 </div>
@@ -207,10 +207,9 @@
         const districtSelect = document.getElementById('district_select');
         const courseSelect = document.getElementById('course_select');
         const courseFeeInput = document.getElementById('course_fee_input');
+        const oldDistrictId = "{{ old('district_id') }}";
 
-        // State change -> load districts
-        stateSelect.addEventListener('change', function () {
-            const stateId = this.value;
+        function loadDistricts(stateId, selectedDistrictId = '') {
             districtSelect.innerHTML = '<option value="">Loading districts...</option>';
             if (!stateId) {
                 districtSelect.innerHTML = '<option value="">Select District</option>';
@@ -222,14 +221,25 @@
                 .then(data => {
                     let html = '<option value="">Select District</option>';
                     data.forEach(d => {
-                        html += `<option value="${d.id}">${d.name}</option>`;
+                        const isSel = (selectedDistrictId && selectedDistrictId == d.id) ? 'selected' : '';
+                        html += `<option value="${d.id}" ${isSel}>${d.name}</option>`;
                     });
                     districtSelect.innerHTML = html;
                 })
                 .catch(() => {
                     districtSelect.innerHTML = '<option value="">Failed to load districts</option>';
                 });
+        }
+
+        // State change -> load districts
+        stateSelect.addEventListener('change', function () {
+            loadDistricts(this.value);
         });
+
+        // Trigger on page load if state is already selected (e.g. on validation error)
+        if (stateSelect.value) {
+            loadDistricts(stateSelect.value, oldDistrictId);
+        }
 
         // Course change -> autofill fee
         courseSelect.addEventListener('change', function () {

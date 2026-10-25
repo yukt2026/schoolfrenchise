@@ -29,7 +29,7 @@
             @endif
         </div>
     </div>
-    <a href="{{ route('student.support') }}" class="btn btn-outline-secondary btn-sm rounded-3">
+    <a href="{{ route('student.support') }}" class="btn btn-outline-secondary btn-sm rounded-2 fw-semibold">
         <i class="fa-solid fa-arrow-left me-1"></i> Back to Tickets
     </a>
 </div>
@@ -38,7 +38,7 @@
     <!-- Left Column: Conversation Thread -->
     <div class="col-12 col-lg-8">
         <!-- Original Ticket Body -->
-        <div class="card border-0 shadow-sm rounded-4 mb-4 overflow-hidden">
+        <div class="card border border-light-subtle shadow-sm rounded-3 mb-4 overflow-hidden bg-white">
             <div class="card-header bg-white py-3 px-4 border-bottom">
                 <div class="d-flex justify-content-between align-items-center">
                     <div class="d-flex align-items-center gap-2">
@@ -46,11 +46,11 @@
                             {{ strtoupper(substr($student->full_name, 0, 1)) }}
                         </div>
                         <div>
-                            <div class="fw-bold text-dark small">{{ $student->full_name }} <span class="badge bg-light text-muted border ms-1">Author</span></div>
+                            <div class="fw-bold text-dark small">{{ $student->full_name }} <span class="badge bg-light text-muted border ms-1 rounded-1">Author</span></div>
                             <div class="text-muted" style="font-size: 0.72rem;">{{ $ticket->created_at->format('d M, Y \a\t h:i A') }}</div>
                         </div>
                     </div>
-                    <span class="badge bg-lavender text-primary">{{ $ticket->category }}</span>
+                    <span class="badge bg-primary-subtle text-primary rounded-1">{{ $ticket->category }}</span>
                 </div>
             </div>
             <div class="card-body p-4">
@@ -73,7 +73,7 @@
                         @php
                             $isStaff = $reply->is_staff_reply || ($reply->user && $reply->user->role !== 'student');
                         @endphp
-                        <div class="card border-0 shadow-sm rounded-4 overflow-hidden {{ $isStaff ? 'border-start border-4 border-primary' : '' }}">
+                        <div class="card border border-light-subtle shadow-sm rounded-3 overflow-hidden bg-white {{ $isStaff ? 'border-start border-4 border-primary' : '' }}">
                             <div class="card-header bg-white py-2 px-3 border-bottom d-flex justify-content-between align-items-center">
                                 <div class="d-flex align-items-center gap-2">
                                     <div class="rounded-circle d-flex align-items-center justify-content-center text-white {{ $isStaff ? 'bg-primary' : 'bg-secondary' }}" style="width: 28px; height: 28px; font-size: 0.75rem;">
@@ -86,7 +86,7 @@
                                     <div>
                                         <span class="fw-bold small text-dark">{{ $reply->user->name ?? ($isStaff ? 'Support Staff' : 'You') }}</span>
                                         @if($isStaff)
-                                            <span class="badge bg-primary text-white ms-1" style="font-size: 0.65rem;">Centre Staff</span>
+                                            <span class="badge bg-primary text-white ms-1 rounded-1" style="font-size: 0.65rem;">Centre Staff</span>
                                         @endif
                                     </div>
                                 </div>
@@ -99,7 +99,7 @@
 
                                 @if($reply->attachment_path)
                                     <div class="mt-3 pt-2 border-top">
-                                        <a href="{{ asset('storage/' . $reply->attachment_path) }}" target="_blank" class="btn btn-sm btn-light border rounded-3 text-primary">
+                                        <a href="{{ asset('storage/' . $reply->attachment_path) }}" target="_blank" class="btn btn-sm btn-light border rounded-2 text-primary fw-semibold">
                                             <i class="fa-solid fa-paperclip me-1"></i> View Attachment
                                         </a>
                                     </div>
@@ -112,7 +112,7 @@
         @endif
 
         <!-- Reply Form Box -->
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white">
+        <div class="card border border-light-subtle shadow-sm rounded-3 p-4 bg-white">
             <h6 class="fw-bold text-dark mb-3">
                 <i class="fa-solid fa-reply text-primary me-2"></i>Post a Reply
             </h6>
@@ -134,7 +134,7 @@
                 </div>
 
                 <div class="d-flex justify-content-end">
-                    <button type="submit" class="btn btn-primary rounded-3 btn-sm px-4">
+                    <button type="submit" class="btn btn-primary rounded-2 btn-sm px-4 fw-semibold">
                         <i class="fa-solid fa-paper-plane me-1"></i> Send Reply
                     </button>
                 </div>
@@ -144,7 +144,7 @@
 
     <!-- Right Column: Ticket Meta Info -->
     <div class="col-12 col-lg-4">
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-white mb-4">
+        <div class="card border border-light-subtle shadow-sm rounded-3 p-4 bg-white mb-4">
             <h6 class="fw-bold text-dark mb-3 border-bottom pb-2">Ticket Metadata</h6>
             <div class="d-flex flex-column gap-3 small">
                 <div>
@@ -186,7 +186,7 @@
             </div>
         </div>
 
-        <div class="card border-0 shadow-sm rounded-4 p-4 bg-light">
+        <div class="card border border-light-subtle shadow-sm rounded-3 p-4 bg-light">
             <div class="small text-muted">
                 <i class="fa-solid fa-circle-info text-primary me-2"></i><strong>Support Tip:</strong> Replying to a closed or resolved ticket will automatically reopen the inquiry for staff review.
             </div>

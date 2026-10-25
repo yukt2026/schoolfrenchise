@@ -5,10 +5,12 @@ namespace App\Http\Controllers\Student;
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
 use App\Models\FeePayment;
+use App\Models\PaymentReceipt;
 use App\Models\Setting;
 use App\Models\StudentFee;
 use App\Models\SystemNotification;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Str;
 
@@ -29,9 +31,10 @@ class StudentFeeController extends Controller
         $totalDues = max(0.00, $totalFees - $totalPaid);
 
         $installments = $student->fees()->orderBy('installment_no')->get();
+        $fees = $installments;
         $payments = $student->payments()->with('centre')->latest('payment_date')->latest('id')->get();
 
-        return view('student.fees.index', compact('student', 'admission', 'totalFees', 'totalPaid', 'totalDues', 'installments', 'payments'));
+        return view('student.fees.index', compact('student', 'admission', 'totalFees', 'totalPaid', 'totalDues', 'fees', 'installments', 'payments'));
     }
 
     /**
@@ -104,6 +107,21 @@ class StudentFeeController extends Controller
                 'transaction_ref' => $txnRef,
             ]);
 
+            // Create synchronized official payment receipt
+            PaymentReceipt::create([
+                'fee_payment_id' => $payment->id,
+                'receipt_no'     => $receiptNo,
+                'student_id'     => $student->id,
+                'admission_id'   => $admission->id,
+                'centre_id'      => $student->centre_id,
+                'amount'         => $payAmount,
+                'payment_mode'   => $validated['payment_mode'],
+                'receipt_date'   => now()->toDateString(),
+                'qr_token'       => Str::random(40),
+                'issued_by'      => Auth::id(),
+                'notes'          => "Online Student Portal Payment ({$validated['payment_mode']}) - Ref: {$txnRef}",
+            ]);
+
             // Update admission ledger
             $admission->increment('total_paid', $payAmount);
 
@@ -166,7 +184,8 @@ class StudentFeeController extends Controller
             ->with('centre')
             ->latest('payment_date')
             ->latest('id')
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         return view('student.fees.history', compact('student', 'admission', 'payments'));
     }

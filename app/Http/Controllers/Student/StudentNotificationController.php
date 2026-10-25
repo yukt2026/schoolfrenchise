@@ -21,7 +21,8 @@ class StudentNotificationController extends Controller
 
         $notifications = SystemNotification::where('user_id', $user->id)
             ->latest()
-            ->paginate(15);
+            ->paginate(15)
+            ->withQueryString();
 
         $unreadCount = SystemNotification::where('user_id', $user->id)
             ->whereNull('read_at')

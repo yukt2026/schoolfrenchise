@@ -17,23 +17,23 @@
         </h2>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('student.exams') }}" class="btn btn-outline-secondary btn-sm rounded-3">
+        <a href="{{ route('student.exams') }}" class="btn btn-outline-secondary btn-sm rounded-2 fw-semibold">
             <i class="fa-solid fa-arrow-left me-1"></i> Back to Exams
         </a>
-        <button onclick="window.print()" class="btn btn-primary btn-sm rounded-3">
+        <button onclick="window.print()" class="btn btn-primary btn-sm rounded-2 fw-semibold">
             <i class="fa-solid fa-print me-1"></i> Print Hall Ticket
         </button>
     </div>
 </div>
 
 <!-- PRINTABLE ADMIT CARD CONTAINER -->
-<div class="card border-0 shadow-sm rounded-4 overflow-hidden mb-4 print-card-container">
-    <div class="card-body p-4 p-md-5">
+<div class="card border border-light-subtle shadow-sm rounded-3 overflow-hidden mb-4 print-card-container bg-white">
+    <div class="card-body p-3 p-md-5">
         <!-- Admit Card Border Wrapper -->
-        <div class="border border-3 border-dark rounded-3 p-4 position-relative" style="background: #ffffff;">
+        <div class="border border-2 border-dark rounded-2 p-3 p-md-4 position-relative" style="background: #ffffff;">
             <!-- Watermark / Security Crest -->
             <div class="position-absolute top-50 start-50 translate-middle opacity-10 pointer-events-none" style="z-index: 0;">
-                <i class="fa-solid fa-graduation-cap" style="font-size: 14rem; color: #5b21b6;"></i>
+                <i class="fa-solid fa-graduation-cap" style="font-size: 14rem; color: #0284c7;"></i>
             </div>
 
             <div class="position-relative" style="z-index: 1;">
@@ -46,7 +46,7 @@
                             <p class="small text-muted mb-0">{{ $instituteSettings['institute_tagline'] ?? 'Building Digital Skills for the Future' }} &bull; {{ $instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105' }}</p>
                         </div>
                     </div>
-                    <div class="d-inline-block bg-dark text-white px-4 py-1 rounded-pill small fw-bold text-uppercase tracking-widest mt-1">
+                    <div class="d-inline-block bg-dark text-white px-3 py-1 rounded-1 small fw-bold text-uppercase tracking-widest mt-1">
                         EXAMINATION ADMIT CARD / HALL TICKET
                     </div>
                 </div>
@@ -56,7 +56,7 @@
                     <div class="col-6 col-md-3">
                         <div class="small text-muted text-uppercase" style="font-size: 0.7rem;">Admit Card No</div>
                         <div class="fw-bold font-monospace text-primary">
-                            {{ $admitCard->admit_card_no ?? ('AC-' . str_pad($exam->id, 4, '0', STR_PAD_LEFT) . '-' . str_pad($student->id, 4, '0', STR_PAD_LEFT)) }}
+                            {{ $admitCard?->admit_card_no ?? ('AC-' . str_pad($exam->id, 4, '0', STR_PAD_LEFT) . '-' . str_pad($student->id, 4, '0', STR_PAD_LEFT)) }}
                         </div>
                     </div>
                     <div class="col-6 col-md-3">
@@ -92,15 +92,15 @@
                                 </tr>
                                 <tr>
                                     <th class="text-muted fw-semibold ps-0">Date of Birth / Gender:</th>
-                                    <td class="text-dark">{{ \Carbon\Carbon::parse($student->dob)->format('d-m-Y') }} ({{ ucfirst($student->gender) }})</td>
+                                    <td class="text-dark">{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d-m-Y') : 'N/A' }} ({{ ucfirst($student->gender ?? 'N/A') }})</td>
                                 </tr>
                                 <tr>
                                     <th class="text-muted fw-semibold ps-0">Enrolled Course:</th>
-                                    <td class="fw-bold text-primary">{{ $exam->course->course_name ?? ($admission->course->course_name ?? 'Computer Course') }}</td>
+                                    <td class="fw-bold text-primary">{{ $exam?->course?->course_name ?? ($admission?->course?->course_name ?? 'Computer Course') }}</td>
                                 </tr>
                                 <tr>
                                     <th class="text-muted fw-semibold ps-0">Authorized Centre:</th>
-                                    <td class="text-dark">{{ $student->centre->centre_name ?? 'Main Campus' }} ({{ $student->centre->centre_code ?? 'DCE' }})</td>
+                                    <td class="text-dark">{{ $student->centre?->centre_name ?? 'Main Campus' }} ({{ $student->centre?->centre_code ?? 'DCE' }})</td>
                                 </tr>
                             </tbody>
                         </table>
@@ -128,8 +128,12 @@
                 <h6 class="fw-bold text-dark text-uppercase border-bottom pb-2 mb-3" style="font-size: 0.85rem;">
                     <i class="fa-solid fa-clock me-2 text-primary"></i>Examination Schedule & Venue
                 </h6>
+                <div class="table-scroll-hint d-md-none">
+                    <i class="fa-solid fa-arrows-left-right text-primary"></i>
+                    <span>Scroll horizontally to view exam schedule</span>
+                </div>
                 <div class="table-responsive mb-4">
-                    <table class="table table-bordered table-sm align-middle text-center mb-0">
+                    <table class="table table-bordered table-sm align-middle text-center mb-0" style="min-width: 540px;">
                         <thead class="table-light">
                             <tr>
                                 <th>Exam Title</th>
@@ -155,7 +159,7 @@
                 <div class="p-3 bg-light rounded-3 border mb-4">
                     <div class="small fw-bold text-uppercase text-muted mb-1" style="font-size: 0.72rem;">Examination Venue / Lab Location</div>
                     <div class="fw-bold text-dark">
-                        {{ $admitCard->exam_venue ?? ($student->centre->centre_name . ', ' . $student->centre->address . ', ' . $student->city) }}
+                        {{ $admitCard?->exam_venue ?? (($student->centre?->centre_name ?? 'Main Campus') . ', ' . ($student->centre?->address ?? ($student->address ?? 'Campus')) . ', ' . ($student->city ?? 'Central')) }}
                     </div>
                 </div>
 

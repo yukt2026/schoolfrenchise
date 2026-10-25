@@ -1,10 +1,10 @@
 @extends('layouts.centre')
 
-@section('title', 'Raise Support Ticket - TECH ERA COMPUTER')
+@section('title', 'Raise Support Ticket - ' . ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER'))
 
 @section('content')
 <div class="mb-4">
-    <a href="{{ route('centre.support.index') }}" class="btn btn-outline-secondary btn-sm rounded-pill mb-2">
+    <a href="{{ route('centre.support.index') }}" class="btn btn-outline-secondary btn-sm rounded-2 mb-2">
         <i class="fa-solid fa-arrow-left me-1"></i>Back to Support Desk
     </a>
     <h3 class="fw-bold text-dark mb-1">
@@ -15,7 +15,7 @@
 
 <div class="row">
     <div class="col-lg-8">
-        <div class="card border-0 rounded-4 shadow-sm">
+        <div class="card border-0 rounded-3 shadow-sm">
             <div class="card-body p-4">
                 <form method="POST" action="{{ route('centre.support.store') }}" enctype="multipart/form-data">
                     @csrf
@@ -23,7 +23,7 @@
                     <div class="row g-3 mb-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Department / Category <span class="text-danger">*</span></label>
-                            <select name="category" class="form-select" required>
+                            <select name="category" class="form-select rounded-2" required>
                                 <option value="">Select Category</option>
                                 <option value="wallet" {{ old('category') == 'wallet' ? 'selected' : '' }}>Franchise Wallet & Top-up</option>
                                 <option value="certificate" {{ old('category') == 'certificate' ? 'selected' : '' }}>Certificates & Marksheets Issuance</option>
@@ -36,7 +36,7 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Priority Level <span class="text-danger">*</span></label>
-                            <select name="priority" class="form-select" required>
+                            <select name="priority" class="form-select rounded-2" required>
                                 <option value="low" {{ old('priority') == 'low' ? 'selected' : '' }}>Low</option>
                                 <option value="medium" {{ old('priority', 'medium') == 'medium' ? 'selected' : '' }}>Medium (Standard)</option>
                                 <option value="high" {{ old('priority') == 'high' ? 'selected' : '' }}>High</option>
@@ -47,21 +47,21 @@
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Subject / Short Summary <span class="text-danger">*</span></label>
-                        <input type="text" name="subject" class="form-control" placeholder="e.g. Urgent verification of wallet recharge UTR-9281038" value="{{ old('subject') }}" required>
+                        <input type="text" name="subject" class="form-control rounded-2" placeholder="e.g. Urgent verification of wallet recharge UTR-9281038" value="{{ old('subject') }}" required>
                     </div>
 
                     <div class="mb-3">
                         <label class="form-label fw-semibold">Detailed Query / Problem Description <span class="text-danger">*</span></label>
-                        <textarea name="description" class="form-control" rows="5" placeholder="Provide full context, candidate roll numbers or transaction details if applicable..." required>{{ old('description') }}</textarea>
+                        <textarea name="description" class="form-control rounded-2" rows="5" placeholder="Provide full context, candidate roll numbers or transaction details if applicable..." required>{{ old('description') }}</textarea>
                     </div>
 
                     <div class="mb-4">
                         <label class="form-label fw-semibold">Supporting File / Document Attachment <small class="text-muted">(Optional)</small></label>
-                        <input type="file" name="attachment" class="form-control" accept=".pdf,image/*,.doc,.docx">
+                        <input type="file" name="attachment" class="form-control rounded-2" accept=".pdf,image/*,.doc,.docx">
                         <div class="form-text" style="font-size: 0.72rem;">PDF, Images, DOC up to 5MB.</div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg rounded-pill px-5 fw-bold shadow-sm">
+                    <button type="submit" class="btn btn-primary btn-lg rounded-2 px-5 fw-bold shadow-sm">
                         <i class="fa-solid fa-paper-plane me-1"></i>Submit Support Ticket
                     </button>
                 </form>

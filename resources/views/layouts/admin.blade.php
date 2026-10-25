@@ -21,21 +21,21 @@
 </head>
 <body class="admin-body">
     <!-- TURQUOISE TOPBAR -->
-    <nav class="navbar navbar-expand navbar-dark dce-admin-topbar px-3">
-        <div class="d-flex align-items-center gap-2">
-            <button class="btn btn-link text-white p-0 d-lg-none me-2" id="sidebarToggle" type="button" aria-label="Toggle navigation">
-                <i class="fa-solid fa-bars fs-4"></i>
+    <nav class="navbar navbar-expand navbar-dark dce-admin-topbar px-2 px-sm-3">
+        <div class="d-flex align-items-center gap-1 gap-sm-2 flex-grow-1 overflow-hidden me-2">
+            <button class="btn btn-link text-white p-1 d-lg-none me-1 flex-shrink-0" id="sidebarToggle" type="button" aria-label="Toggle navigation">
+                <i class="fa-solid fa-bars fs-5"></i>
             </button>
-            <a class="navbar-brand d-flex align-items-center gap-2 text-white text-decoration-none" href="{{ route('admin.dashboard') }}">
-                <img src="{{ $instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png') }}" alt="{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}" class="rounded bg-white p-1" style="height: 36px; width: auto; object-fit: contain;">
-                <span class="fw-bold tracking-tight">{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }} <span class="fw-light opacity-75">ERP</span></span>
+            <a class="navbar-brand d-flex align-items-center gap-2 text-white text-decoration-none overflow-hidden me-1" href="{{ route('admin.dashboard') }}">
+                <img src="{{ $instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png') }}" alt="{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}" class="rounded bg-white p-1 flex-shrink-0" style="height: 34px; width: auto; object-fit: contain;">
+                <span class="fw-bold tracking-tight text-truncate" style="font-size: 0.95rem; max-width: 180px;">{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }} <span class="fw-light opacity-75">ERP</span></span>
             </a>
             <span class="topbar-badge d-none d-md-inline-block">
                 {{ auth()->user()->isSuperAdmin() ? 'HEAD OFFICE' : (auth()->user()->centre?->centre_code ?? 'CENTRE PANEL') }}
             </span>
         </div>
 
-        <div class="ms-auto d-flex align-items-center gap-3">
+        <div class="ms-auto d-flex align-items-center gap-2 gap-sm-3 flex-shrink-0">
             <a href="{{ route('home') }}" target="_blank" class="btn btn-sm btn-outline-light d-none d-sm-inline-flex align-items-center gap-1 text-decoration-none">
                 <i class="fa-solid fa-arrow-up-right-from-square small"></i> Public Website
             </a>
@@ -98,9 +98,30 @@
                 <a class="nav-link {{ request()->routeIs('admin.batches*') ? 'active' : '' }}" href="{{ Route::has('admin.batches.index') ? route('admin.batches.index') : '#' }}">
                     <i class="fa-solid fa-calendar-check"></i> Batches & Attendance
                 </a>
-                <a class="nav-link {{ request()->routeIs('admin.exams*') ? 'active' : '' }}" href="{{ Route::has('admin.exams.index') ? route('admin.exams.index') : '#' }}">
-                    <i class="fa-solid fa-pen-nib"></i> Examinations
+                <a class="nav-link d-flex justify-content-between align-items-center {{ request()->routeIs('admin.exams*') ? 'active' : '' }}" 
+                   data-bs-toggle="collapse" href="#adminExamsSubmenu" role="button" 
+                   aria-expanded="{{ request()->routeIs('admin.exams*') ? 'true' : 'false' }}">
+                    <div>
+                        <i class="fa-solid fa-pen-nib"></i> Examinations
+                    </div>
+                    <i class="fa-solid fa-chevron-down small text-muted" style="font-size: 0.72rem;"></i>
                 </a>
+                <div class="collapse {{ request()->routeIs('admin.exams*') ? 'show' : '' }}" id="adminExamsSubmenu">
+                    <div class="py-1 ps-4" style="background: rgba(0,0,0,0.2);">
+                        <a class="nav-link py-1 small {{ request()->routeIs('admin.exams.index') || request()->routeIs('admin.exams.create') || request()->routeIs('admin.exams.show') || request()->routeIs('admin.exams.edit') ? 'active fw-bold' : '' }}" href="{{ route('admin.exams.index') }}">
+                            <i class="fa-solid fa-calendar-days me-2" style="font-size: 0.8rem;"></i> Exam Cycles
+                        </a>
+                        <a class="nav-link py-1 small {{ request()->routeIs('admin.exams.questions*') ? 'active fw-bold' : '' }}" href="{{ route('admin.exams.questions') }}">
+                            <i class="fa-solid fa-circle-question me-2" style="font-size: 0.8rem;"></i> Question Bank
+                        </a>
+                        <a class="nav-link py-1 small {{ request()->routeIs('admin.exams.results*') && !request()->routeIs('admin.exams.results.create') ? 'active fw-bold' : '' }}" href="{{ route('admin.exams.results') }}">
+                            <i class="fa-solid fa-square-poll-vertical me-2" style="font-size: 0.8rem;"></i> Exam Results
+                        </a>
+                        <a class="nav-link py-1 small {{ request()->routeIs('admin.exams.results.create') ? 'active fw-bold' : '' }}" href="{{ route('admin.exams.results.create') }}">
+                            <i class="fa-solid fa-marker me-2" style="font-size: 0.8rem;"></i> Enter Marks
+                        </a>
+                    </div>
+                </div>
                 <a class="nav-link {{ request()->routeIs('admin.materials*') ? 'active' : '' }}" href="{{ Route::has('admin.materials.index') ? route('admin.materials.index') : '#' }}">
                     <i class="fa-solid fa-file-pdf"></i> Study Materials
                 </a>

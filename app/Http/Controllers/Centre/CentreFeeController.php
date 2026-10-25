@@ -136,7 +136,34 @@ class CentreFeeController extends Controller
         if ($receipt instanceof PaymentReceipt) {
             $paymentReceipt = $receipt;
         } else {
-            $paymentReceipt = PaymentReceipt::findOrFail($receipt);
+            $paymentReceipt = PaymentReceipt::find($receipt);
+            if (!$paymentReceipt) {
+                $paymentReceipt = PaymentReceipt::where('fee_payment_id', $receipt)->first();
+            }
+            if (!$paymentReceipt) {
+                $paymentReceipt = PaymentReceipt::where('receipt_no', $receipt)->first();
+            }
+            if (!$paymentReceipt) {
+                $feePayment = \App\Models\FeePayment::find($receipt);
+                if ($feePayment) {
+                    $paymentReceipt = PaymentReceipt::create([
+                        'fee_payment_id' => $feePayment->id,
+                        'receipt_no' => $feePayment->receipt_no ?? PaymentReceipt::generateReceiptNo($feePayment->centre_id ?? $centre->id),
+                        'student_id' => $feePayment->student_id,
+                        'admission_id' => $feePayment->admission_id,
+                        'centre_id' => $feePayment->centre_id ?? $centre->id,
+                        'amount' => $feePayment->amount,
+                        'payment_mode' => $feePayment->payment_mode ?? 'cash',
+                        'receipt_date' => $feePayment->payment_date ?? now(),
+                        'qr_token' => 'QR-' . strtoupper(bin2hex(random_bytes(6))),
+                        'issued_by' => Auth::id(),
+                    ]);
+                }
+            }
+
+            if (!$paymentReceipt) {
+                abort(404, 'Payment receipt record not found.');
+            }
         }
 
         if ($paymentReceipt->centre_id !== $centre->id && !Auth::user()->isSuperAdmin()) {

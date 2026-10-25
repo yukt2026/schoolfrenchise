@@ -206,4 +206,17 @@ class PublicWebsiteTest extends TestCase
         $response->assertSee('Marksheet');
         $response->assertSee('Certificate');
     }
+
+    public function test_homepage_renders_twelve_courses_with_images_and_two_column_mobile_layout(): void
+    {
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $response->assertSee('Academic Programs');
+        $response->assertSee('Why Study With Us');
+        $response->assertSee('dce-course-grid-card');
+        $response->assertSee('dce-course-img');
+
+        $content = $response->getContent();
+        $this->assertEquals(12, substr_count($content, 'dce-course-grid-card'));
+    }
 }
