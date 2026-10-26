@@ -42,6 +42,10 @@ class Banner extends Model
             return asset($this->image_path);
         }
 
+        if (file_exists(public_path($this->image_path))) {
+            return asset($this->image_path);
+        }
+
         return asset('storage/' . ltrim($this->image_path, '/'));
     }
 
@@ -59,6 +63,10 @@ class Banner extends Model
         }
 
         if (str_starts_with($this->mobile_image_path, 'images/')) {
+            return asset($this->mobile_image_path);
+        }
+
+        if (file_exists(public_path($this->mobile_image_path))) {
             return asset($this->mobile_image_path);
         }
 

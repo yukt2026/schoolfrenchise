@@ -79,6 +79,20 @@ class FileUploadService
         // Store into public disk
         $path = $file->storeAs($folder, $safeFileName, 'public');
 
+        // Automatic mirror to public directory for hosting environments where symlinks are disabled or broken
+        try {
+            $publicFolder = public_path($folder);
+            if (!is_dir($publicFolder)) {
+                @mkdir($publicFolder, 0755, true);
+            }
+            $storedSource = storage_path('app/public/' . $path);
+            if (file_exists($storedSource)) {
+                @copy($storedSource, $publicFolder . DIRECTORY_SEPARATOR . $safeFileName);
+            }
+        } catch (\Throwable $e) {
+            // Non-blocking fallback
+        }
+
         return $path;
     }
 }

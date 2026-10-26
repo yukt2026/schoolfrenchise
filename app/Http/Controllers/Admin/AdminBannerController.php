@@ -134,12 +134,18 @@ class AdminBannerController extends Controller
             if ($banner->image_path && Storage::disk('public')->exists($banner->image_path)) {
                 Storage::disk('public')->delete($banner->image_path);
             }
+            if ($banner->image_path && file_exists(public_path($banner->image_path))) {
+                @unlink(public_path($banner->image_path));
+            }
             $updateData['image_path'] = FileUploadService::uploadImage($request->file('image'), 'uploads/banners', 10240);
         }
 
         if ($request->hasFile('mobile_image')) {
             if ($banner->mobile_image_path && Storage::disk('public')->exists($banner->mobile_image_path)) {
                 Storage::disk('public')->delete($banner->mobile_image_path);
+            }
+            if ($banner->mobile_image_path && file_exists(public_path($banner->mobile_image_path))) {
+                @unlink(public_path($banner->mobile_image_path));
             }
             $updateData['mobile_image_path'] = FileUploadService::uploadImage($request->file('mobile_image'), 'uploads/banners', 10240);
         }
@@ -162,8 +168,14 @@ class AdminBannerController extends Controller
         if ($banner->image_path && Storage::disk('public')->exists($banner->image_path)) {
             Storage::disk('public')->delete($banner->image_path);
         }
+        if ($banner->image_path && file_exists(public_path($banner->image_path))) {
+            @unlink(public_path($banner->image_path));
+        }
         if ($banner->mobile_image_path && Storage::disk('public')->exists($banner->mobile_image_path)) {
             Storage::disk('public')->delete($banner->mobile_image_path);
+        }
+        if ($banner->mobile_image_path && file_exists(public_path($banner->mobile_image_path))) {
+            @unlink(public_path($banner->mobile_image_path));
         }
 
         $banner->delete();
