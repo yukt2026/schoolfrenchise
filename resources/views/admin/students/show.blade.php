@@ -255,18 +255,18 @@
                     </div>
                     <div class="card-body p-3">
                         <div class="d-flex flex-column gap-2">
-                            @if($student->photo_path)
-                                <a href="{{ asset('storage/' . $student->photo_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary text-start">
+                            @if($student->photo_url)
+                                <a href="{{ $student->photo_url }}" target="_blank" class="btn btn-sm btn-outline-secondary text-start">
                                     <i class="fa-solid fa-image text-primary me-2"></i> View Passport Photo
                                 </a>
                             @endif
-                            @if($student->signature_path)
-                                <a href="{{ asset('storage/' . $student->signature_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary text-start">
+                            @if($student->signature_url)
+                                <a href="{{ $student->signature_url }}" target="_blank" class="btn btn-sm btn-outline-secondary text-start">
                                     <i class="fa-solid fa-signature text-secondary me-2"></i> View Signature
                                 </a>
                             @endif
-                            @if($student->id_proof_doc)
-                                <a href="{{ asset('storage/' . $student->id_proof_doc) }}" target="_blank" class="btn btn-sm btn-outline-secondary text-start">
+                            @if($student->id_proof_doc_url)
+                                <a href="{{ $student->id_proof_doc_url }}" target="_blank" class="btn btn-sm btn-outline-secondary text-start">
                                     <i class="fa-solid fa-file-pdf text-danger me-2"></i> View KYC / ID Proof Document
                                 </a>
                             @endif

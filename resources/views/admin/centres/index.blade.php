@@ -185,7 +185,7 @@
                             <td class="ps-3">
                                 <div class="d-flex align-items-center gap-2">
                                     @if($centre->centre_logo)
-                                        <img src="{{ asset('storage/' . $centre->centre_logo) }}" alt="Logo" class="rounded border" width="36" height="36" style="object-fit: contain;">
+                                        <img src="{{ $centre->centre_logo_url ?? asset('storage/' . $centre->centre_logo) }}" alt="Logo" class="rounded border" width="36" height="36" style="object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/72x72?text=Logo';">
                                     @else
                                         <div class="rounded bg-light border d-flex align-items-center justify-content-center text-primary fw-bold" style="width: 36px; height: 36px;">
                                             <i class="fa-solid fa-building-columns"></i>

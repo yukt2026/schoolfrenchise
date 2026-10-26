@@ -144,13 +144,50 @@ Route::post('/password/reset', [ResetPasswordController::class, 'reset'])->middl
 Route::middleware(['role:super_admin,admin'])->prefix('admin')->name('admin.')->group(function () {
     Route::get('/dashboard', [AdminDashboardController::class, 'index'])->name('dashboard');
 
-    // Live Server Storage Link Fix
+    // Live Server Storage Link Fix (Safe for shared hosting / exec-disabled servers)
     Route::get('/fix-storage-link', function () {
         try {
-            \Illuminate\Support\Facades\Artisan::call('storage:link');
-            return back()->with('success', 'Storage link executed: ' . \Illuminate\Support\Facades\Artisan::output());
+            $target = storage_path('app/public');
+            $link = public_path('storage');
+            $messages = [];
+
+            // 1. If public/storage does not exist, try symlink without exec
+            if (!file_exists($link)) {
+                $linked = false;
+                if (function_exists('symlink') && !windows_os()) {
+                    try {
+                        $linked = @symlink($target, $link);
+                    } catch (\Throwable $e) {}
+                }
+
+                if (!$linked) {
+                    \Illuminate\Support\Facades\File::makeDirectory($link, 0755, true, true);
+                    $messages[] = 'Created public/storage directory.';
+                } else {
+                    $messages[] = 'Connected public/storage symlink.';
+                }
+            }
+
+            // 2. Synchronize all files from storage/app/public to public/storage
+            if (\Illuminate\Support\Facades\File::isDirectory($target)) {
+                \Illuminate\Support\Facades\File::copyDirectory($target, $link);
+                $messages[] = 'Synchronized files to public/storage.';
+            }
+
+            // 3. Mirror uploads to public/uploads
+            $targetUploads = storage_path('app/public/uploads');
+            $publicUploads = public_path('uploads');
+            if (\Illuminate\Support\Facades\File::isDirectory($targetUploads)) {
+                if (!\Illuminate\Support\Facades\File::isDirectory($publicUploads)) {
+                    \Illuminate\Support\Facades\File::makeDirectory($publicUploads, 0755, true, true);
+                }
+                \Illuminate\Support\Facades\File::copyDirectory($targetUploads, $publicUploads);
+                $messages[] = 'Mirrored files to public/uploads.';
+            }
+
+            return back()->with('success', 'Storage link configured successfully! ' . implode(' ', $messages));
         } catch (\Throwable $e) {
-            return back()->with('error', 'Storage link error: ' . $e->getMessage());
+            return back()->with('error', 'Storage sync error: ' . $e->getMessage());
         }
     })->name('fix-storage-link');
 

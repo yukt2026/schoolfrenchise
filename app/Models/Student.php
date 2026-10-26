@@ -199,4 +199,24 @@ class Student extends Model
 
         return asset('storage/' . ltrim($this->signature_path, '/'));
     }
+
+    /**
+     * Get the resolved URL for the student's ID proof / KYC doc.
+     */
+    public function getIdProofDocUrlAttribute(): ?string
+    {
+        if (empty($this->id_proof_doc)) {
+            return null;
+        }
+
+        if (str_starts_with($this->id_proof_doc, 'http://') || str_starts_with($this->id_proof_doc, 'https://')) {
+            return $this->id_proof_doc;
+        }
+
+        if (file_exists(public_path($this->id_proof_doc))) {
+            return asset($this->id_proof_doc);
+        }
+
+        return asset('storage/' . ltrim($this->id_proof_doc, '/'));
+    }
 }

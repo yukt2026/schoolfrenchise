@@ -109,8 +109,8 @@
                     <!-- Right: Photo & Signature Box -->
                     <div class="col-12 col-md-4 text-center">
                         <div class="d-inline-block border border-2 border-secondary p-1 bg-white rounded-2 mb-2" style="width: 120px; height: 140px;">
-                            @if($student->photo_path)
-                                <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover rounded-1">
+                            @if($student->photo_url)
+                                <img src="{{ $student->photo_url }}" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover rounded-1" onerror="this.onerror=null;this.src='https://placehold.co/120x140?text=Photo';">
                             @else
                                 <div class="w-100 h-100 bg-light d-flex flex-column align-items-center justify-content-center text-muted">
                                     <i class="fa-solid fa-user fs-1"></i>

@@ -131,4 +131,67 @@ class Centre extends Model
     {
         return $this->hasMany(Certificate::class);
     }
+
+    public function getCentreLogoUrlAttribute(): ?string
+    {
+        if (empty($this->centre_logo)) {
+            return null;
+        }
+
+        if (str_starts_with($this->centre_logo, 'http://') || str_starts_with($this->centre_logo, 'https://')) {
+            return $this->centre_logo;
+        }
+
+        if (file_exists(public_path($this->centre_logo))) {
+            return asset($this->centre_logo);
+        }
+
+        if (file_exists(public_path('storage/' . ltrim($this->centre_logo, '/')))) {
+            return asset('storage/' . ltrim($this->centre_logo, '/'));
+        }
+
+        return asset('storage/' . ltrim($this->centre_logo, '/'));
+    }
+
+    public function getDirectorPhotoUrlAttribute(): ?string
+    {
+        if (empty($this->director_photo)) {
+            return null;
+        }
+
+        if (str_starts_with($this->director_photo, 'http://') || str_starts_with($this->director_photo, 'https://')) {
+            return $this->director_photo;
+        }
+
+        if (file_exists(public_path($this->director_photo))) {
+            return asset($this->director_photo);
+        }
+
+        if (file_exists(public_path('storage/' . ltrim($this->director_photo, '/')))) {
+            return asset('storage/' . ltrim($this->director_photo, '/'));
+        }
+
+        return asset('storage/' . ltrim($this->director_photo, '/'));
+    }
+
+    public function getDirectorSignatureUrlAttribute(): ?string
+    {
+        if (empty($this->director_signature)) {
+            return null;
+        }
+
+        if (str_starts_with($this->director_signature, 'http://') || str_starts_with($this->director_signature, 'https://')) {
+            return $this->director_signature;
+        }
+
+        if (file_exists(public_path($this->director_signature))) {
+            return asset($this->director_signature);
+        }
+
+        if (file_exists(public_path('storage/' . ltrim($this->director_signature, '/')))) {
+            return asset('storage/' . ltrim($this->director_signature, '/'));
+        }
+
+        return asset('storage/' . ltrim($this->director_signature, '/'));
+    }
 }

@@ -197,19 +197,28 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label fw-semibold small">Centre Logo / Signboard</label>
-                        <input type="file" name="centre_logo" class="form-control" accept="image/*">
+                        <div class="mb-2 text-center p-2 bg-light rounded border" style="min-height: 85px; display: flex; align-items: center; justify-content: center;">
+                            <img id="newCentreLogoPreview" src="https://placehold.co/150x80?text=Logo+Preview" alt="Logo Preview" class="img-fluid rounded" style="max-height: 70px; object-fit: contain;">
+                        </div>
+                        <input type="file" name="centre_logo" class="form-control" accept="image/*" onchange="previewUpload(this, 'newCentreLogoPreview')">
                         <div class="form-text small">JPEG/PNG/WEBP up to 2MB.</div>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label fw-semibold small">Director Passport Photo</label>
-                        <input type="file" name="director_photo" class="form-control" accept="image/*">
+                        <div class="mb-2 text-center p-2 bg-light rounded border" style="min-height: 85px; display: flex; align-items: center; justify-content: center;">
+                            <img id="newDirectorPhotoPreview" src="https://placehold.co/80x80?text=Photo" alt="Photo Preview" class="rounded-circle" style="width: 70px; height: 70px; object-fit: cover;">
+                        </div>
+                        <input type="file" name="director_photo" class="form-control" accept="image/*" onchange="previewUpload(this, 'newDirectorPhotoPreview')">
                         <div class="form-text small">JPEG/PNG/WEBP up to 2MB.</div>
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label fw-semibold small">Director Signature</label>
-                        <input type="file" name="director_signature" class="form-control" accept="image/*">
+                        <div class="mb-2 text-center p-2 bg-light rounded border" style="min-height: 85px; display: flex; align-items: center; justify-content: center;">
+                            <img id="newDirectorSignPreview" src="https://placehold.co/160x50?text=Sign+Preview" alt="Sign Preview" class="img-fluid" style="max-height: 50px; object-fit: contain;">
+                        </div>
+                        <input type="file" name="director_signature" class="form-control" accept="image/*" onchange="previewUpload(this, 'newDirectorSignPreview')">
                         <div class="form-text small">For certificates & documents.</div>
                     </div>
                 </div>
@@ -264,6 +273,17 @@ document.addEventListener('DOMContentLoaded', function() {
         loadDistricts(stateSelect.value, "{{ old('district_id') }}");
     }
 });
+
+function previewUpload(input, imgId) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const el = document.getElementById(imgId);
+            if (el) el.src = e.target.result;
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
 </script>
 @endpush
 @endsection

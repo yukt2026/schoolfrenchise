@@ -62,11 +62,7 @@
                 <div class="row g-2.5 g-sm-3 g-lg-4">
                     @foreach($courses as $course)
                         @php
-                            $courseImg = $course->thumbnail 
-                                ? (file_exists(public_path($course->thumbnail)) 
-                                    ? asset($course->thumbnail) 
-                                    : (str_starts_with($course->thumbnail, 'http') ? $course->thumbnail : asset('storage/' . $course->thumbnail))) 
-                                : asset('images/courses/' . strtolower(\Illuminate\Support\Str::slug($course->course_code)) . '.svg');
+                            $courseImg = $course->thumbnail_url;
                         @endphp
                         <div class="col-6 col-md-6 col-lg-4">
                             <div class="dce-course-grid-card">

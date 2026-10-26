@@ -341,8 +341,8 @@
                         <div class="d-flex justify-content-center gap-2">
                             <!-- Candidate Photo -->
                             <div class="photo-container">
-                                @if($application->photo_path)
-                                    <img src="{{ asset('storage/' . $application->photo_path) }}" alt="Candidate Photo">
+                                @if($application->photo_url)
+                                    <img src="{{ $application->photo_url }}" alt="Candidate Photo" onerror="this.onerror=null;this.src='https://ui-avatars.com/api/?name={{ urlencode($application->applicant_name) }}&background=4338ca&color=fff&size=200';">
                                 @else
                                     <img src="https://ui-avatars.com/api/?name={{ urlencode($application->applicant_name) }}&background=4338ca&color=fff&size=200" alt="Avatar">
                                 @endif

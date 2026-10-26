@@ -245,30 +245,28 @@
                 </div>
                 <div class="card-body">
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Replace Passport Photo</label>
-                        @if($student->photo_path)
-                            <div class="mb-2">
-                                <img src="{{ $student->photo_url ?? asset('storage/' . $student->photo_path) }}" alt="Current Photo" class="rounded border" style="height: 60px; width: 60px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/120x120?text=Photo';">
-                            </div>
-                        @endif
-                        <input type="file" name="photo" accept="image/*" class="form-control @error('photo') is-invalid @enderror">
+                        <label class="form-label fw-semibold">Passport Photo</label>
+                        <div class="mb-2 d-flex align-items-center gap-3">
+                            <img id="adminStudentPhotoPreview" src="{{ $student->photo_url ?? 'https://placehold.co/120x120?text=Photo' }}" alt="Student Photo" class="rounded border shadow-sm" style="height: 70px; width: 70px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/120x120?text=Photo';">
+                            <span class="small text-muted" id="adminStudentPhotoText">{{ $student->photo_url ? 'Current Photo' : 'No photo uploaded' }}</span>
+                        </div>
+                        <input type="file" name="photo" id="adminStudentPhotoInput" accept="image/*" class="form-control @error('photo') is-invalid @enderror" onchange="previewStudentFile(this, 'adminStudentPhotoPreview', 'adminStudentPhotoText')">
                     </div>
 
                     <div class="mb-3">
-                        <label class="form-label fw-semibold">Replace Signature</label>
-                        @if($student->signature_path)
-                            <div class="mb-2">
-                                <img src="{{ $student->signature_url ?? asset('storage/' . $student->signature_path) }}" alt="Current Signature" class="rounded border" style="height: 35px; object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/200x80?text=Sign';">
-                            </div>
-                        @endif
-                        <input type="file" name="signature" accept="image/*" class="form-control @error('signature') is-invalid @enderror">
+                        <label class="form-label fw-semibold">Signature</label>
+                        <div class="mb-2 d-flex align-items-center gap-3">
+                            <img id="adminStudentSignPreview" src="{{ $student->signature_url ?? 'https://placehold.co/200x80?text=Sign' }}" alt="Student Signature" class="rounded border p-1 bg-white shadow-sm" style="height: 45px; max-width: 150px; object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/200x80?text=Sign';">
+                            <span class="small text-muted" id="adminStudentSignText">{{ $student->signature_url ? 'Current Signature' : 'No signature uploaded' }}</span>
+                        </div>
+                        <input type="file" name="signature" id="adminStudentSignInput" accept="image/*" class="form-control @error('signature') is-invalid @enderror" onchange="previewStudentFile(this, 'adminStudentSignPreview', 'adminStudentSignText')">
                     </div>
 
                     <div>
                         <label class="form-label fw-semibold">Replace ID Proof / KYC Document</label>
-                        @if($student->id_proof_doc)
+                        @if($student->id_proof_doc_url)
                             <div class="mb-2">
-                                <a href="{{ asset('storage/' . $student->id_proof_doc) }}" target="_blank" class="btn btn-sm btn-outline-secondary">
+                                <a href="{{ $student->id_proof_doc_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">
                                     <i class="fa-solid fa-paperclip me-1"></i> View Existing Document
                                 </a>
                             </div>
@@ -318,6 +316,26 @@ document.addEventListener('DOMContentLoaded', function() {
             });
     });
 });
+
+function previewStudentFile(input, imgId, textId) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const targetImg = document.getElementById(imgId);
+            if (targetImg) {
+                targetImg.src = e.target.result;
+            }
+            if (textId) {
+                const targetText = document.getElementById(textId);
+                if (targetText) {
+                    targetText.textContent = 'Selected: ' + input.files[0].name;
+                    targetText.className = 'small text-success fw-semibold';
+                }
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
 </script>
 @endpush
 @endsection

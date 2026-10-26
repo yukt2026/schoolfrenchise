@@ -144,7 +144,7 @@
                             <div class="d-flex align-items-center gap-3">
                                 <div class="rounded-circle overflow-hidden bg-light border d-flex align-items-center justify-content-center" style="width: 44px; height: 44px; flex-shrink: 0;">
                                     @if($st->photo_path)
-                                    <img src="{{ asset('storage/' . $st->photo_path) }}" alt="{{ $st->full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                                    <img src="{{ $st->photo_url ?? asset('storage/' . $st->photo_path) }}" alt="{{ $st->full_name }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/80x80?text=Photo';">
                                     @else
                                     <i class="fa-solid fa-user text-muted fs-5"></i>
                                     @endif

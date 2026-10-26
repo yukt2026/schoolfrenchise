@@ -193,25 +193,40 @@
                 <div class="row g-3">
                     <div class="col-md-4">
                         <label class="form-label fw-semibold small">Update Centre Logo</label>
+                        @if($centre->centre_logo)
+                            <div class="mb-2">
+                                <img src="{{ $centre->centre_logo_url ?? asset('storage/' . $centre->centre_logo) }}" alt="Logo" class="rounded border p-1 bg-white" style="height: 48px; max-width: 100px; object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/100x48?text=Logo';">
+                            </div>
+                        @endif
                         <input type="file" name="centre_logo" class="form-control" accept="image/*">
                         @if($centre->centre_logo)
-                            <div class="small text-muted mt-1">Current: <a href="{{ asset('storage/' . $centre->centre_logo) }}" target="_blank">View Logo</a></div>
+                            <div class="small text-muted mt-1"><a href="{{ $centre->centre_logo_url ?? asset('storage/' . $centre->centre_logo) }}" target="_blank" class="text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>View Full Logo</a></div>
                         @endif
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label fw-semibold small">Update Director Photo</label>
+                        @if($centre->director_photo)
+                            <div class="mb-2">
+                                <img src="{{ $centre->director_photo_url ?? asset('storage/' . $centre->director_photo) }}" alt="Director" class="rounded border p-1" style="height: 56px; width: 56px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/100x100?text=Photo';">
+                            </div>
+                        @endif
                         <input type="file" name="director_photo" class="form-control" accept="image/*">
                         @if($centre->director_photo)
-                            <div class="small text-muted mt-1">Current: <a href="{{ asset('storage/' . $centre->director_photo) }}" target="_blank">View Photo</a></div>
+                            <div class="small text-muted mt-1"><a href="{{ $centre->director_photo_url ?? asset('storage/' . $centre->director_photo) }}" target="_blank" class="text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>View Full Photo</a></div>
                         @endif
                     </div>
 
                     <div class="col-md-4">
                         <label class="form-label fw-semibold small">Update Director Signature</label>
+                        @if($centre->director_signature)
+                            <div class="mb-2">
+                                <img src="{{ $centre->director_signature_url ?? asset('storage/' . $centre->director_signature) }}" alt="Signature" class="rounded border p-1 bg-white" style="height: 38px; max-width: 120px; object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/120x40?text=Signature';">
+                            </div>
+                        @endif
                         <input type="file" name="director_signature" class="form-control" accept="image/*">
                         @if($centre->director_signature)
-                            <div class="small text-muted mt-1">Current: <a href="{{ asset('storage/' . $centre->director_signature) }}" target="_blank">View Signature</a></div>
+                            <div class="small text-muted mt-1"><a href="{{ $centre->director_signature_url ?? asset('storage/' . $centre->director_signature) }}" target="_blank" class="text-decoration-none"><i class="fa-solid fa-arrow-up-right-from-square me-1"></i>View Full Signature</a></div>
                         @endif
                     </div>
                 </div>

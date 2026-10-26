@@ -22,7 +22,10 @@
         <!-- Course Hero Card -->
         <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 mb-4">
             <div class="row align-items-center g-4">
-                <div class="col-md-8">
+                <div class="col-sm-3 col-md-2 text-center d-none d-sm-block">
+                    <img src="{{ $course->thumbnail_url }}" alt="{{ $course->course_name }}" class="img-fluid rounded-3 shadow-sm border p-2 bg-white" style="max-height: 95px; width: auto; object-fit: contain;">
+                </div>
+                <div class="col-sm-9 col-md-6">
                     <div class="d-flex align-items-center gap-2 mb-2">
                         <span class="badge bg-primary-subtle text-primary font-monospace px-3 py-1 fw-bold fs-6 rounded-1">
                             {{ $course->course_code }}

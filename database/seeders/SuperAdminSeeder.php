@@ -54,7 +54,7 @@ class SuperAdminSeeder extends Seeder
             'auditable_type' => User::class,
             'auditable_id' => $superAdmin->id,
             'new_values' => [
-                'email' => $email,
+                'email' => $superAdmin->email,
                 'role' => 'super_admin',
                 'provisioned_via' => 'SuperAdminSeeder',
                 'timestamp' => now()->toIso8601String(),

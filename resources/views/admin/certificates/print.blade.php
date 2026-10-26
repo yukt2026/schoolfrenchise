@@ -146,6 +146,11 @@
                     <div class="small fw-bold text-muted">Reg. No: <span class="font-monospace text-dark">{{ $certificate->student->registration_no ?? 'DCE-REG' }}</span></div>
                     <div class="small fw-bold text-muted">Roll No: <span class="font-monospace text-dark">{{ $certificate->student->roll_no ?? 'DCE-ROLL' }}</span></div>
                 </div>
+                @if($certificate->student?->photo_url)
+                <div class="text-center">
+                    <img src="{{ $certificate->student->photo_url }}" alt="Candidate" class="border border-2 border-dark rounded-1 shadow-sm" style="width: 65px; height: 75px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/65x75?text=Photo';">
+                </div>
+                @endif
                 <div class="text-end">
                     <div class="small fw-bold text-muted">Cert No: <span class="font-monospace text-primary fw-bold">{{ $certificate->certificate_no }}</span></div>
                     <div class="small fw-bold text-muted">Issue Date: <span class="text-dark">{{ $certificate->issue_date ? $certificate->issue_date->format('d/m/Y') : date('d/m/Y') }}</span></div>

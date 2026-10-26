@@ -86,13 +86,47 @@
                     </div>
 
                     <div class="row g-3 mb-4">
-                        <div class="col-md-6">
-                            <label class="form-label fw-semibold small">Director Passport Photo</label>
-                            <input type="file" name="director_photo" class="form-control form-control-sm rounded-2" accept="image/*">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">Centre Official Logo / Signboard</label>
+                            @if($centre->centre_logo_url)
+                                <div class="mb-2" id="centreLogoPreviewBox">
+                                    <img id="centreLogoPreview" src="{{ $centre->centre_logo_url }}" alt="Centre Logo" class="rounded border p-1 bg-white" style="height: 70px; max-width: 140px; object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/150x80?text=Logo';">
+                                </div>
+                            @else
+                                <div class="mb-2 d-none" id="centreLogoPreviewBox">
+                                    <img id="centreLogoPreview" src="" alt="Centre Logo" class="rounded border p-1 bg-white" style="height: 70px; max-width: 140px; object-fit: contain;">
+                                </div>
+                            @endif
+                            <input type="file" name="centre_logo" class="form-control form-control-sm rounded-2" accept="image/*" onchange="previewImageDirect(this, 'centreLogoPreview', 'centreLogoPreviewBox')">
+                            <div class="form-text" style="font-size: 0.72rem;">JPG/PNG/WebP, Max 2MB. Instant preview on select.</div>
                         </div>
-                        <div class="col-md-6">
+                        <div class="col-md-4">
+                            <label class="form-label fw-semibold small">Director Passport Photo</label>
+                            @if($centre->director_photo_url)
+                                <div class="mb-2" id="directorPhotoPreviewBox">
+                                    <img id="directorPhotoPreview" src="{{ $centre->director_photo_url }}" alt="Director" class="rounded border p-1" style="height: 70px; width: 70px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/120x120?text=Photo';">
+                                </div>
+                            @else
+                                <div class="mb-2 d-none" id="directorPhotoPreviewBox">
+                                    <img id="directorPhotoPreview" src="" alt="Director" class="rounded border p-1" style="height: 70px; width: 70px; object-fit: cover;">
+                                </div>
+                            @endif
+                            <input type="file" name="director_photo" class="form-control form-control-sm rounded-2" accept="image/*" onchange="previewImageDirect(this, 'directorPhotoPreview', 'directorPhotoPreviewBox')">
+                            <div class="form-text" style="font-size: 0.72rem;">JPG/PNG/WebP, Max 2MB. Instant preview on select.</div>
+                        </div>
+                        <div class="col-md-4">
                             <label class="form-label fw-semibold small">Director Specimen Signature</label>
-                            <input type="file" name="director_signature" class="form-control form-control-sm rounded-2" accept="image/*">
+                            @if($centre->director_signature_url)
+                                <div class="mb-2" id="directorSigPreviewBox">
+                                    <img id="directorSigPreview" src="{{ $centre->director_signature_url }}" alt="Signature" class="rounded border p-1 bg-white" style="height: 40px; max-width: 150px; object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/200x80?text=Signature';">
+                                </div>
+                            @else
+                                <div class="mb-2 d-none" id="directorSigPreviewBox">
+                                    <img id="directorSigPreview" src="" alt="Signature" class="rounded border p-1 bg-white" style="height: 40px; max-width: 150px; object-fit: contain;">
+                                </div>
+                            @endif
+                            <input type="file" name="director_signature" class="form-control form-control-sm rounded-2" accept="image/*" onchange="previewImageDirect(this, 'directorSigPreview', 'directorSigPreviewBox')">
+                            <div class="form-text" style="font-size: 0.72rem;">Official specimen signature stamp or digital sign.</div>
                         </div>
                     </div>
 
@@ -143,6 +177,11 @@
             </div>
             <div class="card-body p-3 p-md-4">
                 <div class="text-center mb-3">
+                    @if($centre->centre_logo_url)
+                        <div class="mb-2">
+                            <img src="{{ $centre->centre_logo_url }}" alt="{{ $centre->centre_name }}" class="rounded border p-1 bg-white shadow-sm" style="max-height: 55px; max-width: 140px; object-fit: contain;">
+                        </div>
+                    @endif
                     <span class="badge bg-success-subtle text-success fs-6 px-3 py-2 fw-bold rounded-2">
                         <i class="fa-solid fa-circle-check me-1"></i>AUTHORIZED ACTIVE
                     </span>
@@ -181,3 +220,20 @@
     </div>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function previewImageDirect(input, imgId, boxId) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const img = document.getElementById(imgId);
+            if (img) img.src = e.target.result;
+            const box = document.getElementById(boxId);
+            if (box) box.classList.remove('d-none');
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+</script>
+@endpush

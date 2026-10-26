@@ -79,8 +79,8 @@
     </div>
 
     <!-- Student & Course Particulars Table -->
-    <div class="row g-3 mb-4">
-        <div class="col-sm-6">
+    <div class="row g-3 mb-4 align-items-center">
+        <div class="col-sm-5">
             <table class="table table-sm table-borderless mb-0">
                 <tr>
                     <td class="text-muted small fw-semibold" style="width: 140px;">Candidate Name:</td>
@@ -100,7 +100,7 @@
                 </tr>
             </table>
         </div>
-        <div class="col-sm-6">
+        <div class="col-sm-5">
             <table class="table table-sm table-borderless mb-0">
                 <tr>
                     <td class="text-muted small fw-semibold" style="width: 140px;">Course Curriculum:</td>
@@ -119,6 +119,18 @@
                     <td class="text-dark">{{ $certificate->issue_date ? $certificate->issue_date->format('d/m/Y') : date('d/m/Y') }}</td>
                 </tr>
             </table>
+        </div>
+        <div class="col-sm-2 text-end">
+            <div class="border border-2 border-dark rounded-1 overflow-hidden d-inline-block bg-light shadow-sm" style="width: 90px; height: 110px;">
+                @if($certificate->student?->photo_url)
+                    <img src="{{ $certificate->student->photo_url }}" alt="{{ $certificate->student->full_name }}" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.src='https://placehold.co/90x110?text=Photo';">
+                @else
+                    <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted small p-1">
+                        <i class="fa-solid fa-user-graduate fs-4 opacity-50"></i>
+                        <span style="font-size: 0.65rem;">Photo</span>
+                    </div>
+                @endif
+            </div>
         </div>
     </div>
 

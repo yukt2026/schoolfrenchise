@@ -111,10 +111,10 @@
                 <div class="row g-3">
                     <div class="col-md-6">
                         <label class="form-label text-muted small fw-semibold">Passport Photo</label>
-                        @if($application->photo_path)
+                        @if($application->photo_url)
                             <div class="border rounded p-2 text-center bg-light">
-                                <img src="{{ asset('storage/' . $application->photo_path) }}" alt="Photo" class="rounded img-fluid mb-2" style="max-height: 140px;">
-                                <div><a href="{{ asset('storage/' . $application->photo_path) }}" target="_blank" class="btn btn-sm btn-outline-secondary">Open Full Image</a></div>
+                                <img src="{{ $application->photo_url }}" alt="Photo" class="rounded img-fluid mb-2" style="max-height: 140px;" onerror="this.onerror=null;this.src='https://placehold.co/120x140?text=Photo';">
+                                <div><a href="{{ $application->photo_url }}" target="_blank" class="btn btn-sm btn-outline-secondary">Open Full Image</a></div>
                             </div>
                         @else
                             <div class="border rounded p-3 text-center text-muted small bg-light">No photo uploaded</div>
@@ -122,11 +122,11 @@
                     </div>
                     <div class="col-md-6">
                         <label class="form-label text-muted small fw-semibold">KYC / Educational Document</label>
-                        @if($application->id_proof_doc)
+                        @if($application->id_proof_url)
                             <div class="border rounded p-3 text-center bg-light">
                                 <i class="fa-solid fa-file-pdf fa-3x text-danger mb-2"></i>
                                 <div class="small fw-semibold text-truncate mb-2">{{ basename($application->id_proof_doc) }}</div>
-                                <a href="{{ asset('storage/' . $application->id_proof_doc) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                                <a href="{{ $application->id_proof_url }}" target="_blank" class="btn btn-sm btn-outline-primary">
                                     <i class="fa-solid fa-eye me-1"></i> View Document
                                 </a>
                             </div>

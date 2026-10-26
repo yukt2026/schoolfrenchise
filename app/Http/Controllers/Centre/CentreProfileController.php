@@ -54,9 +54,14 @@ class CentreProfileController extends Controller
             'address' => 'required|string',
             'pincode' => 'required|string|max:10',
             'lab_capacity' => 'required|integer|min:1',
+            'centre_logo' => 'nullable|image|max:2048',
             'director_photo' => 'nullable|image|max:2048',
             'director_signature' => 'nullable|image|max:2048',
         ]);
+
+        if ($request->hasFile('centre_logo')) {
+            $validated['centre_logo'] = FileUploadService::uploadImage($request->file('centre_logo'), 'uploads/centres/logos');
+        }
 
         if ($request->hasFile('director_photo')) {
             $validated['director_photo'] = FileUploadService::uploadImage($request->file('director_photo'), 'uploads/centres/directors');

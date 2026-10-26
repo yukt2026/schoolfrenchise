@@ -90,17 +90,24 @@
                         CERTIFICATE OF COMPLETION
                     </div>
 
-                    <p class="lead text-muted mb-2 fst-italic" style="font-family: Georgia, serif;">This is to certify that</p>
-
-                    <h3 class="fw-bold text-dark text-uppercase mb-2 text-decoration-underline" style="color: #0284c7 !important; letter-spacing: 0.5px;">
-                        {{ $certificate->student->full_name ?? 'Candidate Name' }}
-                    </h3>
-
-                    <p class="mb-2" style="font-size: 1.05rem; line-height: 1.8;">
-                        Son/Daughter of <strong>{{ $certificate->student->father_name ?? 'Father Name' }}</strong><br>
-                        Roll No: <span class="font-monospace fw-bold text-primary">{{ $certificate->student->roll_no ?? 'N/A' }}</span> | 
-                        Reg No: <span class="font-monospace fw-bold">{{ $certificate->student->registration_no ?? 'N/A' }}</span>
-                    </p>
+                    <div class="row align-items-center justify-content-center mb-2">
+                        <div class="col-auto">
+                            <p class="lead text-muted mb-1 fst-italic" style="font-family: Georgia, serif;">This is to certify that</p>
+                            <h3 class="fw-bold text-dark text-uppercase mb-1 text-decoration-underline" style="color: #0284c7 !important; letter-spacing: 0.5px;">
+                                {{ $certificate->student->full_name ?? 'Candidate Name' }}
+                            </h3>
+                            <p class="mb-2" style="font-size: 1.05rem; line-height: 1.8;">
+                                Son/Daughter of <strong>{{ $certificate->student->father_name ?? 'Father Name' }}</strong><br>
+                                Roll No: <span class="font-monospace fw-bold text-primary">{{ $certificate->student->roll_no ?? 'N/A' }}</span> | 
+                                Reg No: <span class="font-monospace fw-bold">{{ $certificate->student->registration_no ?? 'N/A' }}</span>
+                            </p>
+                        </div>
+                        @if($certificate->student?->photo_url)
+                        <div class="col-auto ps-3 d-none d-sm-block">
+                            <img src="{{ $certificate->student->photo_url }}" alt="Candidate" class="border border-2 border-dark rounded-1 shadow-sm" style="width: 70px; height: 85px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/70x85?text=Photo';">
+                        </div>
+                        @endif
+                    </div>
 
                     <p class="mb-3" style="font-size: 1.05rem; line-height: 1.8;">
                         has successfully completed the prescribed course of study in

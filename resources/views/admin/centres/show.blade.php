@@ -180,7 +180,7 @@
                             <div class="card border bg-light rounded-3 p-3 text-center mb-3">
                                 <span class="text-muted small fw-bold mb-2">Director Photograph</span>
                                 @if($centre->director_photo)
-                                    <img src="{{ asset('storage/' . $centre->director_photo) }}" alt="Director" class="rounded-circle mx-auto border shadow-sm mb-2" width="100" height="100" style="object-fit: cover;">
+                                    <img src="{{ $centre->director_photo_url ?? asset('storage/' . $centre->director_photo) }}" alt="Director" class="rounded-circle mx-auto border shadow-sm mb-2" width="100" height="100" style="object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/120x120?text=Photo';">
                                 @else
                                     <div class="rounded-circle bg-secondary bg-opacity-10 text-secondary d-flex align-items-center justify-content-center mx-auto mb-2" style="width: 100px; height: 100px;">
                                         <i class="fa-solid fa-user-tie fa-3x"></i>
@@ -191,7 +191,7 @@
                                 @if($centre->director_signature)
                                     <div class="mt-3 pt-2 border-top">
                                         <span class="text-muted small fw-bold d-block mb-1">Director Signature</span>
-                                        <img src="{{ asset('storage/' . $centre->director_signature) }}" alt="Signature" class="border bg-white p-1 rounded" height="40" style="max-width: 140px; object-fit: contain;">
+                                        <img src="{{ $centre->director_signature_url ?? asset('storage/' . $centre->director_signature) }}" alt="Signature" class="border bg-white p-1 rounded" height="40" style="max-width: 140px; object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/140x40?text=Signature';">
                                     </div>
                                 @endif
                             </div>

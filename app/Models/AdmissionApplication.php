@@ -80,4 +80,38 @@ class AdmissionApplication extends Model
     {
         return 'APP-' . date('Y') . '-' . strtoupper(bin2hex(random_bytes(3)));
     }
+
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (empty($this->photo_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->photo_path, 'http://') || str_starts_with($this->photo_path, 'https://')) {
+            return $this->photo_path;
+        }
+
+        if (file_exists(public_path($this->photo_path))) {
+            return asset($this->photo_path);
+        }
+
+        return asset('storage/' . ltrim($this->photo_path, '/'));
+    }
+
+    public function getIdProofUrlAttribute(): ?string
+    {
+        if (empty($this->id_proof_doc)) {
+            return null;
+        }
+
+        if (str_starts_with($this->id_proof_doc, 'http://') || str_starts_with($this->id_proof_doc, 'https://')) {
+            return $this->id_proof_doc;
+        }
+
+        if (file_exists(public_path($this->id_proof_doc))) {
+            return asset($this->id_proof_doc);
+        }
+
+        return asset('storage/' . ltrim($this->id_proof_doc, '/'));
+    }
 }

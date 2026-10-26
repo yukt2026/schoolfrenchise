@@ -261,7 +261,7 @@ class StudentAndCertificateSeeder extends Seeder
             ['email' => 'student@techeracomputer.in'],
             [
                 'name' => 'Rahul Kumar',
-                'mobile' => '9162384660',
+                'mobile' => '9162384661',
                 'password' => Hash::make('Student@123'),
                 'role' => 'student',
                 'is_active' => true,
@@ -287,7 +287,6 @@ class StudentAndCertificateSeeder extends Seeder
                 'address' => 'Sasbahana, Sheikhpura, Bihar - 801105',
                 'pincode' => '801105',
                 'highest_qualification' => '12th Pass (Science)',
-                'academic_session' => '2026',
                 'status' => 'enrolled',
             ]
         );
@@ -340,7 +339,6 @@ class StudentAndCertificateSeeder extends Seeder
                 'address' => 'Sasbahana, Sheikhpura, Bihar - 801105',
                 'pincode' => '801105',
                 'highest_qualification' => 'Graduation (BCA)',
-                'academic_session' => '2026',
                 'status' => 'enrolled',
             ]
         );
@@ -357,7 +355,7 @@ class StudentAndCertificateSeeder extends Seeder
                 'discount_amount' => 0.00,
                 'net_fee' => 4500.00,
                 'total_paid' => 4500.00,
-                'status' => 'approved',
+                'status' => 'active',
                 'remarks' => 'Enrolled in DCA - Full fee paid',
             ]
         );

@@ -20,7 +20,7 @@ class CentreSeeder extends Seeder
                 'name' => 'TECH ERA COMPUTER - Sheikhpura Main Campus',
                 'director' => 'Er. Ranjeet Kumar',
                 'email' => 'centre1001@techeracomputer.in',
-                'mobile' => '9162384660',
+                'mobile' => '9162384669',
                 'state' => 'Bihar',
                 'district' => 'Sheikhpura',
                 'city' => 'Sheikhpura',

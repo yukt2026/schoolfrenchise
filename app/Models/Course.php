@@ -90,4 +90,34 @@ class Course extends Model
     {
         return $query->where('status', true);
     }
+
+    public function getThumbnailUrlAttribute(): string
+    {
+        if (empty($this->thumbnail)) {
+            $slugCode = strtolower(\Illuminate\Support\Str::slug($this->course_code ?? ''));
+            $svgPath = 'images/courses/' . $slugCode . '.svg';
+            if (!empty($slugCode) && file_exists(public_path($svgPath))) {
+                return asset($svgPath);
+            }
+            return asset('images/courses/default-course.svg');
+        }
+
+        if (str_starts_with($this->thumbnail, 'http://') || str_starts_with($this->thumbnail, 'https://')) {
+            return $this->thumbnail;
+        }
+
+        if (file_exists(public_path($this->thumbnail))) {
+            return asset($this->thumbnail);
+        }
+
+        if (file_exists(public_path('storage/' . ltrim($this->thumbnail, '/')))) {
+            return asset('storage/' . ltrim($this->thumbnail, '/'));
+        }
+
+        if (file_exists(storage_path('app/public/' . ltrim($this->thumbnail, '/')))) {
+            return asset('storage/' . ltrim($this->thumbnail, '/'));
+        }
+
+        return asset('storage/' . ltrim($this->thumbnail, '/'));
+    }
 }

@@ -63,7 +63,7 @@
             <div class="d-flex align-items-center gap-3">
                 <div class="rounded-circle overflow-hidden bg-light border d-flex align-items-center justify-content-center" style="width: 48px; height: 48px;">
                     @if($selectedStudent->photo_path)
-                    <img src="{{ asset('storage/' . $selectedStudent->photo_path) }}" alt="{{ $selectedStudent->full_name }}" style="width: 100%; height: 100%; object-fit: cover;">
+                    <img src="{{ $selectedStudent->photo_url ?? asset('storage/' . $selectedStudent->photo_path) }}" alt="{{ $selectedStudent->full_name }}" style="width: 100%; height: 100%; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/96x96?text=Photo';">
                     @else
                     <i class="fa-solid fa-user text-muted fs-4"></i>
                     @endif

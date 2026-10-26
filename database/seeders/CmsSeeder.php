@@ -36,16 +36,17 @@ class CmsSeeder extends Seeder
         }
 
         $galleries = [
-            ['title' => 'Computer Practical Lab Session', 'category' => 'Lab Infrastructure', 'image_path' => 'assets/images/gallery/lab1.webp', 'sort_order' => 1],
-            ['title' => 'Smart Classroom & Presentation Hall', 'category' => 'Infrastructure', 'image_path' => 'assets/images/gallery/class1.webp', 'sort_order' => 2],
-            ['title' => 'Annual Convocation & Certificate Ceremony', 'category' => 'Events', 'image_path' => 'assets/images/gallery/event1.webp', 'sort_order' => 3],
-            ['title' => 'Typing & Speed Test Competition', 'category' => 'Competitions', 'image_path' => 'assets/images/gallery/typing1.webp', 'sort_order' => 4],
-            ['title' => 'Director & Corporate Board Conference', 'category' => 'Corporate', 'image_path' => 'assets/images/gallery/corp1.webp', 'sort_order' => 5],
-            ['title' => 'Student Free Scholarship Distribution', 'category' => 'CSR & Social', 'image_path' => 'assets/images/gallery/scholarship1.webp', 'sort_order' => 6],
+            ['title' => 'Computer Practical Lab Session', 'category' => 'Lab Infrastructure', 'image_path' => 'uploads/gallery/gallery_lab_1.jpg', 'sort_order' => 1],
+            ['title' => 'Smart Classroom & Presentation Hall', 'category' => 'Infrastructure', 'image_path' => 'uploads/gallery/gallery_lab_2.jpg', 'sort_order' => 2],
+            ['title' => 'Annual Convocation & Certificate Ceremony', 'category' => 'Events', 'image_path' => 'uploads/gallery/gallery_cert_1.jpg', 'sort_order' => 3],
+            ['title' => 'Certificate Award Distribution', 'category' => 'Events', 'image_path' => 'uploads/gallery/gallery_cert_2.jpg', 'sort_order' => 4],
+            ['title' => 'Typing & Speed Test Competition', 'category' => 'Competitions', 'image_path' => 'uploads/gallery/gallery_student_1.jpg', 'sort_order' => 5],
+            ['title' => 'Director & Corporate Board Conference', 'category' => 'Corporate', 'image_path' => 'uploads/gallery/gallery_student_2.jpg', 'sort_order' => 6],
+            ['title' => 'Student Free Scholarship Distribution', 'category' => 'CSR & Social', 'image_path' => 'uploads/gallery/gallery_student_3.jpg', 'sort_order' => 7],
         ];
 
         foreach ($galleries as $g) {
-            Gallery::firstOrCreate(['title' => $g['title']], $g);
+            Gallery::updateOrCreate(['title' => $g['title']], $g);
         }
     }
 }

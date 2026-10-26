@@ -150,7 +150,7 @@
             <div class="col-3 d-flex justify-content-end">
                 <div class="photo-box text-center">
                     @if($student->photo_path)
-                    <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}">
+                    <img src="{{ $student->photo_url ?? asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" onerror="this.onerror=null;this.src='https://placehold.co/100x120?text=Photo';">
                     @else
                     <span class="small text-muted">Photo</span>
                     @endif
