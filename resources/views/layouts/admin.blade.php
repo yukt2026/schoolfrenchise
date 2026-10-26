@@ -161,7 +161,13 @@
 
                 <!-- SYSTEM -->
                 <div class="sidebar-heading">System & Config</div>
-                <a class="nav-link {{ request()->routeIs('admin.cms*') ? 'active' : '' }}" href="{{ Route::has('admin.cms.index') ? route('admin.cms.index') : '#' }}">
+                <a class="nav-link {{ request()->routeIs('admin.banners*') ? 'active' : '' }}" href="{{ Route::has('admin.banners.index') ? route('admin.banners.index') : '#' }}">
+                    <i class="fa-solid fa-images"></i> Hero Banners
+                </a>
+                <a class="nav-link {{ request()->routeIs('admin.cms.gallery*') ? 'active' : '' }}" href="{{ Route::has('admin.cms.gallery') ? route('admin.cms.gallery') : '#' }}">
+                    <i class="fa-solid fa-camera-retro"></i> Photo Gallery
+                </a>
+                <a class="nav-link {{ request()->routeIs('admin.cms*') && !request()->routeIs('admin.cms.gallery*') ? 'active' : '' }}" href="{{ Route::has('admin.cms.index') ? route('admin.cms.index') : '#' }}">
                     <i class="fa-solid fa-globe"></i> Website CMS
                 </a>
                 <a class="nav-link {{ request()->routeIs('admin.users*') ? 'active' : '' }}" href="{{ Route::has('admin.users.index') ? route('admin.users.index') : '#' }}">

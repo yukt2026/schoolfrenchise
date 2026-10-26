@@ -2,6 +2,7 @@
 
 use App\Http\Controllers\Admin\AdminAdmissionController;
 use App\Http\Controllers\Admin\AdminAuditLogController;
+use App\Http\Controllers\Admin\AdminBannerController;
 use App\Http\Controllers\Admin\AdminBatchController;
 use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminCentreController;
@@ -283,6 +284,10 @@ Route::middleware(['role:super_admin,admin'])->prefix('admin')->name('admin.')->
     // CMS Content & Settings
     Route::get('/cms/content', [AdminCmsController::class, 'content'])->name('cms.content');
     Route::post('/cms/content', [AdminCmsController::class, 'updateContent'])->name('cms.content.update');
+
+    // Hero Banners & Slider
+    Route::post('/banners/{banner}/toggle-status', [AdminBannerController::class, 'toggleStatus'])->name('banners.toggle-status');
+    Route::resource('banners', AdminBannerController::class);
 
     // Module 16: Notifications & Broadcasting
     Route::get('/notifications', [AdminNotificationController::class, 'index'])->name('notifications.index');

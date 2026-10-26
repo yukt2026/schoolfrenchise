@@ -22,6 +22,9 @@
             <a href="{{ route('home') }}" target="_blank" class="btn btn-outline-secondary shadow-sm">
                 <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> View Live Site
             </a>
+            <a href="{{ route('admin.banners.index') }}" class="btn btn-warning text-dark fw-bold shadow-sm">
+                <i class="fa-solid fa-images me-1"></i> Manage Hero Banners
+            </a>
             <a href="{{ route('admin.cms.notices.create') }}" class="btn btn-primary shadow-sm">
                 <i class="fa-solid fa-plus-circle me-1"></i> Post Announcement
             </a>
@@ -101,7 +104,20 @@
 
     <!-- Navigation Hub Shortcuts -->
     <div class="row g-3 mb-4">
-        <div class="col-md-3">
+        <div class="col-md-6 col-lg">
+            <a href="{{ route('admin.banners.index') }}" class="card border-0 shadow-sm rounded-3 text-decoration-none bg-white h-100 hover-shadow transition">
+                <div class="card-body p-3 d-flex align-items-center gap-3">
+                    <div class="text-white p-3 rounded-3" style="background: linear-gradient(135deg, #0284c7, #4f46e5) !important;">
+                        <i class="fa-solid fa-images fa-xl"></i>
+                    </div>
+                    <div>
+                        <h6 class="fw-bold text-dark mb-1">Hero Banners</h6>
+                        <p class="text-muted small mb-0">{{ $stats['active_banners'] ?? 0 }} active slider graphics</p>
+                    </div>
+                </div>
+            </a>
+        </div>
+        <div class="col-md-6 col-lg">
             <a href="{{ route('admin.cms.notices') }}" class="card border-0 shadow-sm rounded-3 text-decoration-none bg-white h-100 hover-shadow transition">
                 <div class="card-body p-3 d-flex align-items-center gap-3">
                     <div class="bg-primary text-white p-3 rounded-3">
@@ -114,7 +130,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-6 col-lg">
             <a href="{{ route('admin.cms.gallery') }}" class="card border-0 shadow-sm rounded-3 text-decoration-none bg-white h-100 hover-shadow transition">
                 <div class="card-body p-3 d-flex align-items-center gap-3">
                     <div class="bg-info text-white p-3 rounded-3">
@@ -127,7 +143,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-6 col-lg">
             <a href="{{ route('admin.cms.enquiries') }}" class="card border-0 shadow-sm rounded-3 text-decoration-none bg-white h-100 hover-shadow transition">
                 <div class="card-body p-3 d-flex align-items-center gap-3">
                     <div class="bg-warning text-dark p-3 rounded-3">
@@ -140,7 +156,7 @@
                 </div>
             </a>
         </div>
-        <div class="col-md-3">
+        <div class="col-md-6 col-lg">
             <a href="{{ route('admin.cms.content') }}" class="card border-0 shadow-sm rounded-3 text-decoration-none bg-white h-100 hover-shadow transition">
                 <div class="card-body p-3 d-flex align-items-center gap-3">
                     <div class="bg-success text-white p-3 rounded-3">

@@ -93,7 +93,7 @@
                             <label for="image" class="form-label small fw-semibold">Replace Image File (Optional)</label>
                             @if($gallery->image_path)
                                 <div class="mb-2">
-                                    <img src="{{ asset($gallery->image_path) }}" alt="{{ $gallery->title }}" style="max-height: 120px; border-radius: 6px;" class="border p-1 bg-light">
+                                    <img src="{{ $gallery->image_url }}" alt="{{ $gallery->title }}" style="max-height: 120px; border-radius: 6px;" class="border p-1 bg-light">
                                 </div>
                             @endif
                             <input type="file" class="form-control @error('image') is-invalid @enderror" id="image" name="image" accept="image/jpeg,image/png,image/webp">

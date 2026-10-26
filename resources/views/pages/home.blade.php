@@ -4,7 +4,51 @@
 @section('meta_description', 'TECH ERA COMPUTER, Sasbahana, Sheikhpura, Bihar - Leading Computer Training Institute offering ADCA, DCA, Typing, Tally Prime with GST, and Programming courses.')
 
 @section('content')
-    <!-- 1. Hero Banner Slider Section -->
+    @if(isset($banners) && $banners->isNotEmpty())
+        <!-- Promotional Graphic Banners Slider (Admin Managed) -->
+        <section class="dce-promo-banner-section position-relative">
+            <div id="dcePromoBannerSlider" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="4500">
+                @if($banners->count() > 1)
+                    <div class="carousel-indicators dce-slider-indicators">
+                        @foreach($banners as $index => $banner)
+                            <button type="button" data-bs-target="#dcePromoBannerSlider" data-bs-slide-to="{{ $index }}" class="{{ $loop->first ? 'active' : '' }}" aria-current="{{ $loop->first ? 'true' : 'false' }}" aria-label="Banner Slide {{ $index + 1 }}"></button>
+                        @endforeach
+                    </div>
+                @endif
+
+                <div class="carousel-inner">
+                    @foreach($banners as $banner)
+                        <div class="carousel-item {{ $loop->first ? 'active' : '' }} dce-graphic-banner-item">
+                            @if($banner->link_url)
+                                <a href="{{ $banner->link_url }}" target="{{ $banner->link_target ?? '_self' }}" class="d-block w-100 text-decoration-none">
+                            @endif
+                            <picture>
+                                @if($banner->mobile_image_path)
+                                    <source media="(max-width: 767.98px)" srcset="{{ $banner->mobile_image_url }}">
+                                @endif
+                                <img src="{{ $banner->image_url }}" alt="{{ $banner->title }}" class="d-block w-100 dce-banner-graphic-img" loading="{{ $loop->first ? 'eager' : 'lazy' }}">
+                            </picture>
+                            @if($banner->link_url)
+                                </a>
+                            @endif
+                        </div>
+                    @endforeach
+                </div>
+
+                @if($banners->count() > 1)
+                    <!-- Carousel Navigation Arrows (Desktop Only) -->
+                    <button class="dce-slider-btn prev border-0 d-none d-lg-flex" type="button" data-bs-target="#dcePromoBannerSlider" data-bs-slide="prev" aria-label="Previous Banner">
+                        <i class="fa-solid fa-chevron-left"></i>
+                    </button>
+                    <button class="dce-slider-btn next border-0 d-none d-lg-flex" type="button" data-bs-target="#dcePromoBannerSlider" data-bs-slide="next" aria-label="Next Banner">
+                        <i class="fa-solid fa-chevron-right"></i>
+                    </button>
+                @endif
+            </div>
+        </section>
+    @endif
+
+    <!-- 1. Hero Banner Slider Section (Original Section - Preserved) -->
     <section class="dce-slider-section position-relative">
         <div id="dceHeroSlider" class="carousel slide carousel-fade" data-bs-ride="carousel" data-bs-interval="5000">
             <!-- Slider Indicators (Bottom Center Dots/Pill) -->
@@ -751,6 +795,113 @@
         </div>
     </section>
 
+    <!-- 7.5. Certified Students & Campus Gallery Section -->
+    @if(isset($galleries) && $galleries->isNotEmpty())
+    <section class="py-5 bg-light position-relative" id="homeGallerySection">
+        <div class="container">
+            <div class="dce-section-header">
+                <span class="dce-section-tag" style="background-color: #ede9fe; color: #6d28d9;">
+                    <i class="fa-solid fa-images me-1"></i> Certified Students & Campus Life
+                </span>
+                <h2 class="dce-section-title">Students & Certificate Awards</h2>
+                <p class="dce-section-subtitle">Real glimpses of our students receiving government-recognized diplomas, hands-on computer lab sessions, and annual convocation ceremonies.</p>
+            </div>
+
+            <!-- Filter Buttons & View All Link -->
+            <div class="d-flex flex-column flex-sm-row justify-content-between align-items-sm-center gap-3 mb-4">
+                <div class="d-flex flex-wrap gap-1.5" id="homeGalleryFilters">
+                    <button type="button" class="btn btn-primary btn-sm rounded-pill px-3 py-1.5 home-gallery-filter active" data-filter="all">
+                        <i class="fa-solid fa-border-all me-1"></i> All ({{ $galleries->count() }})
+                    </button>
+                    @php
+                        $uniqueCategories = $galleries->pluck('category')->unique()->filter()->values();
+                    @endphp
+                    @foreach($uniqueCategories as $cat)
+                        <button type="button" class="btn btn-outline-secondary btn-sm rounded-pill px-3 py-1.5 home-gallery-filter" data-filter="{{ Str::slug($cat) }}">
+                            {{ $cat }}
+                        </button>
+                    @endforeach
+                </div>
+                <div>
+                    <a href="{{ route('gallery') }}" class="btn btn-outline-primary btn-sm rounded-pill px-3 py-1.5 fw-semibold d-inline-flex align-items-center gap-1.5">
+                        <span>View Full Gallery</span>
+                        <i class="fa-solid fa-arrow-right-long"></i>
+                    </a>
+                </div>
+            </div>
+
+            <!-- Gallery Grid (10-12 Cards) -->
+            <div class="row g-2.5 g-sm-3 g-lg-4" id="homeGalleryGrid">
+                @foreach($galleries as $gallery)
+                    @php
+                        $badgeClass = match($gallery->category) {
+                            'Certificates' => 'bg-warning text-dark',
+                            'Students'     => 'bg-success text-white',
+                            'Computer Lab' => 'bg-primary text-white',
+                            'Events'       => 'bg-info text-dark',
+                            default        => 'bg-dark bg-opacity-75 text-white',
+                        };
+                    @endphp
+                    <div class="col-6 col-md-4 col-lg-3 home-gallery-item" data-category="{{ Str::slug($gallery->category) }}">
+                        <div class="card border border-light-subtle shadow-sm rounded-4 overflow-hidden h-100 dce-gallery-card bg-white position-relative">
+                            <div class="position-relative overflow-hidden" style="height: 180px; background-color: #0f172a; cursor: pointer;" onclick="showGalleryLightbox('{{ $gallery->image_url }}', '{{ addslashes($gallery->title) }}', '{{ addslashes($gallery->category) }}')">
+                                <img src="{{ $gallery->image_url }}" 
+                                     alt="{{ $gallery->title }}" 
+                                     class="w-100 h-100 object-fit-cover dce-gallery-img"
+                                     loading="lazy"
+                                     onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=TECH+ERA+Gallery';">
+                                
+                                <span class="badge position-absolute top-0 start-0 m-2 shadow-sm {{ $badgeClass }}" style="font-size: 0.68rem; font-weight: 700; border-radius: 6px;">
+                                    {{ $gallery->category }}
+                                </span>
+
+                                <div class="dce-gallery-zoom-overlay">
+                                    <span class="btn btn-light btn-sm rounded-circle shadow" style="width: 42px; height: 42px; display: inline-flex; align-items: center; justify-content: center;">
+                                        <i class="fa-solid fa-magnifying-glass-plus text-primary fs-6"></i>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="card-body p-2.5 p-md-3 bg-white d-flex flex-column justify-content-between">
+                                <h6 class="fw-bold text-dark mb-1 small text-truncate" title="{{ $gallery->title }}">
+                                    {{ $gallery->title }}
+                                </h6>
+                                <div class="d-flex align-items-center justify-content-between text-muted" style="font-size: 0.72rem;">
+                                    <span><i class="fa-solid fa-circle-check text-success me-1"></i> Verified</span>
+                                    <span class="text-primary fw-semibold cursor-pointer" onclick="showGalleryLightbox('{{ $gallery->image_url }}', '{{ addslashes($gallery->title) }}', '{{ addslashes($gallery->category) }}')">
+                                        Zoom <i class="fa-solid fa-arrow-up-right-from-square ms-0.5"></i>
+                                    </span>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                @endforeach
+            </div>
+        </div>
+    </section>
+
+    <!-- Modal for Home Gallery Lightbox -->
+    <div class="modal fade" id="homeGalleryLightboxModal" tabindex="-1" aria-labelledby="homeGalleryLightboxTitle" aria-hidden="true">
+        <div class="modal-dialog modal-dialog-centered modal-lg">
+            <div class="modal-content border-0 shadow-lg rounded-4 overflow-hidden">
+                <div class="modal-header border-0 bg-dark text-white py-2.5 px-3">
+                    <div class="d-flex align-items-center gap-2">
+                        <span class="badge bg-warning text-dark" id="homeGalleryModalBadge">Gallery</span>
+                        <h6 class="modal-title fs-6 fw-bold text-white mb-0" id="homeGalleryLightboxTitle">Photo View</h6>
+                    </div>
+                    <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal" aria-label="Close"></button>
+                </div>
+                <div class="modal-body p-0 bg-black text-center position-relative" style="min-height: 280px; display: flex; align-items: center; justify-content: center;">
+                    <img id="homeGalleryModalImage" src="" alt="" class="img-fluid" style="max-height: 75vh; width: auto; object-fit: contain;">
+                </div>
+                <div class="modal-footer border-0 bg-light py-2 px-3 d-flex justify-content-between align-items-center">
+                    <small class="text-muted"><i class="fa-solid fa-certificate text-warning me-1"></i> {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }} &bull; Verified Campus Photo</small>
+                    <button type="button" class="btn btn-sm btn-secondary rounded-pill px-3" data-bs-dismiss="modal">Close</button>
+                </div>
+            </div>
+        </div>
+    </div>
+    @endif
+
     {{-- [COMMENTED: Campus Facilities Section - redundant with 'Why Choose Us'. Uncomment if a dedicated lab infrastructure section is needed]
     <section class="py-5 bg-light">
         <div class="container">
@@ -950,4 +1101,48 @@
             </div>
         </div>
     </section>
+
+    @push('scripts')
+    <script>
+        function showGalleryLightbox(url, title, category) {
+            const modalEl = document.getElementById('homeGalleryLightboxModal');
+            if (!modalEl) return;
+            const imgEl = document.getElementById('homeGalleryModalImage');
+            const titleEl = document.getElementById('homeGalleryLightboxTitle');
+            const badgeEl = document.getElementById('homeGalleryModalBadge');
+            
+            if (imgEl) imgEl.src = url;
+            if (titleEl) titleEl.textContent = title;
+            if (badgeEl) badgeEl.textContent = category;
+            
+            const modal = bootstrap.Modal.getOrCreateInstance(modalEl);
+            modal.show();
+        }
+
+        document.addEventListener('DOMContentLoaded', function () {
+            const filterBtns = document.querySelectorAll('.home-gallery-filter');
+            const galleryItems = document.querySelectorAll('.home-gallery-item');
+
+            filterBtns.forEach(btn => {
+                btn.addEventListener('click', function () {
+                    filterBtns.forEach(b => {
+                        b.classList.remove('active', 'btn-primary');
+                        b.classList.add('btn-outline-secondary');
+                    });
+                    this.classList.add('active', 'btn-primary');
+                    this.classList.remove('btn-outline-secondary');
+
+                    const filter = this.getAttribute('data-filter');
+                    galleryItems.forEach(item => {
+                        if (filter === 'all' || item.getAttribute('data-category') === filter) {
+                            item.style.display = '';
+                        } else {
+                            item.style.display = 'none';
+                        }
+                    });
+                });
+            });
+        });
+    </script>
+    @endpush
 @endsection

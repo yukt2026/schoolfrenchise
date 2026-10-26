@@ -292,6 +292,10 @@ nav svg {
     -webkit-text-fill-color: transparent;
 }
 
+.dce-brand-suffix {
+    display: inline !important;
+}
+
 .dce-brand-sub {
     font-size: 0.72rem;
     font-weight: 600;
@@ -373,6 +377,56 @@ nav svg {
     position: relative;
     background-color: #0b1329;
     overflow: hidden;
+}
+
+/* Promotional Graphic Banners Section */
+.dce-promo-banner-section {
+    position: relative;
+    background-color: #070e23;
+    overflow: hidden;
+    border-bottom: 2px solid rgba(2, 132, 199, 0.2);
+}
+
+/* Graphic Banners on Hero Slider */
+.dce-graphic-banner-item {
+    background: #070e23;
+    overflow: hidden;
+    text-align: center;
+}
+
+.dce-graphic-banner-item a {
+    display: block;
+    outline: none;
+    text-decoration: none;
+}
+
+.dce-banner-graphic-img {
+    width: 100%;
+    height: auto;
+    max-height: 560px;
+    object-fit: contain;
+    margin: 0 auto;
+    display: block;
+    transition: transform 0.3s ease;
+}
+
+@media (max-width: 991.98px) {
+    .dce-banner-graphic-img {
+        max-height: 440px;
+    }
+}
+
+@media (max-width: 767.98px) {
+    .dce-graphic-banner-item {
+        background: #070e23;
+        padding: 0;
+    }
+    .dce-banner-graphic-img {
+        max-height: none !important;
+        width: 100% !important;
+        height: auto !important;
+        object-fit: contain !important;
+    }
 }
 
 .dce-slider-item {
@@ -2093,7 +2147,7 @@ img {
     }
 
     .dce-brand-suffix {
-        display: none !important;
+        display: inline !important;
     }
 
     .btn-sm {
@@ -2214,6 +2268,46 @@ img {
     font-size: 0.92rem;
     color: #64748b;
     line-height: 1.6;
+}
+
+/* Home Gallery Cards */
+.dce-gallery-card {
+    transition: transform 0.25s ease, box-shadow 0.25s ease;
+}
+
+.dce-gallery-card:hover {
+    transform: translateY(-4px);
+    box-shadow: 0 10px 25px rgba(15, 23, 42, 0.12) !important;
+}
+
+.dce-gallery-img {
+    transition: transform 0.35s ease;
+}
+
+.dce-gallery-card:hover .dce-gallery-img {
+    transform: scale(1.06);
+}
+
+.dce-gallery-zoom-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(15, 23, 42, 0.45);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.25s ease;
+    cursor: pointer;
+}
+
+.dce-gallery-card:hover .dce-gallery-zoom-overlay {
+    opacity: 1;
+}
+
+@media (max-width: 575.98px) {
+    .dce-gallery-card .card-body {
+        padding: 8px 10px !important;
+    }
 }
 
 /* Color Accents on Modern Stat Cards */

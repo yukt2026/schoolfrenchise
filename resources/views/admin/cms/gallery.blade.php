@@ -74,7 +74,7 @@
                 <div class="card border-0 shadow-sm rounded-3 h-100 bg-white overflow-hidden">
                     <div class="position-relative" style="height: 180px; background: #f8f9fa;">
                         @if($item->image_path)
-                            <img src="{{ asset($item->image_path) }}" class="w-100 h-100 object-fit-cover" alt="{{ $item->title }}" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=Photo';">
+                            <img src="{{ $item->image_url }}" class="w-100 h-100 object-fit-cover" alt="{{ $item->title }}" onerror="this.onerror=null;this.src='https://placehold.co/600x400?text=Photo';">
                         @else
                             <div class="d-flex align-items-center justify-content-center h-100 text-muted">
                                 <i class="fa-solid fa-image fa-2x opacity-25"></i>

@@ -27,7 +27,7 @@
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
     <!-- Custom Brand CSS -->
-    <link rel="stylesheet" href="{{ asset('css/drishti-custom.css') }}">
+    <link rel="stylesheet" href="{{ asset('css/drishti-custom.css') }}?v={{ filemtime(public_path('css/drishti-custom.css')) }}">
 
     @stack('styles')
 </head>
@@ -42,7 +42,7 @@
                 <div class="row align-items-center d-none d-lg-flex">
                     <div class="col-lg-7">
                         <div class="d-flex align-items-center gap-4">
-                            <span><i class="fa-solid fa-location-dot text-info me-2"></i>{{ $instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105' }}</span>
+                            <!-- <span><i class="fa-solid fa-location-dot text-info me-2"></i>{{ $instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105' }}</span> -->
                             <span><i class="fa-solid fa-phone text-warning me-2"></i><a href="tel:{{ $instituteSettings['contact_phone'] ?? '9162384660' }}">{{ $instituteSettings['contact_phone'] ?? '9162384660' }}</a></span>
                         </div>
                     </div>
@@ -88,7 +88,7 @@
                          style="max-height: 42px; width: auto; object-fit: contain;">
                     <div class="dce-brand-text text-truncate">
                         <div class="dce-brand-title fw-bold text-nowrap">
-                            <span style="color: #0284c7;">TECH</span> <span style="color: #ea580c;">ERA</span> <span class="dce-brand-suffix" style="color: #0f172a;">COMPUTER</span>
+                            <span style="color: #0284c7;">TECH</span> <span style="color: #ea580c;">ERA</span> <span class="dce-brand-suffix" style="color: #0f172a; display: inline !important;">COMPUTER</span>
                         </div>
                         <div class="dce-brand-sub d-none d-md-block text-truncate">
                             {{ $instituteSettings['institute_tagline'] ?? 'Building Digital Skills for the Future' }}
@@ -433,7 +433,7 @@
                 <div class="col-lg-3 col-md-6">
                     <h5>Institute Campus</h5>
                     <ul class="dce-footer-links text-secondary small">
-                        <li class="mb-2"><i class="fa-solid fa-location-dot text-info me-2"></i> {{ $instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105' }}</li>
+                        <!-- <li class="mb-2"><i class="fa-solid fa-location-dot text-info me-2"></i> {{ $instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105' }}</li> -->
                         <li class="mb-2"><i class="fa-solid fa-phone text-warning me-2"></i> +91 {{ $instituteSettings['contact_phone'] ?? '9162384660' }}</li>
                         @if(!empty($instituteSettings['contact_email']))
                         <li class="mb-2"><i class="fa-solid fa-envelope text-info me-2"></i> {{ $instituteSettings['contact_email'] }}</li>

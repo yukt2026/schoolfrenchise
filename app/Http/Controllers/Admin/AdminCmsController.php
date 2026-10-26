@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Banner;
 use App\Models\Enquiry;
 use App\Models\Gallery;
 use App\Models\Notice;
@@ -20,6 +21,8 @@ class AdminCmsController extends Controller
     public function index()
     {
         $stats = [
+            'total_banners'   => Banner::count(),
+            'active_banners'  => Banner::where('status', true)->count(),
             'total_notices'   => Notice::count(),
             'active_notices'  => Notice::where('status', true)->count(),
             'marquee_count'   => Notice::where('is_marquee', true)->where('status', true)->count(),
@@ -196,7 +199,10 @@ class AdminCmsController extends Controller
 
     public function createGallery()
     {
-        $categories = ['Events', 'Campus', 'Computer Lab', 'Celebration', 'Convocation', 'Classroom', 'Banners', 'Awards'];
+        $dbCategories = Gallery::distinct()->pluck('category')->filter()->values()->toArray();
+        $defaultCategories = ['Certificates', 'Students', 'Computer Lab', 'Events', 'Campus', 'Celebration', 'Convocation', 'Classroom', 'Awards'];
+        $categories = array_values(array_unique(array_merge($defaultCategories, $dbCategories)));
+
         return view('admin.cms.create_gallery', compact('categories'));
     }
 
@@ -228,7 +234,10 @@ class AdminCmsController extends Controller
 
     public function editGallery(Gallery $gallery)
     {
-        $categories = ['Events', 'Campus', 'Computer Lab', 'Celebration', 'Convocation', 'Classroom', 'Banners', 'Awards'];
+        $dbCategories = Gallery::distinct()->pluck('category')->filter()->values()->toArray();
+        $defaultCategories = ['Certificates', 'Students', 'Computer Lab', 'Events', 'Campus', 'Celebration', 'Convocation', 'Classroom', 'Awards'];
+        $categories = array_values(array_unique(array_merge($defaultCategories, $dbCategories)));
+
         return view('admin.cms.edit_gallery', compact('gallery', 'categories'));
     }
 

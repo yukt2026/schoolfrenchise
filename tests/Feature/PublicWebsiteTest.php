@@ -219,4 +219,21 @@ class PublicWebsiteTest extends TestCase
         $content = $response->getContent();
         $this->assertEquals(12, substr_count($content, 'dce-course-grid-card'));
     }
+
+    public function test_homepage_and_gallery_page_render_student_and_certificate_gallery_items(): void
+    {
+        $response = $this->get('/');
+        $response->assertStatus(200);
+        $response->assertSee('homeGallerySection');
+        $response->assertSee('Students & Certificate Awards', false);
+        $response->assertSee('home-gallery-item');
+        $response->assertSee('homeGalleryLightboxModal');
+        $response->assertSee('uploads/gallery/gallery_cert_1.jpg');
+
+        $galleryPageResponse = $this->get('/gallery');
+        $galleryPageResponse->assertStatus(200);
+        $galleryPageResponse->assertSee('galleryContainer');
+        $galleryPageResponse->assertSee('mainGalleryLightboxModal');
+        $galleryPageResponse->assertSee('uploads/gallery/gallery_cert_1.jpg');
+    }
 }
