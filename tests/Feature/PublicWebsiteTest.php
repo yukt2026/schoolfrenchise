@@ -235,5 +235,9 @@ class PublicWebsiteTest extends TestCase
         $galleryPageResponse->assertSee('galleryContainer');
         $galleryPageResponse->assertSee('mainGalleryLightboxModal');
         $galleryPageResponse->assertSee('uploads/gallery/gallery_cert_1.jpg');
+
+        // Test fallback storage route works even if hosting has no symlink
+        $storageFileResponse = $this->get('/storage/uploads/gallery/gallery_cert_1.jpg');
+        $storageFileResponse->assertStatus(200);
     }
 }

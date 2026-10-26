@@ -811,8 +811,8 @@
                 <div class="dropdown">
                     <a href="#" class="d-flex align-items-center gap-2 text-white text-decoration-none dropdown-toggle student-profile-pill" id="studentMenuDropdown" data-bs-toggle="dropdown" aria-expanded="false">
                         <div class="student-avatar shadow-sm position-relative">
-                            @if($authStudent && $authStudent->photo_path && file_exists(public_path('storage/' . $authStudent->photo_path)))
-                                <img src="{{ asset('storage/' . $authStudent->photo_path) }}" alt="{{ $authStudent->full_name }}" class="w-100 h-100 rounded-circle object-fit-cover">
+                            @if($authStudent && $authStudent->photo_url)
+                                <img src="{{ $authStudent->photo_url }}" alt="{{ $authStudent->full_name }}" class="w-100 h-100 rounded-circle object-fit-cover" onerror="this.onerror=null;this.style.display='none';">
                             @else
                                 {{ $authStudent ? strtoupper(substr($authStudent->full_name, 0, 1)) : 'S' }}
                             @endif
@@ -888,8 +888,8 @@
         <div class="p-3 border-bottom bg-light">
             <div class="d-flex align-items-center gap-3">
                 <div class="student-avatar" style="width: 44px; height: 44px; font-size: 1.1rem;">
-                    @if($authStudent && $authStudent->photo_path && file_exists(public_path('storage/' . $authStudent->photo_path)))
-                        <img src="{{ asset('storage/' . $authStudent->photo_path) }}" alt="{{ $authStudent->full_name }}" class="w-100 h-100 rounded-circle object-fit-cover">
+                    @if($authStudent && $authStudent->photo_url)
+                        <img src="{{ $authStudent->photo_url }}" alt="{{ $authStudent->full_name }}" class="w-100 h-100 rounded-circle object-fit-cover" onerror="this.onerror=null;this.style.display='none';">
                     @else
                         {{ $authStudent ? strtoupper(substr($authStudent->full_name, 0, 1)) : 'S' }}
                     @endif

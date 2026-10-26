@@ -67,8 +67,8 @@
             </div>
             <div class="col-4 col-md-3 text-end">
                 <div class="border border-2 border-secondary rounded-2 overflow-hidden d-inline-block bg-light" style="width: 110px; height: 130px;">
-                    @if($student->photo_path && file_exists(public_path('storage/' . $student->photo_path)))
-                        <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover">
+                    @if($student->photo_url)
+                        <img src="{{ $student->photo_url }}" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.style.display='none';">
                     @else
                         <div class="w-100 h-100 d-flex flex-column align-items-center justify-content-center text-muted small p-1">
                             <i class="fa-regular fa-image fs-3 mb-1"></i>

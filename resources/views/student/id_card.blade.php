@@ -38,8 +38,8 @@
             <!-- Photo & Name -->
             <div class="text-center pt-3 pb-2 px-3">
                 <div class="rounded-circle border border-3 border-primary overflow-hidden mx-auto mb-2 bg-light shadow-sm" style="width: 100px; height: 100px;">
-                    @if($student->photo_path && file_exists(public_path('storage/' . $student->photo_path)))
-                        <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover">
+                    @if($student->photo_url)
+                        <img src="{{ $student->photo_url }}" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.style.display='none';">
                     @else
                         <div class="w-100 h-100 d-flex align-items-center justify-content-center text-secondary">
                             <i class="fa-solid fa-user fa-3x opacity-50"></i>

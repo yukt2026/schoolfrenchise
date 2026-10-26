@@ -33,7 +33,7 @@
         <div class="card border-0 rounded-3 shadow-sm text-center p-4 mb-4">
             <div class="position-relative d-inline-block mx-auto mb-3">
                 @if($student->photo_path)
-                <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" class="rounded-circle img-thumbnail shadow-sm" style="width: 120px; height: 120px; object-fit: cover;">
+                <img src="{{ $student->photo_url ?? asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" class="rounded-circle img-thumbnail shadow-sm" style="width: 120px; height: 120px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/120x120?text=Photo';">
                 @else
                 <div class="rounded-circle bg-primary-subtle text-primary d-flex align-items-center justify-content-center mx-auto shadow-sm" style="width: 120px; height: 120px; font-size: 3rem;">
                     <i class="fa-solid fa-user-graduate"></i>

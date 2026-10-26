@@ -124,8 +124,8 @@
                 </div>
                 <div class="col-4 col-sm-3 text-end">
                     <div class="photo-box ms-auto">
-                        @if($admission->student?->photo_path && file_exists(public_path('storage/' . $admission->student->photo_path)))
-                            <img src="{{ asset('storage/' . $admission->student->photo_path) }}" alt="{{ $admission->student->full_name }}" class="w-100 h-100 object-fit-cover">
+                        @if($admission->student?->photo_url)
+                            <img src="{{ $admission->student->photo_url }}" alt="{{ $admission->student->full_name }}" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.style.display='none';">
                         @else
                             <div class="text-center text-muted small p-1">
                                 <i class="fa-regular fa-user fs-2 mb-1"></i>

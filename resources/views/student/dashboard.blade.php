@@ -11,8 +11,8 @@
                 <div class="col-md-8">
                     <div class="d-flex align-items-center gap-3">
                         <div class="rounded-circle bg-white text-primary fw-bold d-flex align-items-center justify-content-center flex-shrink-0" style="width: 58px; height: 58px; font-size: 1.5rem; border: 3px solid rgba(255,255,255,0.4);">
-                            @if($student->photo_path && file_exists(public_path('storage/' . $student->photo_path)))
-                                <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" class="w-100 h-100 rounded-circle object-fit-cover">
+                            @if($student->photo_url)
+                                <img src="{{ $student->photo_url }}" alt="{{ $student->full_name }}" class="w-100 h-100 rounded-circle object-fit-cover" onerror="this.onerror=null;this.style.display='none';">
                             @else
                                 {{ strtoupper(substr($student->full_name, 0, 1)) }}
                             @endif

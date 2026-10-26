@@ -451,3 +451,16 @@ Route::middleware(['role:super_admin,student'])->prefix('student')->name('studen
 // 9. Geo AJAX & Utility Routes
 Route::get('/api/districts/{state_id}', [GeoController::class, 'getDistricts'])->name('api.districts');
 Route::get('/sitemap.xml', [SitemapController::class, 'index'])->name('sitemap');
+
+// 10. Safe Live Server Fallback: serve public storage files if storage:link symlink is missing on live host
+Route::get('/storage/{path}', function ($path) {
+    $storageFile = storage_path('app/public/' . $path);
+    if (file_exists($storageFile) && !is_dir($storageFile)) {
+        return response()->file($storageFile);
+    }
+    $publicFile = public_path($path);
+    if (file_exists($publicFile) && !is_dir($publicFile)) {
+        return response()->file($publicFile);
+    }
+    abort(404);
+})->where('path', '.*')->name('storage.fallback');

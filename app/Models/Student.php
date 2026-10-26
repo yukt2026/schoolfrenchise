@@ -134,4 +134,69 @@ class Student extends Model
         }
         return date('Y') . '-' . substr((string)(date('Y') + 1), -2);
     }
+
+    /**
+     * Get the resolved URL for the student's passport photo.
+     */
+    public function getPhotoUrlAttribute(): ?string
+    {
+        if (empty($this->photo_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->photo_path, 'http://') || str_starts_with($this->photo_path, 'https://')) {
+            return $this->photo_path;
+        }
+
+        // 1. Direct in public directory (e.g. public/uploads/students/photos/...)
+        if (file_exists(public_path($this->photo_path))) {
+            return asset($this->photo_path);
+        }
+
+        // 2. In public/storage symlink
+        if (file_exists(public_path('storage/' . ltrim($this->photo_path, '/')))) {
+            return asset('storage/' . ltrim($this->photo_path, '/'));
+        }
+
+        // 3. Fallback: storage/app/public exists on server, serve via asset or fallback
+        if (file_exists(storage_path('app/public/' . ltrim($this->photo_path, '/')))) {
+            return asset('storage/' . ltrim($this->photo_path, '/'));
+        }
+
+        return asset('storage/' . ltrim($this->photo_path, '/'));
+    }
+
+    /**
+     * Check if the student has a valid photo file.
+     */
+    public function getHasPhotoAttribute(): bool
+    {
+        if (empty($this->photo_path)) {
+            return false;
+        }
+
+        return file_exists(public_path($this->photo_path))
+            || file_exists(public_path('storage/' . ltrim($this->photo_path, '/')))
+            || file_exists(storage_path('app/public/' . ltrim($this->photo_path, '/')));
+    }
+
+    /**
+     * Get the resolved URL for the student's signature.
+     */
+    public function getSignatureUrlAttribute(): ?string
+    {
+        if (empty($this->signature_path)) {
+            return null;
+        }
+
+        if (str_starts_with($this->signature_path, 'http://') || str_starts_with($this->signature_path, 'https://')) {
+            return $this->signature_path;
+        }
+
+        if (file_exists(public_path($this->signature_path))) {
+            return asset($this->signature_path);
+        }
+
+        return asset('storage/' . ltrim($this->signature_path, '/'));
+    }
 }

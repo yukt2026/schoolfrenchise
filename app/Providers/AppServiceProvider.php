@@ -64,6 +64,8 @@ class AppServiceProvider extends ServiceProvider
                     $merged['logo_url'] = asset($logoPath);
                 } elseif (file_exists(public_path('storage/' . $logoPath))) {
                     $merged['logo_url'] = asset('storage/' . $logoPath);
+                } elseif (file_exists(storage_path('app/public/' . $logoPath))) {
+                    $merged['logo_url'] = asset('storage/' . $logoPath);
                 } else {
                     $merged['logo_url'] = asset('images/tech-era-logo.png');
                 }

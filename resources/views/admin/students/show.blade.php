@@ -35,8 +35,8 @@
         <div class="d-flex flex-wrap align-items-center gap-4">
             <div class="position-relative">
                 @if($student->photo_path)
-                    <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" 
-                         class="rounded-circle border shadow-sm" style="width: 100px; height: 100px; object-fit: cover;">
+                    <img src="{{ $student->photo_url ?? asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" 
+                         class="rounded-circle border shadow-sm" style="width: 100px; height: 100px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/120x120?text=Photo';">
                 @else
                     <div class="rounded-circle bg-light d-flex align-items-center justify-content-center border text-secondary shadow-sm" 
                          style="width: 100px; height: 100px; font-size: 38px;">

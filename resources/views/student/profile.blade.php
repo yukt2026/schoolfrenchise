@@ -27,10 +27,12 @@
                 <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 text-center mb-4">
                     <div class="position-relative d-inline-block mx-auto mb-3">
                         <div class="rounded-circle bg-light border border-3 border-primary shadow-sm overflow-hidden d-flex align-items-center justify-content-center mx-auto" style="width: 130px; height: 130px;">
-                            @if($student->photo_path && file_exists(public_path('storage/' . $student->photo_path)))
-                                <img src="{{ asset('storage/' . $student->photo_path) }}" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover">
+                            @if($student->photo_url)
+                                <img id="studentAvatarPreview" src="{{ $student->photo_url }}" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.classList.add('d-none');document.getElementById('studentAvatarPlaceholder').classList.remove('d-none');">
+                                <i id="studentAvatarPlaceholder" class="fa-solid fa-user fa-4x text-secondary opacity-50 d-none"></i>
                             @else
-                                <i class="fa-solid fa-user fa-4x text-secondary opacity-50"></i>
+                                <img id="studentAvatarPreview" src="" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover d-none">
+                                <i id="studentAvatarPlaceholder" class="fa-solid fa-user fa-4x text-secondary opacity-50"></i>
                             @endif
                         </div>
                     </div>
@@ -50,8 +52,8 @@
                     <!-- Upload New Avatar -->
                     <div class="text-start mt-2">
                         <label class="form-label small fw-semibold text-muted">Update Passport Photo</label>
-                        <input type="file" name="photo" class="form-control form-control-sm @error('photo') is-invalid @enderror" accept="image/jpeg,image/png,image/webp">
-                        <div class="form-text" style="font-size: 0.72rem;">JPG/PNG, Max 2MB. Square headshot recommended.</div>
+                        <input type="file" name="photo" id="studentPhotoInput" class="form-control form-control-sm @error('photo') is-invalid @enderror" accept="image/jpeg,image/png,image/webp" onchange="previewStudentPhoto(this)">
+                        <div class="form-text" style="font-size: 0.72rem;">JPG/PNG, Max 2MB. Instant live preview above.</div>
                         @error('photo')
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
@@ -194,6 +196,24 @@
 
 @push('scripts')
 <script>
+function previewStudentPhoto(input) {
+    if (input.files && input.files[0]) {
+        const reader = new FileReader();
+        reader.onload = function(e) {
+            const preview = document.getElementById('studentAvatarPreview');
+            const placeholder = document.getElementById('studentAvatarPlaceholder');
+            if (preview) {
+                preview.src = e.target.result;
+                preview.classList.remove('d-none');
+            }
+            if (placeholder) {
+                placeholder.classList.add('d-none');
+            }
+        };
+        reader.readAsDataURL(input.files[0]);
+    }
+}
+
 document.getElementById('stateSelect')?.addEventListener('change', function() {
     const stateId = this.value;
     const districtSelect = document.getElementById('districtSelect');

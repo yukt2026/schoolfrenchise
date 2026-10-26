@@ -248,7 +248,7 @@
                         <label class="form-label fw-semibold">Replace Passport Photo</label>
                         @if($student->photo_path)
                             <div class="mb-2">
-                                <img src="{{ asset('storage/' . $student->photo_path) }}" alt="Current Photo" class="rounded border" style="height: 60px; width: 60px; object-fit: cover;">
+                                <img src="{{ $student->photo_url ?? asset('storage/' . $student->photo_path) }}" alt="Current Photo" class="rounded border" style="height: 60px; width: 60px; object-fit: cover;" onerror="this.onerror=null;this.src='https://placehold.co/120x120?text=Photo';">
                             </div>
                         @endif
                         <input type="file" name="photo" accept="image/*" class="form-control @error('photo') is-invalid @enderror">
@@ -258,7 +258,7 @@
                         <label class="form-label fw-semibold">Replace Signature</label>
                         @if($student->signature_path)
                             <div class="mb-2">
-                                <img src="{{ asset('storage/' . $student->signature_path) }}" alt="Current Signature" class="rounded border" style="height: 35px; object-fit: contain;">
+                                <img src="{{ $student->signature_url ?? asset('storage/' . $student->signature_path) }}" alt="Current Signature" class="rounded border" style="height: 35px; object-fit: contain;" onerror="this.onerror=null;this.src='https://placehold.co/200x80?text=Sign';">
                             </div>
                         @endif
                         <input type="file" name="signature" accept="image/*" class="form-control @error('signature') is-invalid @enderror">
