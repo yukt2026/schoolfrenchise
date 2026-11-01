@@ -256,13 +256,14 @@ class PaymentGatewayService
             } elseif (!empty($transaction->student_roll_no)) {
                 $student = Student::where('roll_no', $transaction->student_roll_no)
                     ->orWhere('registration_no', $transaction->student_roll_no)
+                    ->orWhere('mobile', $transaction->student_roll_no)
                     ->first();
                 if ($student) {
                     $transaction->student_id = $student->id;
                     $admission = Admission::where('student_id', $student->id)
                         ->whereIn('status', ['active', 'enrolled'])
                         ->latest()
-                        ->first();
+                        ->first() ?: Admission::where('student_id', $student->id)->latest()->first();
                     if ($admission) {
                         $transaction->admission_id = $admission->id;
                     }

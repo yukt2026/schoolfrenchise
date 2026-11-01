@@ -50,6 +50,11 @@ class VerificationController extends Controller
             $marksheet = Marksheet::with(['student.centre', 'course', 'result.subjectResults.subject'])
                 ->where('marksheet_no', $queryStr)
                 ->first();
+            if ($marksheet) {
+                $certificate = Certificate::with(['student.centre', 'course', 'result.subjectResults.subject'])
+                    ->where('exam_result_id', $marksheet->exam_result_id)
+                    ->first();
+            }
         }
 
         // Log verification audit
@@ -77,9 +82,26 @@ class VerificationController extends Controller
         $certificate = Certificate::with(['student.centre', 'course', 'result.subjectResults.subject'])
             ->where('certificate_no', $cert_no)
             ->orWhere('certificate_no', $cleanedCertNo)
-            ->firstOrFail();
+            ->orWhereHas('student', function ($sq) use ($cert_no, $cleanedCertNo) {
+                $sq->where('roll_no', $cert_no)
+                  ->orWhere('registration_no', $cert_no)
+                  ->orWhere('registration_no', $cleanedCertNo);
+            })
+            ->first();
 
-        $marksheet = Marksheet::where('exam_result_id', $certificate->exam_result_id)->first();
+        $marksheet = null;
+        if ($certificate) {
+            $marksheet = Marksheet::where('exam_result_id', $certificate->exam_result_id)->first();
+        } else {
+            $marksheet = Marksheet::with(['student.centre', 'course', 'result.subjectResults.subject'])
+                ->where('marksheet_no', $cert_no)
+                ->orWhere('marksheet_no', $cleanedCertNo)
+                ->firstOrFail();
+
+            $certificate = Certificate::with(['student.centre', 'course', 'result.subjectResults.subject'])
+                ->where('exam_result_id', $marksheet->exam_result_id)
+                ->first();
+        }
 
         VerificationLog::create([
             'type' => 'certificate',

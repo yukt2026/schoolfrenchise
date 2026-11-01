@@ -7,6 +7,7 @@ use App\Models\Enquiry;
 use App\Models\FranchiseApplication;
 use App\Models\OnlineTransaction;
 use App\Models\State;
+use App\Models\Student;
 use Tests\TestCase;
 
 class PublicWebsiteTest extends TestCase
@@ -166,6 +167,22 @@ class PublicWebsiteTest extends TestCase
         $receiptResponse->assertStatus(200);
         $receiptResponse->assertSee($transaction->transaction_id);
         $receiptResponse->assertSee('₹1,500.00');
+    }
+
+    public function test_online_payment_lookup_by_mobile_and_roll_no(): void
+    {
+        $student = Student::whereNotNull('roll_no')->whereNotNull('mobile')->first();
+        if ($student) {
+            // Lookup by roll_no
+            $responseRoll = $this->get('/online-payment?roll_no=' . $student->roll_no);
+            $responseRoll->assertStatus(200);
+            $responseRoll->assertSee($student->full_name);
+
+            // Lookup by mobile
+            $responseMobile = $this->get('/online-payment?roll_no=' . $student->mobile);
+            $responseMobile->assertStatus(200);
+            $responseMobile->assertSee($student->full_name);
+        }
     }
 
     public function test_api_districts_returns_json(): void

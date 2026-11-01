@@ -103,6 +103,7 @@ Route::middleware('throttle:30,1')->group(function () {
     Route::get('/check-certificate-marksheet', [VerificationController::class, 'certificateIndex'])->name('verify.certificate');
     Route::post('/check-certificate-marksheet', [VerificationController::class, 'verifyCertificate'])->name('verify.certificate.submit');
     Route::get('/verify/cert/{cert_no}', [VerificationController::class, 'directVerifyCert'])->where('cert_no', '.*')->name('verify.cert.direct');
+    Route::get('/verify/certificate/{cert_no}', [VerificationController::class, 'directVerifyCert'])->where('cert_no', '.*')->name('verify.certificate.public');
     Route::get('/check-admission', [VerificationController::class, 'admissionIndex'])->name('verify.admission');
     Route::post('/check-admission', [VerificationController::class, 'verifyAdmission'])->name('verify.admission.submit');
 });
@@ -193,6 +194,7 @@ Route::middleware(['role:super_admin,admin'])->prefix('admin')->name('admin.')->
 
     // Module 2: Students
     Route::get('/students/export', [AdminStudentController::class, 'export'])->name('students.export');
+    Route::get('/students/{student}/id-card', [AdminStudentController::class, 'idCard'])->name('students.id-card');
     Route::resource('students', AdminStudentController::class);
 
     // Module 3: Admissions & Applications
@@ -469,6 +471,7 @@ Route::middleware(['role:super_admin,student'])->prefix('student')->name('studen
     Route::get('/results', [StudentAcademicController::class, 'results'])->name('results');
     Route::get('/results/{id}/marksheet', [StudentAcademicController::class, 'marksheet'])->name('marksheet');
     Route::get('/certificates', [StudentAcademicController::class, 'certificates'])->name('certificates');
+    Route::get('/certificates/{id}/print', [StudentAcademicController::class, 'printCertificate'])->name('certificates.print');
 
     // Support Tickets
     Route::get('/support', [StudentSupportController::class, 'index'])->name('support');

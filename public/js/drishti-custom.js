@@ -5,31 +5,35 @@
 document.addEventListener('DOMContentLoaded', function () {
     // 1. Dynamic AJAX Districts Loader for State Selects
     document.querySelectorAll('.dce-state-select').forEach(function (stateSelect) {
-        stateSelect.addEventListener('change', function () {
-            const stateId = this.value;
-            const targetDistrictId = this.dataset.districtTarget || 'district_id';
-            const districtSelect = document.getElementById(targetDistrictId);
+        const targetDistrictId = stateSelect.dataset.districtTarget || 'district_id';
+        const districtSelect = document.getElementById(targetDistrictId);
 
+        function updateDistricts(stateId, selectedDistrictId = '') {
             if (!districtSelect) return;
 
-            districtSelect.innerHTML = '<option value="">Loading districts...</option>';
-            districtSelect.disabled = true;
+            const defaultPlaceholder = districtSelect.getAttribute('data-placeholder') || 'Select District';
 
             if (!stateId) {
-                districtSelect.innerHTML = '<option value="">Select District</option>';
+                districtSelect.innerHTML = `<option value="">${defaultPlaceholder}</option>`;
                 districtSelect.disabled = false;
                 return;
             }
 
+            districtSelect.innerHTML = '<option value="">Loading districts...</option>';
+            districtSelect.disabled = true;
+
             fetch('/api/districts/' + stateId)
                 .then(response => response.json())
                 .then(data => {
-                    districtSelect.innerHTML = '<option value="">Select District</option>';
+                    districtSelect.innerHTML = `<option value="">${defaultPlaceholder}</option>`;
                     if (data && data.length > 0) {
                         data.forEach(function (dist) {
                             const option = document.createElement('option');
                             option.value = dist.id;
                             option.textContent = dist.name;
+                            if (selectedDistrictId && selectedDistrictId == dist.id) {
+                                option.selected = true;
+                            }
                             districtSelect.appendChild(option);
                         });
                     } else {
@@ -39,10 +43,20 @@ document.addEventListener('DOMContentLoaded', function () {
                 })
                 .catch(err => {
                     console.error('Error fetching districts:', err);
-                    districtSelect.innerHTML = '<option value="">Select District</option>';
+                    districtSelect.innerHTML = `<option value="">${defaultPlaceholder}</option>`;
                     districtSelect.disabled = false;
                 });
+        }
+
+        stateSelect.addEventListener('change', function () {
+            updateDistricts(this.value);
         });
+
+        // If state is already selected on load and district select has no options yet
+        if (stateSelect.value && districtSelect && districtSelect.options.length <= 1) {
+            const initialDistId = districtSelect.getAttribute('data-selected-district') || '';
+            updateDistricts(stateSelect.value, initialDistId);
+        }
     });
 
     // 2. Animated Counter for Homepage Metrics

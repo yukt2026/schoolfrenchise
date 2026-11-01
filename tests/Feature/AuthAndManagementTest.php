@@ -271,6 +271,22 @@ class AuthAndManagementTest extends TestCase
         $this->assertNull(DB::table('password_reset_tokens')->where('email', $user->email)->first());
     }
 
+    public function test_password_reset_accepts_roll_number_and_mobile(): void
+    {
+        $student = Student::whereNotNull('roll_no')->whereNotNull('user_id')->first();
+        $this->assertNotNull($student);
+
+        // 1. Request reset link using student roll number
+        $resp1 = $this->post('/password/email', ['email' => $student->roll_no]);
+        $resp1->assertSessionHas('success');
+
+        // 2. Request reset link using student mobile
+        if ($student->mobile) {
+            $resp2 = $this->post('/password/email', ['email' => $student->mobile]);
+            $resp2->assertSessionHas('success');
+        }
+    }
+
     public function test_student_policy_prevents_viewing_another_students_record_idor(): void
     {
         $policy = new StudentPolicy();

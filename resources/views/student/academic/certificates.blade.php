@@ -94,13 +94,13 @@
                         @endif
 
                         <!-- Action Controls -->
-                        <div class="d-flex gap-2">
-                            <a href="{{ route('verify.certificate', ['cert_no' => $cert->certificate_no]) }}" target="_blank" class="btn btn-outline-primary btn-sm rounded-2 flex-grow-1 fw-semibold">
-                                <i class="fa-solid fa-qrcode me-1"></i> Verify Authenticity
+                        <div class="d-flex flex-wrap gap-2">
+                            <a href="{{ route('student.certificates.print', $cert->id) }}" target="_blank" class="btn btn-primary btn-sm rounded-2 flex-grow-1 fw-semibold">
+                                <i class="fa-solid fa-graduation-cap me-1"></i> View & Print Official Certificate
                             </a>
-                            <button onclick="window.print()" class="btn btn-primary btn-sm rounded-2 fw-semibold px-3">
-                                <i class="fa-solid fa-print me-1"></i> Print
-                            </button>
+                            <a href="{{ route('verify.cert.direct', ['cert_no' => $cert->certificate_no]) }}" target="_blank" class="btn btn-outline-secondary btn-sm rounded-2 fw-semibold px-3">
+                                <i class="fa-solid fa-qrcode me-1"></i> Verify
+                            </a>
                         </div>
                     </div>
                 </div>

@@ -17,6 +17,9 @@
         <p class="text-muted small mb-0">Complete academic, financial, attendance and certification records.</p>
     </div>
     <div class="d-flex gap-2">
+        <a href="{{ route('admin.students.id-card', $student->id) }}" target="_blank" class="btn btn-primary btn-sm px-3 shadow-sm">
+            <i class="fa-solid fa-id-card me-1"></i> Print ID Card
+        </a>
         <a href="{{ route('admin.students.edit', $student->id) }}" class="btn btn-outline-primary btn-sm px-3 shadow-sm">
             <i class="fa-solid fa-pen me-1"></i> Edit Profile
         </a>

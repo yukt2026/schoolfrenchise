@@ -27,8 +27,12 @@
 </div>
 
 <style>
+@page {
+    size: A4 portrait;
+    margin: 8mm;
+}
 @media print {
-    .centre-sidebar, .centre-topbar, .centre-footer, .no-print {
+    .centre-sidebar, .centre-topbar, .centre-footer, .no-print, nav {
         display: none !important;
     }
     .centre-content-area {

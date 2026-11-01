@@ -607,6 +607,12 @@ class StudentPortalModuleTest extends TestCase
         $response->assertSee('ISSUED');
         $response->assertSee('VALID');
         $response->assertSee('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
+
+        // Test student certificate printable view
+        $printResp = $this->actingAs($this->studentUser)->get(route('student.certificates.print', $cert->id));
+        $printResp->assertStatus(200);
+        $printResp->assertSee('DCE-CERT-2026-0089');
+        $printResp->assertSee('Certificate of Proficiency');
     }
 
     /**

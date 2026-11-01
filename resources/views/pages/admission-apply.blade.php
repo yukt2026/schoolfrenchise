@@ -224,22 +224,52 @@
 
 @push('scripts')
 <script>
-document.getElementById('stateSelect')?.addEventListener('change', function() {
-    const stateId = this.value;
+document.addEventListener('DOMContentLoaded', function() {
+    const stateSelect = document.getElementById('stateSelect');
     const districtSelect = document.getElementById('districtSelect');
-    if (!stateId) return;
+    const oldDistrictId = "{{ old('district_id') }}";
 
-    fetch(`/api/districts/${stateId}`)
-        .then(res => res.json())
-        .then(data => {
+    function loadDistricts(stateId, selectedDistrict = '') {
+        if (!districtSelect) return;
+        if (!stateId) {
             districtSelect.innerHTML = '<option value="">Select District</option>';
-            data.forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d.id;
-                opt.textContent = d.name;
-                districtSelect.appendChild(opt);
+            return;
+        }
+
+        districtSelect.innerHTML = '<option value="">Loading districts...</option>';
+
+        fetch(`/api/districts/${stateId}`)
+            .then(res => res.json())
+            .then(data => {
+                districtSelect.innerHTML = '<option value="">Select District</option>';
+                if (data && data.length > 0) {
+                    data.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.id;
+                        opt.textContent = d.name;
+                        if (selectedDistrict && selectedDistrict == d.id) {
+                            opt.selected = true;
+                        }
+                        districtSelect.appendChild(opt);
+                    });
+                } else {
+                    districtSelect.innerHTML = '<option value="">No districts found</option>';
+                }
+            })
+            .catch(() => {
+                districtSelect.innerHTML = '<option value="">Failed to load districts</option>';
             });
+    }
+
+    if (stateSelect) {
+        stateSelect.addEventListener('change', function() {
+            loadDistricts(this.value);
         });
+
+        if (stateSelect.value) {
+            loadDistricts(stateSelect.value, oldDistrictId);
+        }
+    }
 });
 </script>
 @endpush

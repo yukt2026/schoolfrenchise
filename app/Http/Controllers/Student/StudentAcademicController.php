@@ -234,4 +234,23 @@ class StudentAcademicController extends Controller
 
         return view('student.academic.certificates', compact('student', 'admission', 'certificates'));
     }
+
+    /**
+     * Display / print student's official diploma certificate.
+     */
+    public function printCertificate(Request $request, $id)
+    {
+        $student = $this->getStudent($request);
+
+        $certificate = Certificate::where('id', $id)
+            ->where('student_id', $student->id)
+            ->with(['student.centre', 'course', 'centre', 'result'])
+            ->firstOrFail();
+
+        if ($certificate->status === 'revoked') {
+            abort(403, 'This certificate has been revoked. Please contact the administration.');
+        }
+
+        return view('student.academic.certificate_print', compact('student', 'certificate'));
+    }
 }

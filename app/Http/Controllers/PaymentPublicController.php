@@ -17,16 +17,24 @@ class PaymentPublicController extends Controller
     {
         $student = null;
         $pendingFee = 0;
+        $query = trim((string) ($request->input('roll_no') ?? $request->input('query') ?? ''));
 
-        if ($request->filled('roll_no')) {
+        if (!empty($query)) {
             $student = Student::with(['admissions.course', 'centre', 'admissions.fees'])
-                ->where('roll_no', trim($request->roll_no))
-                ->orWhere('registration_no', trim($request->roll_no))
+                ->where('roll_no', $query)
+                ->orWhere('registration_no', $query)
+                ->orWhere('mobile', $query)
+                ->orWhere('alternate_mobile', $query)
+                ->orWhere('email', $query)
                 ->first();
 
             if ($student && $student->admissions->isNotEmpty()) {
-                $admission = $student->admissions->first();
-                $pendingFee = max(0, (float) $admission->net_fee - (float) $admission->total_paid);
+                $admission = $student->admissions->whereIn('status', ['active', 'enrolled'])->first() ?: $student->admissions->first();
+                if ($admission) {
+                    $pendingFee = max(0, (float) $admission->net_fee - (float) $admission->total_paid);
+                }
+            } elseif (!$student) {
+                session()->flash('search_not_found', "No student record found matching '{$query}'. Please verify your Roll Number, Registration Number, or Mobile.");
             }
         }
 
@@ -54,10 +62,14 @@ class PaymentPublicController extends Controller
         if (!empty($validated['student_roll_no'])) {
             $student = Student::where('roll_no', $validated['student_roll_no'])
                 ->orWhere('registration_no', $validated['student_roll_no'])
+                ->orWhere('mobile', $validated['student_roll_no'])
                 ->first();
             if ($student) {
                 $studentId = $student->id;
-                $admission = Admission::where('student_id', $student->id)->latest()->first();
+                $admission = Admission::where('student_id', $student->id)
+                    ->whereIn('status', ['active', 'enrolled'])
+                    ->latest()
+                    ->first() ?: Admission::where('student_id', $student->id)->latest()->first();
                 if ($admission) {
                     $admissionId = $admission->id;
                 }

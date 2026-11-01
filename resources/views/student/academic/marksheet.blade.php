@@ -231,10 +231,14 @@
                 <!-- Verification QR Code & Tamper-Proof Assurance -->
                 <div class="row align-items-center g-3 p-3 bg-light rounded-3 border mb-4">
                     <div class="col-sm-3 text-center text-sm-start">
-                        <div class="border d-inline-block p-2 bg-white rounded text-center">
-                            <i class="fa-solid fa-qrcode fa-3x text-dark"></i>
-                            <div class="font-monospace text-muted mt-1" style="font-size: 0.65rem;">
-                                VERIFIED: {{ $student->registration_no }}
+                        <div class="border d-inline-block p-1 bg-white rounded text-center shadow-sm">
+                            @php
+                                $verifyCode = $result->student->roll_no;
+                                $verifyUrl = route('verify.cert.direct', ['cert_no' => $verifyCode]);
+                            @endphp
+                            <img src="https://api.qrserver.com/v1/create-qr-code/?size=85x85&data={{ urlencode($verifyUrl) }}" alt="QR Verification" style="width: 75px; height: 75px;" class="mb-1">
+                            <div class="font-monospace text-muted" style="font-size: 0.65rem;">
+                                SCAN TO VERIFY
                             </div>
                         </div>
                     </div>
@@ -276,11 +280,16 @@
 </div>
 
 <style>
+@page {
+    size: A4 portrait;
+    margin: 8mm;
+}
 @media print {
     .student-header,
     .student-subnav,
     .mobile-bottom-nav,
     .no-print,
+    nav,
     footer {
         display: none !important;
     }

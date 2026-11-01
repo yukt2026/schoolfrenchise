@@ -177,4 +177,30 @@ class AdminStudentModuleTest extends TestCase
         $response->assertStatus(200);
         $this->assertTrue(str_contains($response->headers->get('content-type'), 'text/csv'));
     }
+
+    public function test_admin_can_view_student_id_card(): void
+    {
+        $student = Student::create([
+            'centre_id' => $this->centre->id,
+            'registration_no' => 'DCE/2026/TEST/' . rand(1000, 9999),
+            'roll_no' => 'DCE26' . rand(10000, 99999),
+            'full_name' => 'ID Card Test Student',
+            'father_name' => 'Father Test',
+            'dob' => '2001-05-10',
+            'gender' => 'male',
+            'mobile' => '91' . rand(10000000, 99999999),
+            'state_id' => $this->state->id,
+            'district_id' => $this->district->id,
+            'city' => 'Sheikhpura',
+            'address' => 'Some address',
+            'pincode' => '801105',
+            'status' => 'enrolled',
+        ]);
+
+        $response = $this->actingAs($this->superAdmin)->get(route('admin.students.id-card', $student->id));
+        $response->assertStatus(200);
+        $response->assertSee('STUDENT IDENTITY CARD');
+        $response->assertSee($student->full_name);
+        $response->assertSee($student->roll_no);
+    }
 }

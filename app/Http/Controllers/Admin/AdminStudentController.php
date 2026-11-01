@@ -159,6 +159,15 @@ class AdminStudentController extends Controller
         return view('admin.students.show', compact('student'));
     }
 
+    public function idCard(Student $student)
+    {
+        $student->load(['centre.state', 'centre.district', 'state', 'district', 'admissions.course', 'admissions.batch']);
+        $centre = $student->centre ?? Centre::where('status', 'active')->first();
+        $admission = $student->admissions->first();
+
+        return view('centre.students.id_card', compact('student', 'centre', 'admission'));
+    }
+
     public function edit(Student $student)
     {
         $centres = Centre::where('status', 'active')->get();

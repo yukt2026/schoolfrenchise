@@ -56,32 +56,42 @@
                             </div>
 
                             <!-- Payer & Student Info -->
-                            <div class="row g-3 mb-4 small">
-                                <div class="col-sm-6">
-                                    <span class="text-muted d-block">Payer Name:</span>
-                                    <strong class="fs-6 text-dark">{{ $transaction->payer_name }}</strong>
+                            <div class="row g-3 mb-4 small align-items-center">
+                                <div class="col-sm-8">
+                                    <div class="row g-3">
+                                        <div class="col-sm-6">
+                                            <span class="text-muted d-block">Payer Name:</span>
+                                            <strong class="fs-6 text-dark">{{ $transaction->payer_name }}</strong>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-muted d-block">Payer Mobile:</span>
+                                            <strong>{{ $transaction->payer_mobile }}</strong>
+                                        </div>
+                                        @if($transaction->student_roll_no)
+                                        <div class="col-sm-6">
+                                            <span class="text-muted d-block">Student Roll No:</span>
+                                            <code>{{ $transaction->student_roll_no }}</code>
+                                        </div>
+                                        @endif
+                                        <div class="col-sm-6">
+                                            <span class="text-muted d-block">Payment Purpose:</span>
+                                            <strong class="text-primary">{{ $transaction->purpose }}</strong>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-muted d-block">Payment Mode:</span>
+                                            <span class="badge bg-secondary">{{ $transaction->payment_method }}</span>
+                                        </div>
+                                        <div class="col-sm-6">
+                                            <span class="text-muted d-block">Digital Verification Signature:</span>
+                                            <code class="small text-truncate d-block" style="max-width: 250px;">{{ $transaction->gateway_signature }}</code>
+                                        </div>
+                                    </div>
                                 </div>
-                                <div class="col-sm-6">
-                                    <span class="text-muted d-block">Payer Mobile:</span>
-                                    <strong>{{ $transaction->payer_mobile }}</strong>
-                                </div>
-                                @if($transaction->student_roll_no)
-                                <div class="col-sm-6">
-                                    <span class="text-muted d-block">Student Roll No:</span>
-                                    <code>{{ $transaction->student_roll_no }}</code>
-                                </div>
-                                @endif
-                                <div class="col-sm-6">
-                                    <span class="text-muted d-block">Payment Purpose:</span>
-                                    <strong class="text-primary">{{ $transaction->purpose }}</strong>
-                                </div>
-                                <div class="col-sm-6">
-                                    <span class="text-muted d-block">Payment Mode:</span>
-                                    <span class="badge bg-secondary">{{ $transaction->payment_method }}</span>
-                                </div>
-                                <div class="col-sm-6">
-                                    <span class="text-muted d-block">Digital Verification Signature:</span>
-                                    <code class="small text-truncate d-block" style="max-width: 250px;">{{ $transaction->gateway_signature }}</code>
+                                <div class="col-sm-4 text-center">
+                                    <div class="d-inline-block p-2 bg-light rounded-3 border">
+                                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=95x95&data={{ urlencode(route('payment.receipt', $transaction->transaction_id)) }}" alt="QR Verification" style="width: 80px; height: 80px;">
+                                        <div class="text-muted font-monospace mt-1" style="font-size: 0.65rem;">SCAN TO VERIFY</div>
+                                    </div>
                                 </div>
                             </div>
 
@@ -103,3 +113,32 @@
         </div>
     </section>
 @endsection
+
+@push('styles')
+<style>
+@media print {
+    header, footer, nav, .dce-page-banner, .btn, .breadcrumb, a {
+        display: none !important;
+    }
+    body, section {
+        background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
+    }
+    .container {
+        max-width: 100% !important;
+        width: 100% !important;
+        padding: 0 !important;
+    }
+    .card {
+        border: 2px solid #333 !important;
+        box-shadow: none !important;
+        border-radius: 0 !important;
+    }
+    #printableReceipt {
+        margin: 0 auto !important;
+        page-break-inside: avoid;
+    }
+}
+</style>
+@endpush

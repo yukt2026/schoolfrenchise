@@ -74,10 +74,14 @@
                                     <!-- Candidate Info -->
                                     <div class="row g-4 align-items-center mb-4">
                                         <div class="col-md-3 text-center">
-                                            <div class="rounded-circle border p-1 bg-light d-inline-block">
-                                                <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center" style="width: 110px; height: 110px; font-size: 3rem;">
-                                                    <i class="fa-solid fa-user-graduate"></i>
-                                                </div>
+                                            <div class="rounded-circle border p-1 bg-light d-inline-block shadow-sm" style="width: 110px; height: 110px; overflow: hidden;">
+                                                @if($certificate->student?->photo_url)
+                                                    <img src="{{ $certificate->student->photo_url }}" alt="{{ $certificate->student->full_name }}" class="w-100 h-100 object-fit-cover rounded-circle" onerror="this.onerror=null;this.src='https://placehold.co/110x110?text=Photo';">
+                                                @else
+                                                    <div class="rounded-circle bg-primary text-white d-flex align-items-center justify-content-center w-100 h-100" style="font-size: 2.8rem;">
+                                                        <i class="fa-solid fa-user-graduate"></i>
+                                                    </div>
+                                                @endif
                                             </div>
                                             <div class="mt-2 fw-bold text-dark fs-6">{{ $certificate->student->full_name }}</div>
                                             <span class="badge bg-success mt-1">Status: {{ ucfirst($certificate->status) }}</span>
@@ -209,4 +213,26 @@
             </div>
         </div>
     </section>
+
+    <style>
+    @media print {
+        header, footer, .dce-page-banner, .col-lg-5, .btn, .dce-topbar, .navbar, nav, .dce-footer {
+            display: none !important;
+        }
+        body {
+            background: #ffffff !important;
+            padding: 0 !important;
+        }
+        .col-lg-8 {
+            width: 100% !important;
+            max-width: 100% !important;
+            flex: 0 0 100% !important;
+        }
+        .dce-verified-card {
+            box-shadow: none !important;
+            border: 2px solid #0f172a !important;
+            page-break-inside: avoid !important;
+        }
+    }
+    </style>
 @endsection

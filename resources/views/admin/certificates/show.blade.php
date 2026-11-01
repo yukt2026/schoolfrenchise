@@ -141,10 +141,10 @@
                 </div>
                 <div class="card-body p-4">
                     <div class="p-3 bg-light rounded-3 d-inline-block border mb-3">
-                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode($certificate->qr_code_url ?? route('verify.certificate.public', ['cert_no' => $certificate->certificate_no])) }}" alt="Certificate QR" class="img-fluid" style="width: 140px; height: 140px;">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=160x160&data={{ urlencode($certificate->qr_code_url ?? route('verify.cert.direct', ['cert_no' => $certificate->certificate_no])) }}" alt="Certificate QR" class="img-fluid" style="width: 140px; height: 140px;">
                     </div>
                     <div class="small text-muted mb-2">Scan with camera to verify online authenticity</div>
-                    <a href="{{ $certificate->qr_code_url ?? route('verify.certificate.public', ['cert_no' => $certificate->certificate_no]) }}" target="_blank" class="btn btn-sm btn-outline-primary">
+                    <a href="{{ $certificate->qr_code_url ?? route('verify.cert.direct', ['cert_no' => $certificate->certificate_no]) }}" target="_blank" class="btn btn-sm btn-outline-primary">
                         <i class="fa-solid fa-arrow-up-right-from-square me-1"></i> Public Verification Link
                     </a>
 

@@ -115,13 +115,19 @@
                     </div>
                 </div>
 
-                <!-- Verification QR Code representation -->
-                <div class="text-center my-3">
-                    <div class="border d-inline-block p-2 bg-white rounded">
-                        <i class="fa-solid fa-qrcode fa-4x text-dark"></i>
+                <!-- Verification QR Code -->
+                <div class="text-center my-2">
+                    @php
+                        $verifyUrl = route('verify.admission') . '?search_key=' . urlencode($student->registration_no);
+                    @endphp
+                    <div class="border d-inline-block p-1 bg-white rounded shadow-sm">
+                        <img src="https://api.qrserver.com/v1/create-qr-code/?size=95x95&data={{ urlencode($verifyUrl) }}" alt="QR Code" style="width: 75px; height: 75px;">
                     </div>
                     <div class="font-monospace text-muted mt-1" style="font-size: 0.65rem;">
-                        VERIFY: {{ $student->registration_no }}
+                        SCAN TO VERIFY CREDENTIALS
+                    </div>
+                    <div class="text-secondary font-monospace" style="font-size: 0.6rem;">
+                        REG: {{ $student->registration_no }}
                     </div>
                 </div>
             </div>
@@ -144,14 +150,28 @@
 
 @push('styles')
 <style>
+@page {
+    size: auto;
+    margin: 8mm;
+}
 @media print {
-    body {
+    .student-header,
+    .student-subnav,
+    .mobile-bottom-nav,
+    .no-print,
+    nav,
+    footer {
+        display: none !important;
+    }
+    body, .student-main-content {
         background: #ffffff !important;
+        padding: 0 !important;
+        margin: 0 !important;
     }
     .id-card-wrap {
         border: 1px solid #000 !important;
         box-shadow: none !important;
-        page-break-inside: avoid;
+        page-break-inside: avoid !important;
     }
 }
 </style>

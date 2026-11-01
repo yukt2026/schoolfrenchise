@@ -23,10 +23,10 @@
                     <!-- Step 1: Optional Roll No Lookup -->
                     <div class="card border-0 shadow-sm rounded-4 p-4 mb-4 bg-light">
                         <h5 class="fw-bold text-primary mb-2"><i class="fa-solid fa-user-check me-2"></i>Quick Student Lookup (Optional)</h5>
-                        <p class="text-muted small mb-3">If you are an enrolled student, enter your Roll Number or Registration Number to automatically fetch your details and outstanding fee.</p>
+                        <p class="text-muted small mb-3">If you are an enrolled student, enter your Roll Number, Registration Number, or Registered Mobile Number to automatically fetch your details and outstanding course fees.</p>
                         <form action="{{ route('payment.index') }}" method="GET" class="row g-2">
                             <div class="col-sm-9">
-                                <input type="text" name="roll_no" class="form-control" placeholder="Enter Student Roll No. / Registration No." value="{{ request('roll_no') }}">
+                                <input type="text" name="roll_no" class="form-control" placeholder="Enter Roll No. / Registration No. / Mobile Number" value="{{ request('roll_no') }}">
                             </div>
                             <div class="col-sm-3">
                                 <button type="submit" class="btn btn-primary w-100 fw-bold">
@@ -36,11 +36,29 @@
                         </form>
                     </div>
 
+                    @if(session('search_not_found'))
+                        <div class="alert alert-warning d-flex align-items-center gap-2 p-3 rounded-3 mb-4 shadow-sm" role="alert">
+                            <i class="fa-solid fa-triangle-exclamation text-warning fs-4"></i>
+                            <div>
+                                <strong>Student Not Found:</strong> {{ session('search_not_found') }}
+                            </div>
+                        </div>
+                    @endif
+
+                    @if(session('error'))
+                        <div class="alert alert-danger d-flex align-items-center gap-2 p-3 rounded-3 mb-4 shadow-sm" role="alert">
+                            <i class="fa-solid fa-circle-exclamation text-danger fs-4"></i>
+                            <div>
+                                <strong>Payment Error:</strong> {{ session('error') }}
+                            </div>
+                        </div>
+                    @endif
+
                     @if(isset($student) && $student)
                         <div class="alert alert-success d-flex align-items-center justify-content-between p-3 rounded-3 mb-4 shadow-sm">
                             <div>
                                 <strong class="d-block text-dark"><i class="fa-solid fa-circle-check text-success me-1"></i> Student Record Found: {{ $student->full_name }}</strong>
-                                <small class="text-muted">Course: {{ $student->admissions->first()->course->course_name ?? 'IT Program' }} | Centre: {{ $student->centre->centre_name ?? 'Head Office' }}</small>
+                                <small class="text-muted">Course: {{ $student->admissions->first()->course->course_name ?? 'IT Program' }} | Roll No: {{ $student->roll_no ?? 'Pending' }} | Centre: {{ $student->centre->centre_name ?? 'Head Office' }}</small>
                             </div>
                             @if(isset($pendingFee) && $pendingFee > 0)
                                 <div class="text-end">
