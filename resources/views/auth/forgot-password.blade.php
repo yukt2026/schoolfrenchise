@@ -16,10 +16,10 @@
 
                     <div class="card-body p-4 p-md-5">
                         @if (session('success'))
-                            <div class="alert alert-success alert-dismissible fade show" role="alert">
+                            <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
                                 <div class="d-flex align-items-start gap-2">
                                     <i class="fa-solid fa-circle-check text-success fs-5 mt-1"></i>
-                                    <div>{!! session('success') !!}</div>
+                                    <div>{{ session('success') }}</div>
                                 </div>
                                 <button type="button" class="btn-close" data-bs-dismiss="alert"></button>
                             </div>

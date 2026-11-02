@@ -326,6 +326,7 @@
     </header>
 
     <!-- 4. Flash Notifications & Alerts -->
+    @if(!request()->routeIs('password.request') && !request()->routeIs('password.reset') && !request()->routeIs('login') && !request()->routeIs('student.login'))
     <div class="container mt-3">
         @if(session('success'))
             <div class="alert alert-success alert-dismissible fade show shadow-sm" role="alert">
@@ -353,6 +354,7 @@
             </div>
         @endif
     </div>
+    @endif
 
     <!-- 5. Main Page Content -->
     <main>

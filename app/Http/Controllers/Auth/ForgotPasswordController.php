@@ -108,17 +108,34 @@ class ForgotPasswordController extends Controller
 
         $resetUrl = route('password.reset', ['token' => $token, 'email' => $user->email]);
 
-        // Attempt sending email if mailer is configured
+        // Send official password reset email
         try {
-            if (config('mail.default') !== 'log' && config('mail.mailers.smtp.host')) {
-                // Production email send logic
+            $instituteSettings = \App\Models\Setting::getAllKeyValues();
+            $instituteName = $instituteSettings['institute_name'] ?? config('app.name', 'TECH ERA COMPUTER');
+            $fromAddress = config('mail.from.address', 'noreply@techeracomputer.com');
+            if ($fromAddress === 'hello@example.com' && !empty($instituteSettings['contact_email'])) {
+                $fromAddress = $instituteSettings['contact_email'];
             }
+            $fromName = config('mail.from.name', $instituteName);
+            if ($fromName === 'Laravel') {
+                $fromName = $instituteName;
+            }
+
+            Mail::send('emails.password-reset', [
+                'user'              => $user,
+                'resetUrl'          => $resetUrl,
+                'instituteSettings' => $instituteSettings,
+            ], function ($message) use ($user, $instituteName, $fromAddress, $fromName) {
+                $message->to($user->email, $user->name)
+                        ->from($fromAddress, $fromName)
+                        ->subject("Password Reset Request - {$instituteName}");
+            });
         } catch (\Throwable $e) {
-            report($e);
+            \Illuminate\Support\Facades\Log::error("Password reset email delivery failed for {$user->email}: " . $e->getMessage());
         }
 
         $maskedEmail = Str::mask($user->email, '*', 3, -4);
-        $message = "Password reset link generated for <strong>" . e($user->name) . "</strong> (" . e($maskedEmail) . ").<div class='mt-3'><a href='{$resetUrl}' class='btn btn-success btn-sm fw-bold text-white shadow-sm'><i class='fa-solid fa-key me-1'></i> Click here to reset your password</a></div>";
+        $message = "A password reset link has been successfully sent to your registered email address ({$maskedEmail}). Please check your email inbox and spam folder.";
 
         return back()->with('success', $message);
     }
