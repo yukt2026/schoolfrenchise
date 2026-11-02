@@ -363,6 +363,18 @@ class CentreStudentController extends Controller
                     $userUpdates['password'] = Hash::make($validated['password']);
                 }
                 $studentModel->user->update($userUpdates);
+            } elseif (!empty($validated['email']) || !empty($validated['password'])) {
+                $studentRole = Role::firstOrCreate(['name' => 'student'], ['display_name' => 'Student']);
+                $newUser = User::create([
+                    'name'      => $validated['full_name'],
+                    'email'     => $validated['email'] ?? "student_{$studentModel->roll_no}@domain.com",
+                    'mobile'    => $validated['mobile'],
+                    'password'  => Hash::make($validated['password'] ?? $validated['mobile']),
+                    'role'      => 'student',
+                    'is_active' => true,
+                ]);
+                $newUser->roles()->syncWithoutDetaching([$studentRole->id]);
+                $studentModel->update(['user_id' => $newUser->id]);
             }
 
             AuditLog::record('centre_student_updated', $studentModel, $oldValues, [

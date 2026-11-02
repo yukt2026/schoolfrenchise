@@ -236,6 +236,18 @@ class AdminStudentController extends Controller
                     $userUpdates['password'] = Hash::make($validated['password']);
                 }
                 $student->user->update($userUpdates);
+            } elseif (!empty($validated['email']) || !empty($validated['password'])) {
+                $studentRole = Role::firstOrCreate(['name' => 'student'], ['display_name' => 'Student']);
+                $newUser = User::create([
+                    'name'      => $validated['full_name'],
+                    'email'     => $validated['email'] ?? "student_{$student->roll_no}@domain.com",
+                    'mobile'    => $validated['mobile'],
+                    'password'  => Hash::make($validated['password'] ?? $validated['mobile']),
+                    'role'      => 'student',
+                    'is_active' => true,
+                ]);
+                $newUser->roles()->syncWithoutDetaching([$studentRole->id]);
+                $student->update(['user_id' => $newUser->id]);
             }
 
             AuditLog::record('student_updated', $student, $oldValues, $student->toArray());
