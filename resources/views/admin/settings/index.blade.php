@@ -257,6 +257,18 @@
                             <div class="invalid-feedback">{{ $message }}</div>
                         @enderror
                     </div>
+
+                    <div class="col-md-6">
+                        <label for="franchise_admission_commission" class="form-label small fw-bold">Franchise Admission Commission (₹)</label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light fw-bold">₹</span>
+                            <input type="number" step="1" min="0" name="franchise_admission_commission" id="franchise_admission_commission" class="form-control @error('franchise_admission_commission') is-invalid @enderror" value="{{ old('franchise_admission_commission', $settings['franchise_admission_commission'] ?? '200.00') }}" placeholder="200.00">
+                        </div>
+                        <div class="form-text small">Commission credited automatically to franchise wallet upon eligible student admission.</div>
+                        @error('franchise_admission_commission')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
                 </div>
             </div>
         </div>

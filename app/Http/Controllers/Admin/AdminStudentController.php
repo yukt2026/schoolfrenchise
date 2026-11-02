@@ -15,6 +15,7 @@ use App\Services\FileUploadService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 use Symfony\Component\HttpFoundation\StreamedResponse;
 
 class AdminStudentController extends Controller
@@ -77,8 +78,12 @@ class AdminStudentController extends Controller
             'mobile' => 'required|string|size:10',
             'alternate_mobile' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:191',
+            'password' => 'nullable|string|min:6|confirmed',
             'state_id' => 'required|exists:states,id',
-            'district_id' => 'required|exists:districts,id',
+            'district_id' => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
             'city' => 'required|string|max:100',
             'address' => 'required|string',
             'pincode' => 'required|string|max:10',
@@ -188,8 +193,12 @@ class AdminStudentController extends Controller
             'mobile' => 'required|string|size:10',
             'alternate_mobile' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:191',
+            'password' => 'nullable|string|min:6|confirmed',
             'state_id' => 'required|exists:states,id',
-            'district_id' => 'required|exists:districts,id',
+            'district_id' => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
             'city' => 'required|string|max:100',
             'address' => 'required|string',
             'pincode' => 'required|string|max:10',
@@ -212,12 +221,28 @@ class AdminStudentController extends Controller
             $validated['id_proof_doc'] = FileUploadService::uploadDocument($request->file('id_proof'), 'uploads/students/docs');
         }
 
-        $student->update($validated);
+        return DB::transaction(function () use ($request, $student, $validated, $oldValues) {
+            $student->update($validated);
 
-        AuditLog::record('student_updated', $student, $oldValues, $student->toArray());
+            if ($student->user) {
+                $userUpdates = [
+                    'name' => $validated['full_name'],
+                    'mobile' => $validated['mobile'],
+                ];
+                if (!empty($validated['email'])) {
+                    $userUpdates['email'] = $validated['email'];
+                }
+                if (!empty($validated['password'])) {
+                    $userUpdates['password'] = Hash::make($validated['password']);
+                }
+                $student->user->update($userUpdates);
+            }
 
-        return redirect()->route('admin.students.show', $student->id)
-            ->with('success', "Student record [{$student->full_name}] updated successfully.");
+            AuditLog::record('student_updated', $student, $oldValues, $student->toArray());
+
+            return redirect()->route('admin.students.show', $student->id)
+                ->with('success', "Student record [{$student->full_name}] updated successfully.");
+        });
     }
 
     public function destroy(Student $student)

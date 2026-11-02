@@ -17,10 +17,12 @@ use App\Models\User;
 use App\Services\FeeService;
 use App\Services\FileUploadService;
 use App\Services\NotificationDispatchService;
+use App\Services\WalletService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Hash;
+use Illuminate\Validation\Rule;
 
 class CentreStudentController extends Controller
 {
@@ -103,7 +105,10 @@ class CentreStudentController extends Controller
             'alternate_mobile' => 'nullable|string|max:20',
             'email' => 'nullable|email|max:191',
             'state_id' => 'required|exists:states,id',
-            'district_id' => 'required|exists:districts,id',
+            'district_id' => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
             'city' => 'required|string|max:100',
             'address' => 'required|string',
             'pincode' => 'required|string|max:10',
@@ -193,7 +198,10 @@ class CentreStudentController extends Controller
                 FeeService::assignAdmissionFees($admission, $discount);
             }
 
-            // 5. Audit Log
+            // 5. Credit Franchise Commission for this eligible admission
+            WalletService::creditAdmissionCommission($admission);
+
+            // 6. Audit Log
             AuditLog::record('centre_student_registered', $student, null, [
                 'registration_no' => $regNo,
                 'roll_no' => $rollNo,
@@ -262,5 +270,109 @@ class CentreStudentController extends Controller
         $admission = $studentModel->admissions->first();
 
         return view('centre.students.admission_form', ['centre' => $centre, 'student' => $studentModel, 'admission' => $admission]);
+    }
+
+    public function edit($student)
+    {
+        $centre = $this->getAuthCentre();
+        $studentModel = $student instanceof Student ? $student : Student::withoutGlobalScope('centre_isolation')->findOrFail($student);
+
+        // Strict franchise tenant authorization
+        if ($studentModel->centre_id !== $centre->id && !Auth::user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized access: You can only edit student profiles assigned to your franchise.');
+        }
+
+        $studentModel->load(['user', 'state', 'district', 'admissions.course']);
+        $states = State::orderBy('name')->get();
+        $districts = District::where('state_id', $studentModel->state_id)->where('status', true)->orderBy('name')->get();
+
+        return view('centre.students.edit', [
+            'centre'    => $centre,
+            'student'   => $studentModel,
+            'states'    => $states,
+            'districts' => $districts,
+        ]);
+    }
+
+    public function update(Request $request, $student)
+    {
+        $centre = $this->getAuthCentre();
+        $studentModel = $student instanceof Student ? $student : Student::withoutGlobalScope('centre_isolation')->findOrFail($student);
+
+        // Strict franchise tenant authorization
+        if ($studentModel->centre_id !== $centre->id && !Auth::user()->isSuperAdmin()) {
+            abort(403, 'Unauthorized access: You can only edit student profiles assigned to your franchise.');
+        }
+
+        $validated = $request->validate([
+            'full_name'             => 'required|string|max:191',
+            'father_name'           => 'required|string|max:191',
+            'mother_name'           => 'nullable|string|max:191',
+            'dob'                   => 'required|date',
+            'gender'                => 'required|in:male,female,other',
+            'mobile'                => 'required|string|size:10',
+            'alternate_mobile'      => 'nullable|string|max:20',
+            'email'                 => [
+                'nullable',
+                'email',
+                'max:191',
+                Rule::unique('users', 'email')->ignore($studentModel->user_id),
+                Rule::unique('students', 'email')->ignore($studentModel->id),
+            ],
+            'password'              => 'nullable|string|min:6|confirmed',
+            'state_id'              => 'required|exists:states,id',
+            'district_id'           => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
+            'city'                  => 'required|string|max:100',
+            'address'               => 'required|string',
+            'pincode'               => 'required|string|max:10',
+            'highest_qualification' => 'nullable|string|max:100',
+            'status'                => 'required|in:enrolled,ongoing,completed,dropped',
+            'photo'                 => 'nullable|image|max:2048',
+            'signature'             => 'nullable|image|max:2048',
+            'id_proof'              => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+        ]);
+
+        $oldValues = $studentModel->toArray();
+
+        if ($request->hasFile('photo')) {
+            $validated['photo_path'] = FileUploadService::uploadImage($request->file('photo'), 'uploads/students/photos');
+        }
+        if ($request->hasFile('signature')) {
+            $validated['signature_path'] = FileUploadService::uploadImage($request->file('signature'), 'uploads/students/signatures');
+        }
+        if ($request->hasFile('id_proof')) {
+            $validated['id_proof_doc'] = FileUploadService::uploadDocument($request->file('id_proof'), 'uploads/students/docs');
+        }
+
+        return DB::transaction(function () use ($studentModel, $validated, $oldValues, $centre) {
+            $studentModel->update($validated);
+
+            // Update associated User credentials (email, mobile, password, name)
+            if ($studentModel->user) {
+                $userUpdates = [
+                    'name'   => $validated['full_name'],
+                    'mobile' => $validated['mobile'],
+                ];
+                if (!empty($validated['email'])) {
+                    $userUpdates['email'] = $validated['email'];
+                }
+                if (!empty($validated['password'])) {
+                    $userUpdates['password'] = Hash::make($validated['password']);
+                }
+                $studentModel->user->update($userUpdates);
+            }
+
+            AuditLog::record('centre_student_updated', $studentModel, $oldValues, [
+                'centre_id'  => $centre->id,
+                'student_id' => $studentModel->id,
+                'roll_no'    => $studentModel->roll_no,
+            ]);
+
+            return redirect()->route('centre.students.show', $studentModel->id)
+                ->with('success', "Student dossier for [{$studentModel->full_name}] updated successfully.");
+        });
     }
 }

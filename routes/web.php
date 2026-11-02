@@ -384,6 +384,8 @@ Route::middleware(['role:super_admin,centre,staff', 'centre.active'])->prefix('c
     Route::get('/students/create', [CentreStudentController::class, 'create'])->name('students.create');
     Route::post('/students', [CentreStudentController::class, 'store'])->name('students.store');
     Route::get('/students/{student}', [CentreStudentController::class, 'show'])->name('students.show');
+    Route::get('/students/{student}/edit', [CentreStudentController::class, 'edit'])->name('students.edit');
+    Route::put('/students/{student}', [CentreStudentController::class, 'update'])->name('students.update');
     Route::get('/students/{student}/id-card', [CentreStudentController::class, 'idCard'])->name('students.id-card');
     Route::get('/students/{student}/admission-form', [CentreStudentController::class, 'admissionForm'])->name('students.admission-form');
 
@@ -419,6 +421,8 @@ Route::middleware(['role:super_admin,centre,staff', 'centre.active'])->prefix('c
     Route::get('/wallet', [CentreWalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/topup', [CentreWalletController::class, 'topupForm'])->name('wallet.topup');
     Route::post('/wallet/topup', [CentreWalletController::class, 'storeTopup'])->name('wallet.topup.store');
+    Route::post('/wallet/recharge/initiate', [CentreWalletController::class, 'initiateOnlineRecharge'])->name('wallet.recharge.initiate');
+    Route::post('/wallet/recharge/verify', [CentreWalletController::class, 'verifyOnlineRecharge'])->name('wallet.recharge.verify');
 
     // Downloads & Certificates
     Route::get('/downloads', [CentreDownloadController::class, 'index'])->name('downloads.index');

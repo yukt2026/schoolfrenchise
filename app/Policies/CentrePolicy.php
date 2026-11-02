@@ -41,16 +41,8 @@ class CentrePolicy
 
     public function update(User $user, Centre $centre): bool
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
-
-        if ($user->isCentre()) {
-            $userCentreId = $user->centre_id ?? $user->centre?->id;
-            return (int)$centre->id === (int)$userCentreId || (int)$centre->user_id === (int)$user->id;
-        }
-
-        return false;
+        // Franchise profile editing is strictly restricted to Main Administration
+        return $user->isAdmin();
     }
 
     public function delete(User $user, Centre $centre): bool

@@ -57,9 +57,8 @@ class OperationalModulesTest extends TestCase
         $studentRole = Role::firstOrCreate(['name' => 'student'], ['display_name' => 'Student']);
 
         $this->state = State::first() ?? State::create(['name' => 'Bihar', 'status' => true]);
-        $this->district = District::firstOrCreate(
-            ['name' => 'Patna'],
-            ['state_id' => $this->state->id, 'status' => true]
+        $this->district = District::where('state_id', $this->state->id)->first() ?? District::create(
+            ['name' => 'Patna', 'state_id' => $this->state->id, 'status' => true]
         );
 
         // Super Admin

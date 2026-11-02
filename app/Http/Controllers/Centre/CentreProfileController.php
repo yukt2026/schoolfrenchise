@@ -43,6 +43,12 @@ class CentreProfileController extends Controller
 
     public function update(Request $request)
     {
+        // Enforce backend authorization: Franchise users must not edit their own franchise profile
+        $user = Auth::user();
+        if (!$user || !$user->isAdmin()) {
+            abort(403, 'Unauthorized action: Franchise study centre profile editing is strictly restricted to Main Administration. Please contact Head Office for any corrections or updates.');
+        }
+
         $centre = $this->getAuthCentre();
 
         $validated = $request->validate([

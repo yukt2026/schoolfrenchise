@@ -131,6 +131,9 @@ class AdminAdmissionController extends Controller
                 FeeService::assignAdmissionFees($admission, $discount);
             }
 
+            // Credit Franchise Commission for this admission
+            \App\Services\WalletService::creditAdmissionCommission($admission);
+
             AuditLog::record('admission_created', $admission, null, [
                 'student_id' => $admission->student_id,
                 'course_id' => $admission->course_id,
@@ -251,6 +254,9 @@ class AdminAdmissionController extends Controller
             } elseif ($netFee > 0 && $admission->course) {
                 FeeService::assignAdmissionFees($admission, $discount);
             }
+
+            // Credit Franchise Commission for this admission
+            \App\Services\WalletService::creditAdmissionCommission($admission);
 
             // Update Application
             $application->update([

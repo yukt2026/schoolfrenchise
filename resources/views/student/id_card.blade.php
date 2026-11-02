@@ -50,6 +50,12 @@
                 <span class="badge bg-primary-subtle text-primary font-monospace px-3 py-1 mt-1 fw-bold" style="font-size: 0.72rem;">
                     ROLL NO: {{ $student->roll_no ?? 'PROVISIONAL' }}
                 </span>
+                <div class="text-center mt-1">
+                    <div style="font-family: 'Courier New', monospace; font-weight: 900; font-size: 1rem; letter-spacing: 2px; line-height: 1; color: #0f172a;">
+                        ||| | |||| | ||| |||| |
+                    </div>
+                    <span class="font-monospace text-muted" style="font-size: 0.55rem; letter-spacing: 1px;">BARCODE: {{ $student->roll_no }}</span>
+                </div>
             </div>
 
             <!-- Details Table -->
@@ -133,12 +139,20 @@
             </div>
 
             <!-- Back Footer Signatures -->
-            <div class="position-absolute bottom-0 start-0 end-0 bg-light border-top p-3">
+            <div class="position-absolute bottom-0 start-0 end-0 bg-light border-top p-2">
                 <div class="d-flex justify-content-between align-items-end text-center" style="font-size: 0.68rem;">
                     <div>
+                        @if($student->signature_url)
+                            <img src="{{ $student->signature_url }}" alt="Sign" style="height: 20px; max-width: 75px; object-fit: contain; display: block; margin: 0 auto -2px auto;">
+                        @endif
                         <div class="border-top border-dark pt-1 fw-bold">Student Sign</div>
                     </div>
                     <div>
+                        @if(!empty($student->centre?->director_signature_url))
+                            <img src="{{ $student->centre->director_signature_url }}" alt="Director" style="height: 20px; max-width: 75px; object-fit: contain; display: block; margin: 0 auto -2px auto;">
+                        @elseif(!empty($instituteSettings['seal_url']))
+                            <img src="{{ $instituteSettings['seal_url'] }}" alt="Seal" style="height: 22px; max-width: 50px; object-fit: contain; display: block; margin: 0 auto -2px auto;">
+                        @endif
                         <div class="border-top border-dark pt-1 fw-bold">Director / Issuing Authority</div>
                     </div>
                 </div>

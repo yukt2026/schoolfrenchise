@@ -131,7 +131,16 @@ class StudentPortalController extends Controller
             'city'             => ['nullable', 'string', 'max:100'],
             'pincode'          => ['nullable', 'string', 'max:10'],
             'state_id'         => ['nullable', 'exists:states,id'],
-            'district_id'      => ['nullable', 'exists:districts,id'],
+            'district_id'      => [
+                'nullable',
+                'exists:districts,id',
+                function ($attribute, $value, $fail) use ($request, $student) {
+                    $stateId = $request->input('state_id', $student->state_id);
+                    if ($value && $stateId && !\App\Models\District::where('id', $value)->where('state_id', $stateId)->exists()) {
+                        $fail('The selected district does not belong to the selected state.');
+                    }
+                },
+            ],
             'photo'            => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
         ]);
 

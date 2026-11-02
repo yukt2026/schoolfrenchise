@@ -111,7 +111,7 @@
                         @forelse($exam->course?->subjects ?? [] as $sub)
                         @php
                             $subMax = (float)($sub->total_max ?: 100);
-                            $passM = (float)($sub->pass_marks ?: 40);
+                            $passM = (float)($sub->min_pass_marks ?: ($sub->pass_marks ?: ($subMax * 0.40)));
                             $existingSub = $existingSubjects[$sub->id] ?? null;
                             $defaultTheory = old('subjects.' . $sub->id . '.theory_obtained', $existingSub?->theory_obtained ?? 0);
                             $defaultPractical = old('subjects.' . $sub->id . '.practical_obtained', $existingSub?->practical_obtained ?? 0);

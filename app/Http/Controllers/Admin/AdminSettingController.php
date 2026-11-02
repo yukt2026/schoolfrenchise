@@ -47,6 +47,7 @@ class AdminSettingController extends Controller
             'marksheet_prefix'             => 'DCE/MS',
             'currency_symbol'              => '₹',
             'tax_percentage'               => '0.00',
+            'franchise_admission_commission' => '200.00',
 
             // Integrations & Notification Toggles
             'online_payments_enabled'      => '1',
@@ -93,6 +94,7 @@ class AdminSettingController extends Controller
             'marksheet_prefix'            => ['required', 'string', 'max:30'],
             'currency_symbol'             => ['required', 'string', 'max:10'],
             'tax_percentage'              => ['nullable', 'numeric', 'min:0', 'max:100'],
+            'franchise_admission_commission' => ['nullable', 'numeric', 'min:0'],
 
             // Integrations
             'online_payments_enabled'     => ['nullable', 'boolean'],
@@ -141,6 +143,7 @@ class AdminSettingController extends Controller
             Setting::set('marksheet_prefix', strtoupper(trim($validated['marksheet_prefix'])), 'financial');
             Setting::set('currency_symbol', $validated['currency_symbol'], 'financial');
             Setting::set('tax_percentage', (string) ($validated['tax_percentage'] ?? '0.00'), 'financial');
+            Setting::set('franchise_admission_commission', (string) ($validated['franchise_admission_commission'] ?? '200.00'), 'financial');
 
             // Group 5: Integrations
             Setting::set('online_payments_enabled', $request->boolean('online_payments_enabled') ? '1' : '0', 'integrations');

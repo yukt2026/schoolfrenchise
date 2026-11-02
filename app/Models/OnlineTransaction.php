@@ -14,6 +14,7 @@ class OnlineTransaction extends Model
         'order_id',
         'student_roll_no',
         'admission_id',
+        'centre_id',
         'student_id',
         'fee_payment_id',
         'payer_name',
@@ -38,6 +39,11 @@ class OnlineTransaction extends Model
     public function admission()
     {
         return $this->belongsTo(Admission::class);
+    }
+
+    public function centre()
+    {
+        return $this->belongsTo(Centre::class);
     }
 
     public function student()

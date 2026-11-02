@@ -48,9 +48,8 @@ class CentrePortalModuleTest extends TestCase
         Role::firstOrCreate(['name' => 'student'], ['display_name' => 'Student']);
 
         $this->state = State::first() ?? State::create(['name' => 'Bihar', 'status' => true]);
-        $this->district = District::firstOrCreate(
-            ['name' => 'Patna'],
-            ['state_id' => $this->state->id, 'status' => true]
+        $this->district = District::where('state_id', $this->state->id)->first() ?? District::create(
+            ['name' => 'Patna', 'state_id' => $this->state->id, 'status' => true]
         );
 
         // Centre A
@@ -693,9 +692,9 @@ class CentrePortalModuleTest extends TestCase
         $resReceipt->assertStatus(403);
     }
 
-    public function test_centre_director_can_update_profile_and_change_password(): void
+    public function test_centre_director_cannot_update_profile_but_can_change_password(): void
     {
-        // 1. Update Profile
+        // 1. Franchise user must NOT be able to edit centre profile (403 Forbidden backend restriction)
         $profilePayload = [
             'director_name' => 'Rajesh K. Sharma Updated',
             'mobile' => '9876543290',
@@ -708,13 +707,12 @@ class CentrePortalModuleTest extends TestCase
         ];
 
         $resProfile = $this->actingAs($this->centreUserA)->post(route('centre.profile.update'), $profilePayload);
-        $resProfile->assertSessionHas('success');
+        $resProfile->assertStatus(403);
 
         $this->centreA->refresh();
-        $this->assertEquals('Rajesh K. Sharma Updated', $this->centreA->director_name);
-        $this->assertEquals(45, $this->centreA->lab_capacity);
+        $this->assertNotEquals('Rajesh K. Sharma Updated', $this->centreA->director_name);
 
-        // 2. Change Password
+        // 2. Change Password remains accessible and functional
         $pwdPayload = [
             'current_password' => 'password123',
             'password' => 'newSecretPass2026',

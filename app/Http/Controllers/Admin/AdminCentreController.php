@@ -236,7 +236,10 @@ class AdminCentreController extends Controller
             'mobile'             => 'required|string|max:20',
             'alternate_mobile'   => 'nullable|string|max:20',
             'state_id'           => 'required|exists:states,id',
-            'district_id'        => 'required|exists:districts,id',
+            'district_id'        => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
             'city'               => 'required|string|max:100',
             'address'            => 'required|string',
             'pincode'            => 'required|string|max:10',
@@ -372,7 +375,10 @@ class AdminCentreController extends Controller
             'mobile'             => 'required|string|max:20',
             'alternate_mobile'   => 'nullable|string|max:20',
             'state_id'           => 'required|exists:states,id',
-            'district_id'        => 'required|exists:districts,id',
+            'district_id'        => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
             'city'               => 'required|string|max:100',
             'address'            => 'required|string',
             'pincode'            => 'required|string|max:10',

@@ -326,6 +326,13 @@
                 <div class="student-name-box">
                     <div class="student-full-name">{{ $student->full_name }}</div>
                     <div class="roll-pill">ROLL NO: {{ $student->roll_no }}</div>
+                    <!-- Barcode Verification -->
+                    <div class="text-center my-1">
+                        <div style="font-family: 'Courier New', monospace; font-weight: 900; font-size: 1.1rem; letter-spacing: 3px; line-height: 1; color: #0f172a; text-transform: uppercase;">
+                            ||| | |||| | ||| |||| |
+                        </div>
+                        <span class="font-monospace text-muted" style="font-size: 0.56rem; letter-spacing: 1px;">BARCODE: {{ $student->roll_no }}</span>
+                    </div>
                 </div>
             </div>
 
@@ -372,7 +379,10 @@
                     <span style="font-size: 0.58rem;">Official Cardholder Credential</span>
                 </div>
                 <div class="sign-area">
-                    <div class="sign-line"></div>
+                    @if(!empty($centre->director_signature_url))
+                        <img src="{{ $centre->director_signature_url }}" alt="Centre Director" style="height: 22px; max-width: 80px; object-fit: contain; display: block; margin: 0 auto -2px auto;">
+                    @endif
+                    <div class="sign-line" style="margin-top: {{ !empty($centre->director_signature_url) ? '2px' : '12px' }};"></div>
                     <strong style="font-size: 0.58rem; text-transform: uppercase;">Centre Incharge</strong>
                 </div>
             </div>
@@ -424,7 +434,10 @@
             <!-- Back Signatures & Footer -->
             <div class="id-card-footer">
                 <div class="sign-area">
-                    <div class="sign-line"></div>
+                    @if($student->signature_url)
+                        <img src="{{ $student->signature_url }}" alt="Student Signature" style="height: 20px; max-width: 80px; object-fit: contain; display: block; margin: 0 auto -2px auto;">
+                    @endif
+                    <div class="sign-line" style="margin-top: {{ $student->signature_url ? '2px' : '12px' }};"></div>
                     <strong style="font-size: 0.58rem; text-transform: uppercase;">Student Sign</strong>
                 </div>
                 <div class="text-center text-muted" style="font-size: 0.55rem; line-height: 1.1;">
@@ -432,7 +445,10 @@
                     Helpline: {{ $instituteSettings['contact_phone'] ?? '9162384660' }}
                 </div>
                 <div class="sign-area">
-                    <div class="sign-line"></div>
+                    @if(!empty($instituteSettings['seal_url']))
+                        <img src="{{ $instituteSettings['seal_url'] }}" alt="Director Seal" style="height: 24px; max-width: 60px; object-fit: contain; display: block; margin: 0 auto -2px auto;">
+                    @endif
+                    <div class="sign-line" style="margin-top: {{ !empty($instituteSettings['seal_url']) ? '2px' : '12px' }};"></div>
                     <strong style="font-size: 0.58rem; text-transform: uppercase;">Director Sign</strong>
                 </div>
             </div>

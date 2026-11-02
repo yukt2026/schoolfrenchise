@@ -13,6 +13,9 @@
         <span class="badge bg-secondary-subtle text-secondary rounded-2 font-monospace mt-1">REG: {{ $student->registration_no }}</span>
     </div>
     <div class="d-flex flex-wrap gap-2">
+        <a href="{{ route('centre.students.edit', $student->id) }}" class="btn btn-primary rounded-2 px-3">
+            <i class="fa-solid fa-pen-to-square me-1"></i>Edit Profile
+        </a>
         <a href="{{ route('centre.students.id-card', $student->id) }}" class="btn btn-outline-info rounded-2 px-3" target="_blank">
             <i class="fa-solid fa-id-card me-1"></i>Digital ID Card
         </a>

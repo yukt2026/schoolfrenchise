@@ -169,6 +169,20 @@
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Reset Portal Password</label>
+                            <input type="password" name="password" class="form-control @error('password') is-invalid @enderror" minlength="6" placeholder="Leave blank to retain current">
+                            <div class="form-text small">Minimum 6 characters.</div>
+                            @error('password')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Confirm Reset Password</label>
+                            <input type="password" name="password_confirmation" class="form-control" minlength="6" placeholder="Repeat new password">
+                        </div>
                     </div>
                 </div>
             </div>

@@ -7,6 +7,7 @@ use App\Models\District;
 use App\Models\FranchiseApplication;
 use App\Models\State;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class FranchisePublicController extends Controller
 {
@@ -24,7 +25,10 @@ class FranchisePublicController extends Controller
             'mobile' => 'required|string|max:20',
             'email' => 'required|email|max:191',
             'state_id' => 'required|exists:states,id',
-            'district_id' => 'required|exists:districts,id',
+            'district_id' => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
             'city' => 'required|string|max:100',
             'address' => 'required|string',
             'qualification' => 'required|string|max:100',

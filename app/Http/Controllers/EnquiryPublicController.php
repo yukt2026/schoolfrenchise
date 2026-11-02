@@ -9,6 +9,7 @@ use App\Models\Enquiry;
 use App\Models\State;
 use App\Services\FileUploadService;
 use Illuminate\Http\Request;
+use Illuminate\Validation\Rule;
 
 class EnquiryPublicController extends Controller
 {
@@ -19,7 +20,10 @@ class EnquiryPublicController extends Controller
             'mobile'      => 'required|string|max:20',
             'email'       => 'nullable|email|max:191',
             'state_id'    => 'required|exists:states,id',
-            'district_id' => 'required|exists:districts,id',
+            'district_id' => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
             'subject'     => 'required|string|max:191',
         ]);
 
@@ -45,7 +49,10 @@ class EnquiryPublicController extends Controller
             'mobile'      => 'required|string|max:20',
             'email'       => 'nullable|email|max:191',
             'state_id'    => 'required|exists:states,id',
-            'district_id' => 'required|exists:districts,id',
+            'district_id' => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
             'course_id'   => 'nullable|exists:courses,id',
             'subject'     => 'required|string|max:191',
             'message'     => 'nullable|string',
@@ -87,7 +94,10 @@ class EnquiryPublicController extends Controller
             'mobile'                 => 'required|string|max:20',
             'email'                  => 'nullable|email|max:191',
             'state_id'               => 'required|exists:states,id',
-            'district_id'            => 'required|exists:districts,id',
+            'district_id'            => [
+                'required',
+                Rule::exists('districts', 'id')->where('state_id', $request->state_id),
+            ],
             'city'                   => 'required|string|max:100',
             'address'                => 'required|string|max:1000',
             'pincode'                => 'required|string|max:10',

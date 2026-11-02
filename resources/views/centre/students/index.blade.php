@@ -146,6 +146,11 @@
                                         </a>
                                     </li>
                                     <li>
+                                        <a class="dropdown-item py-2" href="{{ route('centre.students.edit', $student->id) }}">
+                                            <i class="fa-solid fa-pen-to-square text-secondary me-2"></i>Edit Student Profile
+                                        </a>
+                                    </li>
+                                    <li>
                                         <a class="dropdown-item py-2" href="{{ route('centre.students.id-card', $student->id) }}" target="_blank">
                                             <i class="fa-solid fa-id-card text-info me-2"></i>Print Digital ID Card
                                         </a>

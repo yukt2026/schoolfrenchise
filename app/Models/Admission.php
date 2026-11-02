@@ -22,6 +22,8 @@ class Admission extends Model
         'net_fee',
         'total_paid',
         'status',
+        'commission_credited',
+        'commission_amount',
         'remarks',
     ];
 
@@ -31,6 +33,8 @@ class Admission extends Model
         'discount_amount' => 'decimal:2',
         'net_fee' => 'decimal:2',
         'total_paid' => 'decimal:2',
+        'commission_credited' => 'boolean',
+        'commission_amount' => 'decimal:2',
     ];
 
     public function student()

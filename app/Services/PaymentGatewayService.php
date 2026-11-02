@@ -109,7 +109,8 @@ class PaymentGatewayService
         ?string $rollNo = null,
         ?int $admissionId = null,
         ?int $studentId = null,
-        string $paymentMethod = 'UPI'
+        string $paymentMethod = 'UPI',
+        ?int $centreId = null
     ): array {
         if ($amount <= 0) {
             throw new InvalidArgumentException('Payment amount must be greater than zero.');
@@ -132,6 +133,7 @@ class PaymentGatewayService
             'order_id'           => $orderId,
             'student_roll_no'    => $rollNo,
             'admission_id'       => $admissionId,
+            'centre_id'          => $centreId,
             'student_id'         => $studentId,
             'payer_name'         => $payerName,
             'payer_mobile'       => $payerMobile,
@@ -248,6 +250,12 @@ class PaymentGatewayService
             $transaction->gateway_signature = $signature;
             $transaction->response_payload = json_encode($gatewayPayload);
             $transaction->save();
+
+            // Check if this transaction is for a franchise wallet recharge
+            if ($transaction->centre_id || str_contains(strtolower($transaction->purpose), 'wallet')) {
+                \App\Services\WalletService::creditFromOnlineRecharge($transaction, $gatewayPaymentId, $signature, $gatewayPayload);
+                return $transaction;
+            }
 
             // 5. Reconcile with Student Admission & Fee Ledger
             $admission = null;
