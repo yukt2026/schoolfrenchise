@@ -144,15 +144,17 @@
     <!-- Header -->
     <div class="text-center border-bottom border-2 pb-2 mb-3">
         <div class="d-flex align-items-center justify-content-center gap-3 mb-1">
-            <img src="{{ $instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png') }}" alt="{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}" style="height: 48px; width: auto; object-fit: contain;">
+            <img src="{{ $certificate->centre?->centre_logo_url ?? ($instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png')) }}" alt="{{ $certificate->centre?->centre_name ?? 'Centre Logo' }}" style="height: 52px; width: auto; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('images/tech-era-logo.png') }}';">
             <div class="text-start">
-                <div class="header-title">{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
-                <div class="header-tagline">{{ $instituteSettings['institute_tagline'] ?? 'Building Digital Skills for the Future' }}</div>
+                <div class="header-title text-uppercase" style="color: #0284c7;">{{ $certificate->centre?->centre_name ?? ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER') }}</div>
+                <div class="fw-bold text-uppercase" style="color: #b45309; font-size: 0.82rem; letter-spacing: 0.5px;">
+                    <i class="fa-solid fa-certificate me-1"></i> Authorized by {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}
+                </div>
             </div>
         </div>
         <div class="small text-muted" style="font-size: 0.68rem;">
-            Registered Under MCA (Govt. of India) &bull; ISO 9001:2015 Certified Organization<br>
-            {{ $instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105' }} &bull; Helpline: {{ $instituteSettings['contact_phone'] ?? '9162384660' }}
+            Registered Under MCA (Govt. of India) &bull; ISO 9001:2015 Certified Organization &bull; Centre Code: {{ $certificate->centre?->centre_code ?? 'MAIN' }}<br>
+            {{ $certificate->centre?->centre_address ?? ($instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105') }} &bull; Helpline: {{ $certificate->centre?->contact_number ?? ($instituteSettings['contact_phone'] ?? '9162384660') }}
         </div>
         <div class="mt-2">
             <span class="doc-badge">STATEMENT OF MARKS</span>
@@ -318,8 +320,9 @@
     <div class="row text-center align-items-end pt-3 border-top border-dark">
         <div class="col-4">
             <div class="sign-box">
-                <div class="fw-bold text-dark" style="font-size: 0.74rem;">Prepared By</div>
-                <div class="text-muted" style="font-size: 0.65rem;">Examination Section</div>
+                <div class="fw-bold text-dark" style="font-size: 0.74rem;">Centre Incharge / Director</div>
+                <div class="text-muted" style="font-size: 0.65rem;">{{ $certificate->centre?->director_name ?? 'Authorized Signatory' }}</div>
+                <div class="text-secondary font-monospace" style="font-size: 0.58rem;">(Official Seal & Signature)</div>
             </div>
         </div>
         <div class="col-4">
@@ -327,7 +330,7 @@
                 $qrTarget = $certificate->qr_code_url ?: route('verify.cert.direct', ['cert_no' => $certificate->certificate_no]);
             @endphp
             <img src="https://api.qrserver.com/v1/create-qr-code/?size=80x80&data={{ urlencode($qrTarget) }}" alt="QR" style="width: 62px; height: 62px;" class="border p-1 bg-white mb-1 shadow-sm">
-            <div class="text-muted font-monospace" style="font-size: 0.6rem;">Scan to Verify Online</div>
+            <div class="text-muted font-monospace" style="font-size: 0.6rem;">Scan with Google / Camera to Verify</div>
         </div>
         <div class="col-4">
             <div class="sign-box">

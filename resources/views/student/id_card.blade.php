@@ -28,11 +28,11 @@
             <!-- Header -->
             <div class="text-center py-2 px-2 text-white" style="background: linear-gradient(135deg, #0a192f, #0284c7);">
                 <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
-                    <img src="{{ $instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png') }}" alt="{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}" class="rounded bg-white p-1" style="height: 32px; width: auto; object-fit: contain;">
-                    <div class="fw-bold fs-6 lh-1" style="letter-spacing: 0.5px;">{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
+                    <img src="{{ $student->centre?->centre_logo_url ?? ($instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png')) }}" alt="{{ $student->centre?->centre_name }}" class="rounded bg-white p-1" style="height: 30px; width: auto; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('images/tech-era-logo.png') }}';">
+                    <div class="fw-bold fs-6 lh-1" style="letter-spacing: 0.5px;">{{ $student->centre?->centre_name ?? ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER') }}</div>
                 </div>
-                <div class="text-uppercase fw-semibold" style="font-size: 0.65rem; letter-spacing: 0.5px;">{{ $instituteSettings['institute_tagline'] ?? 'Building Digital Skills for the Future' }}</div>
-                <div class="text-white-50" style="font-size: 0.6rem;">{{ $instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105' }}</div>
+                <div class="text-uppercase fw-semibold" style="font-size: 0.65rem; letter-spacing: 0.5px; color: #fbbf24;">AUTHORIZED BY {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
+                <div class="text-white-50" style="font-size: 0.58rem;">Centre Code: {{ $student->centre?->centre_code ?? 'MAIN' }} &bull; Helpline: {{ $instituteSettings['contact_phone'] ?? '9162384660' }}</div>
             </div>
 
             <!-- Photo & Name -->

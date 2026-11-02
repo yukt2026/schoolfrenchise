@@ -291,10 +291,12 @@
                     </div>
 
                     <div class="d-flex align-items-center justify-content-center gap-3">
-                        <img src="{{ $instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png') }}" alt="{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}" style="height: 48px; width: auto; object-fit: contain;">
+                        <img src="{{ $centre->centre_logo_url ?? ($instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png')) }}" alt="{{ $centre->centre_name }}" style="height: 50px; width: auto; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('images/tech-era-logo.png') }}';">
                         <div>
-                            <div class="cert-brand-title">{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
-                            <div class="cert-brand-sub">{{ $instituteSettings['institute_tagline'] ?? 'Building Digital Skills for the Future' }}</div>
+                            <div class="cert-brand-title">{{ $centre->centre_name ?? 'AUTHORIZED STUDY CENTRE' }}</div>
+                            <div class="cert-brand-sub" style="color: #b45309; font-weight: 800; font-size: 0.85rem; letter-spacing: 1.5px; text-transform: uppercase;">
+                                <i class="fa-solid fa-certificate me-1"></i> AUTHORIZED BY {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}
+                            </div>
                         </div>
                     </div>
                     <div class="small text-muted mt-1" style="font-size: 0.68rem;">

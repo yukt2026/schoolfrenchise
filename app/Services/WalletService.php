@@ -16,21 +16,22 @@ use Illuminate\Support\Facades\Log;
 class WalletService
 {
     /**
-     * Credit franchise commission when a student admission is completed.
-     * Prevents duplicate wallet credits for the same admission.
+     * Deduct franchise fee (₹200) when a student admission is completed.
+     * Requirement: "Student ke Admission lene par Franchise ke Wallet se 200 rs kat hona chahiye"
+     * Prevents duplicate wallet debits for the same admission.
      */
-    public static function creditAdmissionCommission(Admission $admission): bool
+    public static function processAdmissionFeeDeduction(Admission $admission): bool
     {
         if (empty($admission->centre_id)) {
             return false;
         }
 
-        // 1. Check if admission was already flagged as credited
+        // 1. Check if admission was already processed
         if ($admission->commission_credited) {
             return false;
         }
 
-        $refNo = "COMM-ADM-{$admission->id}";
+        $refNo = "ADM-DEBIT-{$admission->id}";
 
         // 2. Database transaction with row-level lock
         return DB::transaction(function () use ($admission, $refNo) {
@@ -50,9 +51,9 @@ class WalletService
                 return false;
             }
 
-            // Configurable commission from Admin Panel (Default ₹200)
-            $commissionAmount = (float) Setting::get('franchise_admission_commission', 200.00);
-            if ($commissionAmount <= 0) {
+            // Configurable admission deduction from Admin Panel (Default ₹200)
+            $feeAmount = (float) Setting::get('franchise_admission_commission', 200.00);
+            if ($feeAmount <= 0) {
                 return false;
             }
 
@@ -70,10 +71,10 @@ class WalletService
             $wallet = CentreWallet::where('id', $wallet->id)->lockForUpdate()->first();
 
             $oldBalance = (float) $wallet->balance;
-            $newBalance = $oldBalance + $commissionAmount;
+            $newBalance = $oldBalance - $feeAmount;
 
             $wallet->balance = $newBalance;
-            $wallet->total_credited = (float) $wallet->total_credited + $commissionAmount;
+            $wallet->total_debited = (float) $wallet->total_debited + $feeAmount;
             $wallet->save();
 
             $studentName = $freshAdmission->student?->full_name ?? 'Student';
@@ -81,30 +82,38 @@ class WalletService
 
             $txn = CentreWalletTransaction::create([
                 'centre_id'     => $freshAdmission->centre_id,
-                'type'          => 'credit',
-                'amount'        => $commissionAmount,
+                'type'          => 'debit',
+                'amount'        => $feeAmount,
                 'balance_after' => $newBalance,
                 'reference_no'  => $refNo,
-                'description'   => "Franchise Commission for Student Admission: {$studentName} ({$rollNo})",
+                'description'   => "Admission Fee for Student: {$studentName} ({$rollNo})",
                 'approved_by'   => Auth::id() ?? 1,
                 'status'        => 'approved',
             ]);
 
             $freshAdmission->update([
                 'commission_credited' => true,
-                'commission_amount'   => $commissionAmount,
+                'commission_amount'   => $feeAmount,
             ]);
 
-            AuditLog::record('wallet_commission_credited', $txn, null, [
+            AuditLog::record('wallet_admission_debited', $txn, null, [
                 'centre_id'          => $freshAdmission->centre_id,
                 'admission_id'       => $freshAdmission->id,
                 'student_id'         => $freshAdmission->student_id,
-                'commission_amount'  => $commissionAmount,
+                'fee_amount'         => $feeAmount,
                 'new_wallet_balance' => $newBalance,
             ]);
 
             return true;
         });
+    }
+
+    /**
+     * Backward-compatible alias for admission wallet processing.
+     */
+    public static function creditAdmissionCommission(Admission $admission): bool
+    {
+        return self::processAdmissionFeeDeduction($admission);
     }
 
     /**

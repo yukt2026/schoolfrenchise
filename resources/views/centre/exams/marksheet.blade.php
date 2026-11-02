@@ -63,10 +63,13 @@
                 <!-- Header Banner -->
                 <div class="text-center border-bottom border-2 border-dark pb-3 mb-4">
                     <div class="d-flex align-items-center justify-content-center gap-3 mb-2">
-                        <img src="{{ $instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png') }}" alt="{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}" class="rounded bg-white p-1" style="height: 52px; width: auto; object-fit: contain;">
+                        <img src="{{ $centre->centre_logo_url ?? ($instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png')) }}" alt="{{ $centre->centre_name }}" class="rounded bg-white p-1" style="height: 52px; width: auto; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('images/tech-era-logo.png') }}';">
                         <div class="text-start">
-                            <h2 class="h4 fw-bolder mb-0 text-dark text-uppercase tracking-wider" style="color: #0284c7 !important;">{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</h2>
-                            <p class="small text-muted mb-0">{{ $instituteSettings['institute_tagline'] ?? 'Building Digital Skills for the Future' }} &bull; {{ $instituteSettings['corporate_address'] ?? 'Sasbahana, Sheikhpura, Bihar - 801105' }}</p>
+                            <h2 class="h4 fw-bolder mb-0 text-dark text-uppercase tracking-wider" style="color: #0284c7 !important;">{{ $centre->centre_name ?? ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER') }}</h2>
+                            <div class="fw-bold small text-uppercase" style="color: #b45309; letter-spacing: 1px;">
+                                <i class="fa-solid fa-certificate me-1"></i> Authorized by {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}
+                            </div>
+                            <p class="small text-muted mb-0" style="font-size: 0.68rem;">Registered Under MCA (Govt. of India) &bull; ISO 9001:2015 Certified &bull; Centre Code: {{ $centre->centre_code ?? 'MAIN' }}</p>
                         </div>
                     </div>
                     <div class="d-inline-block bg-dark text-white px-3 py-1 rounded-1 small fw-bold text-uppercase tracking-widest mt-1">

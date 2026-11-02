@@ -19,6 +19,17 @@
         </div>
     </div>
 
+    <!-- Official Dossier Advisory Banner -->
+    <div class="alert alert-info border-0 rounded-3 shadow-sm d-flex align-items-center gap-3 p-3 mb-4">
+        <div class="bg-primary text-white rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; min-width: 42px;">
+            <i class="fa-solid fa-user-lock fs-5"></i>
+        </div>
+        <div>
+            <div class="fw-bold text-dark mb-0">Official Student Dossier (Managed by Study Centre)</div>
+            <div class="small text-muted">To maintain academic data integrity, your profile particulars and credentials are maintained by your Authorized Study Centre (<strong>{{ $student->centre?->centre_name ?? 'Study Centre' }}</strong>). If any corrections or updates are required, please contact your franchise centre administrator.</div>
+        </div>
+    </div>
+
     <form method="POST" action="{{ route('student.profile.update') }}" enctype="multipart/form-data">
         @csrf
         <div class="row g-4">
@@ -49,14 +60,8 @@
                         </span>
                     </div>
 
-                    <!-- Upload New Avatar -->
-                    <div class="text-start mt-2">
-                        <label class="form-label small fw-semibold text-muted">Update Passport Photo</label>
-                        <input type="file" name="photo" id="studentPhotoInput" class="form-control form-control-sm @error('photo') is-invalid @enderror" accept="image/jpeg,image/png,image/webp" onchange="previewStudentPhoto(this)">
-                        <div class="form-text" style="font-size: 0.72rem;">JPG/PNG, Max 2MB. Instant live preview above.</div>
-                        @error('photo')
-                            <div class="invalid-feedback">{{ $message }}</div>
-                        @enderror
+                    <div class="p-2 bg-light rounded-2 text-muted small mt-2">
+                        <i class="fa-solid fa-shield me-1 text-primary"></i> Photo & Profile verified by Centre
                     </div>
                 </div>
 
@@ -92,7 +97,7 @@
             <div class="col-12 col-lg-8">
                 <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 mb-4">
                     <h5 class="fw-bold text-dark mb-3">
-                        <i class="fa-solid fa-address-card text-primary me-2"></i> Personal Information
+                        <i class="fa-solid fa-address-card text-primary me-2"></i> Personal Particulars
                     </h5>
 
                     <div class="row g-3">
@@ -102,27 +107,19 @@
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-muted">Father's Name</label>
-                            <input type="text" name="father_name" class="form-control @error('father_name') is-invalid @enderror" value="{{ old('father_name', $student->father_name) }}">
-                            @error('father_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" name="father_name" class="form-control bg-light" value="{{ old('father_name', $student->father_name) }}" readonly>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-muted">Mother's Name</label>
-                            <input type="text" name="mother_name" class="form-control @error('mother_name') is-invalid @enderror" value="{{ old('mother_name', $student->mother_name) }}">
-                            @error('mother_name') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" name="mother_name" class="form-control bg-light" value="{{ old('mother_name', $student->mother_name) }}" readonly>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-semibold text-muted">Date of Birth</label>
-                            <input type="date" name="date_of_birth" class="form-control @error('date_of_birth') is-invalid @enderror" value="{{ old('date_of_birth', $student->date_of_birth ? $student->date_of_birth->format('Y-m-d') : '') }}">
-                            @error('date_of_birth') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" name="date_of_birth" class="form-control bg-light" value="{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d-m-Y') : ($student->date_of_birth ? $student->date_of_birth->format('d-m-Y') : 'N/A') }}" readonly>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-semibold text-muted">Gender</label>
-                            <select name="gender" class="form-select @error('gender') is-invalid @enderror">
-                                <option value="male" {{ old('gender', $student->gender) === 'male' ? 'selected' : '' }}>Male</option>
-                                <option value="female" {{ old('gender', $student->gender) === 'female' ? 'selected' : '' }}>Female</option>
-                                <option value="other" {{ old('gender', $student->gender) === 'other' ? 'selected' : '' }}>Other</option>
-                            </select>
-                            @error('gender') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" class="form-control bg-light text-uppercase" value="{{ $student->gender ?? 'N/A' }}" readonly>
                         </div>
                     </div>
 
@@ -137,55 +134,38 @@
                             <label class="form-label small fw-semibold text-muted">Primary Phone / WhatsApp</label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">+91</span>
-                                <input type="text" name="phone" class="form-control @error('phone') is-invalid @enderror" value="{{ old('phone', $student->phone) }}" maxlength="10">
+                                <input type="text" name="phone" class="form-control bg-light" value="{{ old('phone', $student->phone ?? $student->mobile) }}" readonly>
                             </div>
-                            @error('phone') <div class="invalid-feedback d-block">{{ $message }}</div> @enderror
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-muted">Email Address</label>
-                            <input type="email" name="email" class="form-control @error('email') is-invalid @enderror" value="{{ old('email', $student->email) }}">
-                            @error('email') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="email" name="email" class="form-control bg-light" value="{{ old('email', $student->email) }}" readonly>
                         </div>
                         <div class="col-12">
                             <label class="form-label small fw-semibold text-muted">Permanent / Postal Address</label>
-                            <textarea name="address" rows="2" class="form-control @error('address') is-invalid @enderror">{{ old('address', $student->address) }}</textarea>
-                            @error('address') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <textarea name="address" rows="2" class="form-control bg-light" readonly>{{ old('address', $student->address) }}</textarea>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-semibold text-muted">State</label>
-                            <select name="state_id" id="stateSelect" class="form-select @error('state_id') is-invalid @enderror">
-                                <option value="">Select State</option>
-                                @foreach($states as $state)
-                                    <option value="{{ $state->id }}" {{ old('state_id', $student->state_id) == $state->id ? 'selected' : '' }}>
-                                        {{ $state->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('state_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" class="form-control bg-light" value="{{ $student->state?->name ?? 'N/A' }}" readonly>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-semibold text-muted">District</label>
-                            <select name="district_id" id="districtSelect" class="form-select @error('district_id') is-invalid @enderror">
-                                <option value="">Select District</option>
-                                @foreach($districts as $district)
-                                    <option value="{{ $district->id }}" {{ old('district_id', $student->district_id) == $district->id ? 'selected' : '' }}>
-                                        {{ $district->name }}
-                                    </option>
-                                @endforeach
-                            </select>
-                            @error('district_id') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" class="form-control bg-light" value="{{ $student->district?->name ?? 'N/A' }}" readonly>
                         </div>
                         <div class="col-md-4">
                             <label class="form-label small fw-semibold text-muted">PIN Code</label>
-                            <input type="text" name="pincode" class="form-control @error('pincode') is-invalid @enderror" value="{{ old('pincode', $student->pincode) }}" maxlength="6">
-                            @error('pincode') <div class="invalid-feedback">{{ $message }}</div> @enderror
+                            <input type="text" name="pincode" class="form-control bg-light" value="{{ old('pincode', $student->pincode) }}" readonly>
                         </div>
                     </div>
 
-                    <div class="text-end mt-4 pt-2">
-                        <button type="submit" class="btn btn-primary rounded-2 px-4 fw-semibold shadow-sm">
-                            <i class="fa-solid fa-floppy-disk me-1"></i> Save Changes
-                        </button>
+                    <div class="alert alert-light border rounded-3 mt-4 mb-0 d-flex align-items-center justify-content-between p-3">
+                        <div class="small text-muted">
+                            <i class="fa-solid fa-circle-info text-primary me-1"></i> Need to update your address, mobile number or particulars?
+                        </div>
+                        <span class="badge bg-secondary-subtle text-dark border px-3 py-2">
+                            <i class="fa-solid fa-hand-holding-hand me-1 text-primary"></i> Contact Your Study Centre Coordinator
+                        </span>
                     </div>
                 </div>
             </div>

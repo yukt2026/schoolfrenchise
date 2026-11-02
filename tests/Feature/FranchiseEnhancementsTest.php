@@ -482,22 +482,22 @@ class FranchiseEnhancementsTest extends TestCase
 
         $this->assertTrue((bool) $admission->commission_credited);
         $this->assertEquals(200.00, (float) $admission->commission_amount);
-        $this->assertEquals($initialBalance + 200.00, (float) $wallet->balance);
+        $this->assertEquals($initialBalance - 200.00, (float) $wallet->balance);
 
-        // Assert transaction logged
+        // Assert transaction logged as debit (fee cut from wallet)
         $this->assertDatabaseHas('centre_wallet_transactions', [
             'centre_id' => $this->centreA->id,
-            'type' => 'credit',
+            'type' => 'debit',
             'amount' => 200.00,
         ]);
 
-        // 3. Duplicate Call: Idempotency check prevents double credit
+        // 3. Duplicate Call: Idempotency check prevents double debit
         $secondAttempt = $walletService->creditAdmissionCommission($admission);
         $this->assertFalse($secondAttempt);
 
         $wallet->refresh();
-        // Balance remains exactly +200, NOT +400!
-        $this->assertEquals($initialBalance + 200.00, (float) $wallet->balance);
+        // Balance remains exactly -200, NOT -400!
+        $this->assertEquals($initialBalance - 200.00, (float) $wallet->balance);
     }
 
     /**

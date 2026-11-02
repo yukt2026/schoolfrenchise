@@ -300,10 +300,10 @@
             <!-- Header -->
             <div class="id-card-header">
                 <div class="d-flex align-items-center justify-content-center gap-2 mb-1">
-                    <img src="{{ $instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png') }}" alt="{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}" class="rounded bg-white p-1" style="height: 28px; width: auto; object-fit: contain;">
+                    <img src="{{ $centre->centre_logo_url ?? ($instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png')) }}" alt="{{ $centre->centre_name }}" class="rounded bg-white p-1" style="height: 30px; width: auto; object-fit: contain;" onerror="this.onerror=null;this.src='{{ asset('images/tech-era-logo.png') }}';">
                     <div class="text-start">
-                        <div class="id-org-title text-white">{{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
-                        <div class="id-org-sub">{{ $instituteSettings['institute_tagline'] ?? 'Building Digital Skills for the Future' }}</div>
+                        <div class="id-org-title text-white">{{ $centre->centre_name ?? ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER') }}</div>
+                        <div class="id-org-sub" style="font-size: 0.58rem; letter-spacing: 0.5px;">AUTHORIZED BY {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
                     </div>
                 </div>
                 <div>
@@ -392,8 +392,8 @@
         <div class="id-card-unit">
             <!-- Back Header -->
             <div class="id-card-header" style="background: linear-gradient(135deg, #0b1329 0%, #1e293b 100%);">
-                <div class="id-org-title text-white">TERMS & VERIFICATION</div>
-                <div class="id-org-sub" style="color: #cbd5e1;">Official Institutional Guidelines</div>
+                <div class="id-org-title text-white">{{ $centre->centre_name ?? ($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER') }}</div>
+                <div class="id-org-sub" style="color: #cbd5e1; font-size: 0.58rem;">AUTHORIZED BY {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
             </div>
 
             <!-- Rules List -->
@@ -423,8 +423,8 @@
                 <div class="border d-inline-block p-1 bg-white rounded shadow-sm">
                     <img src="https://api.qrserver.com/v1/create-qr-code/?size=100x100&data={{ urlencode($verifyUrl) }}" alt="QR Scan" style="width: 75px; height: 75px;">
                 </div>
-                <div class="text-muted font-monospace mt-1" style="font-size: 0.62rem;">
-                    SCAN TO VERIFY CREDENTIALS
+                <div class="text-muted font-monospace mt-1" style="font-size: 0.62rem; font-weight: 700;">
+                    SCAN WITH GOOGLE / CAMERA TO VERIFY
                 </div>
                 <div class="text-secondary font-monospace" style="font-size: 0.58rem;">
                     REG: {{ $student->registration_no }}

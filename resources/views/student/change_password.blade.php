@@ -25,6 +25,13 @@
 <div class="row justify-content-center">
     <div class="col-12 col-md-8 col-lg-6">
         <div class="card border border-light-subtle shadow-sm rounded-3 p-4 p-md-5 bg-white">
+            <div class="alert alert-info border-0 rounded-3 mb-4 d-flex align-items-center gap-3 py-2 px-3">
+                <i class="fa-solid fa-building-user text-primary fs-4"></i>
+                <div class="small">
+                    <strong>Study Centre Managed:</strong> Your student credentials and account security are monitored by your Authorized Study Centre (<strong>{{ $student->centre?->centre_name ?? 'Franchise Centre' }}</strong>). If you forgot your password or need a reset, your franchise administrator can update it directly for you.
+                </div>
+            </div>
+
             <form action="{{ route('student.change-password.update') }}" method="POST">
                 @csrf
 

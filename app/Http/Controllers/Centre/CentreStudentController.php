@@ -198,8 +198,8 @@ class CentreStudentController extends Controller
                 FeeService::assignAdmissionFees($admission, $discount);
             }
 
-            // 5. Credit Franchise Commission for this eligible admission
-            WalletService::creditAdmissionCommission($admission);
+            // 5. Deduct Franchise Admission Fee (₹200) for this eligible admission
+            WalletService::processAdmissionFeeDeduction($admission);
 
             // 6. Audit Log
             AuditLog::record('centre_student_registered', $student, null, [

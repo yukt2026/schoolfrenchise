@@ -1126,10 +1126,6 @@
                     <i class="fa-solid fa-pen-to-square"></i>
                     <span>Marks Entry</span>
                 </a>
-                <a class="nav-link {{ request()->routeIs('centre.exams.results*') ? 'active' : '' }}" href="{{ route('centre.exams.results') }}">
-                    <i class="fa-solid fa-square-poll-vertical"></i>
-                    <span>Exam Results</span>
-                </a>
 
                 <!-- Group 5: Academic Resources -->
                 <div class="centre-nav-heading">
