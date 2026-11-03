@@ -78,6 +78,11 @@ class Course extends Model
         return (float) ($this->default_course_fee + $this->registration_fee + $this->exam_fee + $this->certificate_fee);
     }
 
+    public function getCourseFeeAttribute()
+    {
+        return (float) ($this->default_course_fee ?: $this->total_fee ?: 0);
+    }
+
     public function getDurationMonthsAttribute()
     {
         if (preg_match('/(\d+)/', (string) $this->duration, $m)) {

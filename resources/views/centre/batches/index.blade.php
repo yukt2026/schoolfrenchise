@@ -11,6 +11,9 @@
         <p class="text-muted small mb-0">Manage training batches, lab workstations schedule, and daily student attendance.</p>
     </div>
     <div class="d-flex flex-wrap gap-2">
+        <a href="{{ route('centre.attendance.index') }}" class="btn btn-success rounded-2 px-3 fw-semibold shadow-sm">
+            <i class="fa-solid fa-clipboard-user me-1"></i>Daily Attendance Hub
+        </a>
         <a href="{{ route('centre.batches.create') }}" class="btn btn-primary rounded-2 px-3 fw-semibold shadow-sm">
             <i class="fa-solid fa-plus me-1"></i>Create New Batch
         </a>
@@ -68,9 +71,9 @@
                     </div>
                 </div>
 
-                <div class="mt-auto">
-                    <a href="{{ route('centre.batches.attendance', $batch->id) }}" class="btn btn-outline-primary w-100 rounded-2 fw-semibold py-1" style="font-size: 0.75rem;">
-                        <i class="fa-solid fa-clipboard-user me-1"></i>Attendance
+                <div class="mt-auto d-flex flex-column gap-1">
+                    <a href="{{ route('centre.batches.attendance', $batch->id) }}" class="btn btn-outline-success w-100 rounded-2 fw-semibold py-1" style="font-size: 0.75rem;">
+                        <i class="fa-solid fa-clipboard-user me-1"></i>Mark Attendance ({{ $batch->admissions_count }})
                     </a>
                 </div>
             </div>

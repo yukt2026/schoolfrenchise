@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Admin;
 
 use App\Http\Controllers\Controller;
 use App\Models\AuditLog;
+use App\Models\Batch;
 use App\Models\Centre;
 use App\Models\District;
 use App\Models\Enquiry;
@@ -90,7 +91,7 @@ class AdminStudentController extends Controller
             'highest_qualification' => 'nullable|string|max:100',
             'photo' => 'nullable|image|max:2048',
             'signature' => 'nullable|image|max:2048',
-            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp,gif|max:5120',
         ]);
 
         return DB::transaction(function () use ($request, $validated) {
@@ -175,10 +176,25 @@ class AdminStudentController extends Controller
 
     public function edit(Student $student)
     {
-        $centres = Centre::where('status', 'active')->get();
+        $student->load(['centre', 'admissions.course', 'admissions.batch']);
+        $centres = Centre::where('status', 'active')->orderBy('centre_name')->get();
         $states = State::orderBy('name')->get();
+
+        // Check if student's district belongs to their state
+        $distExists = District::where('id', $student->district_id)->where('state_id', $student->state_id)->exists();
+        if (!$distExists && $student->state_id) {
+            $fallbackDist = District::where('state_id', $student->state_id)->first();
+            if ($fallbackDist) {
+                $student->district_id = $fallbackDist->id;
+                $student->save();
+            }
+        }
+
         $districts = District::where('state_id', $student->state_id)->orderBy('name')->get();
-        return view('admin.students.edit', compact('student', 'centres', 'states', 'districts'));
+        $batches = Batch::where('centre_id', $student->centre_id)->where('status', 'active')->orderBy('batch_name')->get();
+        $currentAdmission = $student->admissions()->latest('id')->first();
+
+        return view('admin.students.edit', compact('student', 'centres', 'states', 'districts', 'batches', 'currentAdmission'));
     }
 
     public function update(Request $request, Student $student)
@@ -190,9 +206,21 @@ class AdminStudentController extends Controller
             'mother_name' => 'nullable|string|max:191',
             'dob' => 'required|date',
             'gender' => 'required|in:male,female,other',
-            'mobile' => 'required|string|size:10',
+            'mobile' => [
+                'required',
+                'string',
+                'size:10',
+                Rule::unique('users', 'mobile')->ignore($student->user_id),
+                Rule::unique('students', 'mobile')->ignore($student->id),
+            ],
             'alternate_mobile' => 'nullable|string|max:20',
-            'email' => 'nullable|email|max:191',
+            'email' => [
+                'nullable',
+                'email',
+                'max:191',
+                Rule::unique('users', 'email')->ignore($student->user_id),
+                Rule::unique('students', 'email')->ignore($student->id),
+            ],
             'password' => 'nullable|string|min:6|confirmed',
             'state_id' => 'required|exists:states,id',
             'district_id' => [
@@ -203,10 +231,11 @@ class AdminStudentController extends Controller
             'address' => 'required|string',
             'pincode' => 'required|string|max:10',
             'highest_qualification' => 'nullable|string|max:100',
+            'batch_id' => 'nullable|exists:batches,id',
             'status' => 'required|in:enrolled,ongoing,completed,dropped',
-            'photo' => 'nullable|image|max:2048',
-            'signature' => 'nullable|image|max:2048',
-            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'photo' => 'nullable|image|mimes:jpeg,png,webp,jpg,gif|max:2048',
+            'signature' => 'nullable|image|mimes:jpeg,png,webp,jpg,gif|max:2048',
+            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp,gif|max:5120',
         ]);
 
         $oldValues = $student->toArray();
@@ -224,6 +253,13 @@ class AdminStudentController extends Controller
         return DB::transaction(function () use ($request, $student, $validated, $oldValues) {
             $student->update($validated);
 
+            if ($request->has('batch_id')) {
+                $admission = $student->admissions()->latest('id')->first();
+                if ($admission) {
+                    $admission->update(['batch_id' => $request->batch_id ?: null]);
+                }
+            }
+
             if ($student->user) {
                 $userUpdates = [
                     'name' => $validated['full_name'],
@@ -236,16 +272,19 @@ class AdminStudentController extends Controller
                     $userUpdates['password'] = Hash::make($validated['password']);
                 }
                 $student->user->update($userUpdates);
-            } elseif (!empty($validated['email']) || !empty($validated['password'])) {
+            } else {
                 $studentRole = Role::firstOrCreate(['name' => 'student'], ['display_name' => 'Student']);
-                $newUser = User::create([
-                    'name'      => $validated['full_name'],
-                    'email'     => $validated['email'] ?? "student_{$student->roll_no}@domain.com",
-                    'mobile'    => $validated['mobile'],
-                    'password'  => Hash::make($validated['password'] ?? $validated['mobile']),
-                    'role'      => 'student',
-                    'is_active' => true,
-                ]);
+                $userEmail = !empty($validated['email']) ? $validated['email'] : "student_{$student->roll_no}@techeracomputer.in";
+                $newUser = User::firstOrCreate(
+                    ['email' => $userEmail],
+                    [
+                        'name'      => $validated['full_name'],
+                        'mobile'    => $validated['mobile'],
+                        'password'  => Hash::make($validated['password'] ?? $validated['mobile']),
+                        'role'      => 'student',
+                        'is_active' => true,
+                    ]
+                );
                 $newUser->roles()->syncWithoutDetaching([$studentRole->id]);
                 $student->update(['user_id' => $newUser->id]);
             }

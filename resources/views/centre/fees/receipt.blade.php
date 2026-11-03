@@ -94,10 +94,13 @@
 </head>
 <body>
     <div class="no-print text-center mb-4">
+        <a href="{{ route('centre.fees.index') }}" class="btn btn-outline-dark px-3 rounded-2 me-2">
+            <i class="fa-solid fa-arrow-left me-1"></i>Back
+        </a>
         <button onclick="window.print()" class="btn btn-primary px-4 rounded-2 shadow-sm">
             <i class="fa-solid fa-print me-1"></i>Print Receipt
         </button>
-        <button onclick="window.close()" class="btn btn-outline-secondary px-3 rounded-2 ms-2">
+        <button type="button" onclick="closeWindow('{{ route('centre.fees.index') }}')" class="btn btn-outline-secondary px-3 rounded-2 ms-2">
             <i class="fa-solid fa-xmark me-1"></i>Close Window
         </button>
     </div>
@@ -209,5 +212,28 @@
             </div>
         </div>
     </div>
+
+    <script>
+    function closeWindow(fallbackUrl) {
+        try {
+            window.close();
+        } catch (e) {}
+
+        try {
+            window.open('', '_self', '');
+            window.close();
+        } catch (e) {}
+
+        setTimeout(function() {
+            if (!window.closed) {
+                if (window.history.length > 1) {
+                    window.history.back();
+                } else if (fallbackUrl) {
+                    window.location.href = fallbackUrl;
+                }
+            }
+        }, 150);
+    }
+    </script>
 </body>
 </html>

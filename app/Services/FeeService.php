@@ -333,4 +333,82 @@ class FeeService
             ]);
         });
     }
+
+    /**
+     * Auto-reconcile admissions where total_paid > 0 but payment ledger rows are missing.
+     */
+    public static function reconcileAdmissionPayments(Admission $admission): void
+    {
+        if ((float) $admission->total_paid <= 0) {
+            // Also ensure installment schedule exists if missing
+            if (StudentFee::where('admission_id', $admission->id)->doesntExist() && (float) $admission->net_fee > 0) {
+                self::assignAdmissionFees($admission, (float) $admission->discount_amount);
+            }
+            return;
+        }
+
+        $existingPaymentsCount = FeePayment::where('admission_id', $admission->id)->count();
+        if ($existingPaymentsCount > 0) {
+            return;
+        }
+
+        DB::transaction(function () use ($admission) {
+            // Ensure student fees schedule exists
+            if (StudentFee::where('admission_id', $admission->id)->doesntExist()) {
+                self::assignAdmissionFees($admission, (float) $admission->discount_amount);
+            }
+
+            $paidAmount = (float) $admission->total_paid;
+            $centreId = $admission->centre_id ?: 1;
+            $receiptNo = PaymentReceipt::generateReceiptNo($centreId);
+            $date = $admission->admission_date ? \Carbon\Carbon::parse($admission->admission_date)->toDateString() : now()->toDateString();
+
+            // 1. First installment
+            $firstInstallment = StudentFee::where('admission_id', $admission->id)->orderBy('installment_no')->first();
+            $studentFeeId = $firstInstallment ? $firstInstallment->id : null;
+
+            $payment = FeePayment::create([
+                'student_fee_id'  => $studentFeeId,
+                'admission_id'    => $admission->id,
+                'student_id'      => $admission->student_id,
+                'centre_id'       => $centreId,
+                'receipt_no'      => $receiptNo,
+                'payment_date'    => $date,
+                'amount'          => $paidAmount,
+                'payment_mode'    => 'cash',
+                'transaction_ref' => 'INIT-ADM-' . $admission->id,
+                'notes'           => $admission->remarks ?: 'Initial admission fee payment',
+            ]);
+
+            PaymentReceipt::create([
+                'fee_payment_id' => $payment->id,
+                'receipt_no'     => $receiptNo,
+                'student_id'     => $admission->student_id,
+                'admission_id'   => $admission->id,
+                'centre_id'      => $centreId,
+                'amount'         => $paidAmount,
+                'payment_mode'   => 'cash',
+                'receipt_date'   => $date,
+                'qr_token'       => \Illuminate\Support\Str::random(40),
+                'notes'          => 'Initial admission fee payment',
+            ]);
+
+            // Settle installments with paid amount
+            $unpaidFees = StudentFee::where('admission_id', $admission->id)->orderBy('installment_no')->get();
+            $remaining = $paidAmount;
+            foreach ($unpaidFees as $fee) {
+                if ($remaining <= 0) break;
+                $unpaid = (float) $fee->amount - (float) $fee->paid_amount;
+                if ($unpaid <= 0) continue;
+
+                $alloc = min($remaining, $unpaid);
+                $newPaid = (float) $fee->paid_amount + $alloc;
+                $fee->update([
+                    'paid_amount' => $newPaid,
+                    'status'      => $newPaid >= (float) $fee->amount ? 'paid' : 'partial',
+                ]);
+                $remaining -= $alloc;
+            }
+        });
+    }
 }

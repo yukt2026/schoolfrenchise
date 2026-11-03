@@ -17,6 +17,35 @@
     </div>
 </div>
 
+@if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-center mb-1">
+            <i class="fa-solid fa-triangle-exclamation fs-5 me-2"></i>
+            <strong class="fs-6">Please resolve the following issues:</strong>
+        </div>
+        <ul class="mb-0 small ps-4 mt-2">
+            @foreach($errors->all() as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>{{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <form method="POST" action="{{ route('centre.students.update', $student->id) }}" enctype="multipart/form-data">
     @csrf
     @method('PUT')
@@ -125,10 +154,28 @@
                             @enderror
                         </div>
 
-                        <div class="col-12">
+                        <div class="col-md-6">
                             <label class="form-label fw-semibold">Highest Prior Qualification</label>
                             <input type="text" name="highest_qualification" class="form-control rounded-2 @error('highest_qualification') is-invalid @enderror" value="{{ old('highest_qualification', $student->highest_qualification) }}" placeholder="e.g. 10th Standard / 12th / Graduate">
                             @error('highest_qualification')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label fw-semibold">Class Batch Schedule / Shift</label>
+                            <select name="batch_id" class="form-select rounded-2 @error('batch_id') is-invalid @enderror">
+                                <option value="">-- No Batch Assigned --</option>
+                                @if(isset($batches))
+                                    @foreach($batches as $b)
+                                        <option value="{{ $b->id }}" {{ (old('batch_id', $student->admissions->first()?->batch_id) == $b->id) ? 'selected' : '' }}>
+                                            {{ $b->batch_name }} ({{ $b->start_time }} - {{ $b->end_time }})
+                                        </option>
+                                    @endforeach
+                                @endif
+                            </select>
+                            <div class="form-text small">Select batch for daily attendance marking.</div>
+                            @error('batch_id')
                                 <div class="invalid-feedback">{{ $message }}</div>
                             @enderror
                         </div>

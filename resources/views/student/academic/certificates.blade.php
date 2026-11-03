@@ -29,17 +29,22 @@
         @foreach($certificates as $cert)
             <div class="col-12 col-lg-6">
                 <div class="card border border-light-subtle shadow-sm rounded-3 h-100 overflow-hidden bg-white">
-                    <div class="card-header bg-gradient p-4 text-white" style="background: linear-gradient(135deg, #0b1329 0%, #0284c7 100%);">
-                        <div class="d-flex justify-content-between align-items-start">
+                    <div class="cert-header-dark p-4 position-relative" style="background: linear-gradient(135deg, #0b1329 0%, #0284c7 100%) !important; color: #ffffff !important; border-top-left-radius: 8px; border-top-right-radius: 8px;">
+                        <div class="d-flex justify-content-between align-items-start position-relative" style="z-index: 1;">
                             <div>
-                                <span class="badge bg-white text-primary text-uppercase px-2 py-1 mb-2 fw-bold rounded-1" style="font-size: 0.7rem;">
-                                    OFFICIAL CERTIFICATE
+                                <span class="badge text-primary text-uppercase px-2.5 py-1 mb-2 fw-bold rounded-1 shadow-sm" style="font-size: 0.7rem; background-color: #ffffff !important; color: #0284c7 !important; letter-spacing: 0.5px;">
+                                    <i class="fa-solid fa-award me-1"></i> OFFICIAL CERTIFICATE
                                 </span>
-                                <h5 class="fw-bold mb-1 text-white">{{ $cert->course->course_name ?? 'Computer Course' }}</h5>
-                                <div class="text-white-50 small">Issued by {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}</div>
+                                <h5 class="fw-bold mb-1" style="color: #ffffff !important; font-size: 1.15rem; line-height: 1.3;">
+                                    {{ $cert->course->course_name ?? 'Computer Course' }}
+                                </h5>
+                                <div class="small" style="color: rgba(255, 255, 255, 0.9) !important; font-size: 0.8rem;">
+                                    <i class="fa-solid fa-building-columns me-1" style="color: rgba(255, 255, 255, 0.7) !important;"></i>
+                                    Issued by {{ $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER' }}
+                                </div>
                             </div>
-                            <div class="bg-white bg-opacity-25 rounded-circle p-3 text-white">
-                                <i class="fa-solid fa-medal fs-3"></i>
+                            <div class="rounded-circle p-3 d-flex align-items-center justify-content-center shadow-sm" style="background: rgba(255, 255, 255, 0.2) !important; color: #ffffff !important; width: 48px; height: 48px; min-width: 48px; backdrop-filter: blur(4px);">
+                                <i class="fa-solid fa-medal fs-3" style="color: #ffffff !important;"></i>
                             </div>
                         </div>
                     </div>

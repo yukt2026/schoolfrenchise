@@ -103,9 +103,11 @@ Route::middleware('throttle:30,1')->group(function () {
     Route::get('/check-certificate-marksheet', [VerificationController::class, 'certificateIndex'])->name('verify.certificate');
     Route::post('/check-certificate-marksheet', [VerificationController::class, 'verifyCertificate'])->name('verify.certificate.submit');
     Route::get('/verify/cert/{cert_no}', [VerificationController::class, 'directVerifyCert'])->where('cert_no', '.*')->name('verify.cert.direct');
-    Route::get('/verify/certificate/{cert_no}', [VerificationController::class, 'directVerifyCert'])->where('cert_no', '.*')->name('verify.certificate.public');
+    Route::get('/verify/certificate/{token}', [VerificationController::class, 'directVerifyCert'])->where('token', '.*')->name('verify.certificate.token');
+    Route::get('/verify/marksheet/{token}', [VerificationController::class, 'directVerifyMarksheet'])->where('token', '.*')->name('verify.marksheet.token');
     Route::get('/check-admission', [VerificationController::class, 'admissionIndex'])->name('verify.admission');
     Route::post('/check-admission', [VerificationController::class, 'verifyAdmission'])->name('verify.admission.submit');
+    Route::get('/verify/student/{token}', [VerificationController::class, 'verifyStudentCard'])->name('verify.student');
 });
 
 // 5. Online Fee Payment Workflow & Gateway Verification
@@ -216,6 +218,8 @@ Route::middleware(['role:super_admin,admin'])->prefix('admin')->name('admin.')->
     Route::get('/batches/attendance/report', [AdminBatchController::class, 'attendanceReport'])->name('batches.attendance.report');
     Route::get('/batches/{batch}/attendance', [AdminBatchController::class, 'attendanceSheet'])->name('batches.attendance.sheet');
     Route::post('/batches/{batch}/attendance', [AdminBatchController::class, 'markAttendance'])->name('batches.attendance.mark');
+    Route::post('/batches/{batch}/enroll', [AdminBatchController::class, 'enrollStudents'])->name('batches.enroll');
+    Route::post('/batches/{batch}/unenroll/{student}', [AdminBatchController::class, 'unenrollStudent'])->name('batches.unenroll');
     Route::resource('batches', AdminBatchController::class);
 
     // Module 6: Examinations, Question Bank & Results
@@ -388,6 +392,7 @@ Route::middleware(['role:super_admin,centre,staff', 'centre.active'])->prefix('c
     Route::put('/students/{student}', [CentreStudentController::class, 'update'])->name('students.update');
     Route::get('/students/{student}/id-card', [CentreStudentController::class, 'idCard'])->name('students.id-card');
     Route::get('/students/{student}/admission-form', [CentreStudentController::class, 'admissionForm'])->name('students.admission-form');
+    Route::get('/students/{student}/marks', [CentreExamController::class, 'studentMarks'])->name('students.marks');
 
     // Batches & Attendance
     Route::get('/batches', [CentreBatchController::class, 'index'])->name('batches.index');
@@ -395,9 +400,13 @@ Route::middleware(['role:super_admin,centre,staff', 'centre.active'])->prefix('c
     Route::post('/batches', [CentreBatchController::class, 'store'])->name('batches.store');
     Route::get('/batches/{batch}/edit', [CentreBatchController::class, 'edit'])->name('batches.edit');
     Route::put('/batches/{batch}', [CentreBatchController::class, 'update'])->name('batches.update');
+    Route::get('/attendance', [CentreBatchController::class, 'dailyAttendanceHub'])->name('attendance.index');
     Route::get('/batches/{batch}/attendance', [CentreBatchController::class, 'attendanceSheet'])->name('batches.attendance');
     Route::post('/batches/{batch}/attendance', [CentreBatchController::class, 'markAttendance'])->name('batches.attendance.mark');
     Route::get('/batches/attendance/report', [CentreBatchController::class, 'attendanceReport'])->name('batches.attendance.report');
+    Route::get('/batches/attendance/report/export', [CentreBatchController::class, 'exportAttendanceReport'])->name('batches.attendance.report.export');
+    Route::post('/batches/{batch}/enroll', [CentreBatchController::class, 'enrollStudents'])->name('batches.enroll');
+    Route::post('/batches/{batch}/unenroll/{student}', [CentreBatchController::class, 'unenrollStudent'])->name('batches.unenroll');
 
     // Exams, Hall Tickets, Marks Entry & Results
     Route::get('/exams', [CentreExamController::class, 'index'])->name('exams.index');
@@ -420,6 +429,7 @@ Route::middleware(['role:super_admin,centre,staff', 'centre.active'])->prefix('c
     // Wallet & Top-up Requests
     Route::get('/wallet', [CentreWalletController::class, 'index'])->name('wallet.index');
     Route::get('/wallet/topup', [CentreWalletController::class, 'topupForm'])->name('wallet.topup');
+    Route::get('/wallet/qr', [CentreWalletController::class, 'generateQr'])->name('wallet.qr');
     Route::post('/wallet/topup', [CentreWalletController::class, 'storeTopup'])->name('wallet.topup.store');
     Route::post('/wallet/recharge/initiate', [CentreWalletController::class, 'initiateOnlineRecharge'])->name('wallet.recharge.initiate');
     Route::post('/wallet/recharge/verify', [CentreWalletController::class, 'verifyOnlineRecharge'])->name('wallet.recharge.verify');
@@ -427,6 +437,8 @@ Route::middleware(['role:super_admin,centre,staff', 'centre.active'])->prefix('c
     // Downloads & Certificates
     Route::get('/downloads', [CentreDownloadController::class, 'index'])->name('downloads.index');
     Route::get('/downloads/student-certificates', [CentreDownloadController::class, 'studentCertificates'])->name('downloads.student-certificates');
+    Route::get('/downloads/student-certificates/create', [CentreDownloadController::class, 'createCertificate'])->name('downloads.student-certificates.create');
+    Route::post('/downloads/student-certificates', [CentreDownloadController::class, 'storeCertificate'])->name('downloads.student-certificates.store');
     Route::get('/downloads/student-certificates/{certificate}', [CentreDownloadController::class, 'showStudentCertificate'])->name('downloads.student-certificates.show');
     Route::get('/downloads/certificate', [CentreDownloadController::class, 'certificate'])->name('downloads.certificate');
     Route::get('/downloads/{download}/file', [CentreDownloadController::class, 'downloadFile'])->name('downloads.file');

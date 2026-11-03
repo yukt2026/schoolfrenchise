@@ -1100,7 +1100,7 @@
                     <i class="fa-solid fa-users-rectangle"></i>
                     <span>Batch Schedules</span>
                 </a>
-                <a class="nav-link {{ request()->routeIs('centre.batches.attendance*') && !request()->routeIs('centre.batches.attendance.report') ? 'active' : '' }}" href="{{ route('centre.batches.index') }}#attendance">
+                <a class="nav-link {{ (request()->routeIs('centre.attendance.*') || request()->routeIs('centre.batches.attendance')) && !request()->routeIs('centre.batches.attendance.report') ? 'active' : '' }}" href="{{ route('centre.attendance.index') }}">
                     <i class="fa-solid fa-clipboard-user"></i>
                     <span>Daily Attendance</span>
                 </a>
@@ -1272,7 +1272,7 @@
             <i class="fa-solid fa-user-graduate"></i>
             <span>Students</span>
         </a>
-        <a href="{{ route('centre.batches.index') }}" class="bottom-nav-item {{ request()->routeIs('centre.batches.*') ? 'active' : '' }}">
+        <a href="{{ route('centre.attendance.index') }}" class="bottom-nav-item {{ request()->routeIs('centre.attendance.*') || request()->routeIs('centre.batches.*') ? 'active' : '' }}">
             <i class="fa-solid fa-calendar-check"></i>
             <span>Attendance</span>
         </a>

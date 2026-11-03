@@ -77,11 +77,14 @@ class VerificationController extends Controller
 
     public function directVerifyCert($cert_no)
     {
+        $cert_no = trim($cert_no);
         $cleanedCertNo = str_replace('-', '/', $cert_no);
 
-        $certificate = Certificate::with(['student.centre', 'course', 'result.subjectResults.subject'])
-            ->where('certificate_no', $cert_no)
+        $certificate = Certificate::with(['student.centre', 'course', 'result.subjectResults.subject', 'centre.state', 'centre.district'])
+            ->where('verification_token', $cert_no)
+            ->orWhere('certificate_no', $cert_no)
             ->orWhere('certificate_no', $cleanedCertNo)
+            ->orWhere('serial_no', $cert_no)
             ->orWhereHas('student', function ($sq) use ($cert_no, $cleanedCertNo) {
                 $sq->where('roll_no', $cert_no)
                   ->orWhere('registration_no', $cert_no)
@@ -93,31 +96,93 @@ class VerificationController extends Controller
         if ($certificate) {
             $marksheet = Marksheet::where('exam_result_id', $certificate->exam_result_id)->first();
         } else {
-            $marksheet = Marksheet::with(['student.centre', 'course', 'result.subjectResults.subject'])
-                ->where('marksheet_no', $cert_no)
+            $marksheet = Marksheet::with(['student.centre', 'course', 'result.subjectResults.subject', 'centre.state', 'centre.district'])
+                ->where('verification_token', $cert_no)
+                ->orWhere('marksheet_no', $cert_no)
                 ->orWhere('marksheet_no', $cleanedCertNo)
-                ->firstOrFail();
-
-            $certificate = Certificate::with(['student.centre', 'course', 'result.subjectResults.subject'])
-                ->where('exam_result_id', $marksheet->exam_result_id)
+                ->orWhere('serial_no', $cert_no)
                 ->first();
+
+            if ($marksheet) {
+                $certificate = Certificate::with(['student.centre', 'course', 'result.subjectResults.subject', 'centre.state', 'centre.district'])
+                    ->where('exam_result_id', $marksheet->exam_result_id)
+                    ->first();
+            }
         }
 
-        VerificationLog::create([
-            'type' => 'certificate',
-            'search_query' => "QR-Scan: {$cert_no}",
-            'result_found' => true,
-            'ip_address' => request()->ip(),
-            'user_agent' => request()->userAgent(),
-        ]);
+        try {
+            VerificationLog::create([
+                'type' => 'certificate',
+                'search_query' => "QR-Cert-Scan: {$cert_no}",
+                'result_found' => (bool)$certificate,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        } catch (\Throwable $e) {}
 
         return view('pages.check-certificate', [
             'searched' => true,
             'certificate' => $certificate,
             'marksheet' => $marksheet,
-            'queryRegistration' => $certificate->certificate_no,
-            'queryFather' => $certificate->student->father_name,
+            'queryRegistration' => $certificate ? $certificate->certificate_no : $cert_no,
+            'queryFather' => $certificate ? ($certificate->student->father_name ?? '') : '',
             'isDirectScan' => true,
+            'status' => $certificate ? ($certificate->status === 'revoked' ? 'revoked' : 'valid') : 'invalid',
+        ]);
+    }
+
+    public function directVerifyMarksheet($token)
+    {
+        $token = trim($token);
+        $cleanedToken = str_replace('-', '/', $token);
+
+        $marksheet = Marksheet::with(['student.centre', 'course', 'result.subjectResults.subject', 'centre.state', 'centre.district'])
+            ->where('verification_token', $token)
+            ->orWhere('marksheet_no', $token)
+            ->orWhere('marksheet_no', $cleanedToken)
+            ->orWhere('serial_no', $token)
+            ->orWhereHas('student', function ($sq) use ($token, $cleanedToken) {
+                $sq->where('roll_no', $token)
+                  ->orWhere('registration_no', $token)
+                  ->orWhere('registration_no', $cleanedToken);
+            })
+            ->first();
+
+        $certificate = null;
+        if ($marksheet) {
+            $certificate = Certificate::with(['student.centre', 'course', 'result.subjectResults.subject', 'centre.state', 'centre.district'])
+                ->where('exam_result_id', $marksheet->exam_result_id)
+                ->first();
+        } else {
+            $certificate = Certificate::with(['student.centre', 'course', 'result.subjectResults.subject', 'centre.state', 'centre.district'])
+                ->where('verification_token', $token)
+                ->orWhere('certificate_no', $token)
+                ->orWhere('certificate_no', $cleanedToken)
+                ->first();
+
+            if ($certificate) {
+                $marksheet = Marksheet::where('exam_result_id', $certificate->exam_result_id)->first();
+            }
+        }
+
+        try {
+            VerificationLog::create([
+                'type' => 'marksheet',
+                'search_query' => "QR-MS-Scan: {$token}",
+                'result_found' => (bool)$marksheet,
+                'ip_address' => request()->ip(),
+                'user_agent' => request()->userAgent(),
+            ]);
+        } catch (\Throwable $e) {}
+
+        return view('pages.check-certificate', [
+            'searched' => true,
+            'certificate' => $certificate,
+            'marksheet' => $marksheet,
+            'queryRegistration' => $marksheet ? $marksheet->marksheet_no : $token,
+            'queryFather' => $marksheet ? ($marksheet->student->father_name ?? '') : '',
+            'isDirectScan' => true,
+            'status' => $marksheet ? ($certificate && $certificate->status === 'revoked' ? 'revoked' : 'valid') : 'invalid',
         ]);
     }
 
@@ -159,6 +224,52 @@ class VerificationController extends Controller
             'student' => $student,
             'searchKey' => $searchKey,
             'dob' => $dob,
+        ]);
+    }
+
+    /**
+     * Dedicated Student ID Card Online QR Verification Endpoint.
+     * Validates cryptographic verification token against database.
+     */
+    public function verifyStudentCard(Request $request, $token)
+    {
+        $token = trim($token);
+
+        $student = Student::withoutGlobalScopes()
+            ->with(['centre.state', 'centre.district', 'admissions.course', 'admissions.batch', 'state', 'district'])
+            ->where('verification_token', $token)
+            ->orWhere('registration_no', $token)
+            ->orWhere('roll_no', $token)
+            ->first();
+
+        $status = 'invalid';
+        if ($student) {
+            $status = $student->effective_id_card_status;
+        }
+
+        try {
+            VerificationLog::create([
+                'type'         => 'student_id_card',
+                'search_query' => "ID-Card-QR: {$token}",
+                'result_found' => (bool) $student,
+                'ip_address'   => $request->ip(),
+                'user_agent'   => $request->userAgent(),
+            ]);
+        } catch (\Throwable $e) {
+            // Ignore log creation errors
+        }
+
+        $admission = $student ? $student->admissions->first() : null;
+        $course = $admission ? $admission->course : null;
+        $centre = $student ? $student->centre : null;
+
+        return view('pages.verify-student', [
+            'student'   => $student,
+            'status'    => $status,
+            'token'     => $token,
+            'admission' => $admission,
+            'course'    => $course,
+            'centre'    => $centre,
         ]);
     }
 }

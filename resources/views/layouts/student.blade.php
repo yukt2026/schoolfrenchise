@@ -745,8 +745,15 @@
     @php
         $authUser = auth()->user();
         $authStudent = $authUser ? ($authUser->student ?? \App\Models\Student::where('user_id', $authUser->id)->first()) : null;
-        if (!$authStudent && $authUser && $authUser->isSuperAdmin()) {
-            $authStudent = \App\Models\Student::first();
+        if ($authUser && $authUser->isSuperAdmin()) {
+            if (request()->filled('student_id')) {
+                $requestedStudent = \App\Models\Student::find(request('student_id'));
+                if ($requestedStudent) {
+                    $authStudent = $requestedStudent;
+                }
+            } elseif (!$authStudent) {
+                $authStudent = \App\Models\Student::first();
+            }
         }
 
         $unreadCount = 0;

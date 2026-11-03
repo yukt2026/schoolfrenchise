@@ -430,6 +430,19 @@ class AuthAndManagementTest extends TestCase
         $this->assertStringEndsWith('.jpg', $storedPath);
     }
 
+    public function test_file_upload_service_accepts_gif_images(): void
+    {
+        $gifImage = UploadedFile::fake()->image('receipt.gif', 200, 200)->size(300);
+        $storedImagePath = FileUploadService::uploadImage($gifImage, 'uploads/test_photos');
+        $this->assertNotNull($storedImagePath);
+        $this->assertStringEndsWith('.gif', $storedImagePath);
+
+        $gifDoc = UploadedFile::fake()->image('payment_slip.gif', 200, 200)->size(400);
+        $storedDocPath = FileUploadService::uploadDocument($gifDoc, 'uploads/test_photos');
+        $this->assertNotNull($storedDocPath);
+        $this->assertStringEndsWith('.gif', $storedDocPath);
+    }
+
     public function test_audit_log_records_actions_properly(): void
     {
         $log = AuditLog::record('test_action', null, ['old' => '1'], ['new' => '2']);

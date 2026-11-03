@@ -35,10 +35,10 @@
                     <div class="row g-3">
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Select Student <span class="text-danger">*</span></label>
-                            <select name="student_id" class="form-select @error('student_id') is-invalid @enderror" required>
+                            <select name="student_id" id="studentSelect" class="form-select @error('student_id') is-invalid @enderror" required>
                                 <option value="">-- Choose Registered Student --</option>
                                 @foreach($students as $st)
-                                    <option value="{{ $st->id }}" {{ old('student_id') == $st->id ? 'selected' : '' }}>
+                                    <option value="{{ $st->id }}" data-centre-id="{{ $st->centre_id }}" {{ old('student_id') == $st->id ? 'selected' : '' }}>
                                         [{{ $st->roll_no }}] {{ $st->full_name }} ({{ $st->mobile }})
                                     </option>
                                 @endforeach
@@ -51,7 +51,7 @@
 
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Study Centre <span class="text-danger">*</span></label>
-                            <select name="centre_id" class="form-select @error('centre_id') is-invalid @enderror" required>
+                            <select name="centre_id" id="centreSelect" class="form-select @error('centre_id') is-invalid @enderror" required>
                                 <option value="">-- Select Study Centre --</option>
                                 @foreach($centres as $c)
                                     <option value="{{ $c->id }}" {{ old('centre_id') == $c->id ? 'selected' : '' }}>
@@ -67,10 +67,10 @@
                         <div class="col-md-6">
                             <label class="form-label fw-semibold">Select Course <span class="text-danger">*</span></label>
                             <select name="course_id" id="courseSelect" class="form-select @error('course_id') is-invalid @enderror" required>
-                                <option value="">-- Select Course --</option>
+                                <option value="">-- Select Course ({{ $courses->count() }} Available) --</option>
                                 @foreach($courses as $crs)
-                                    <option value="{{ $crs->id }}" data-fee="{{ $crs->total_fee }}" {{ old('course_id') == $crs->id ? 'selected' : '' }}>
-                                        [{{ $crs->course_code }}] {{ $crs->title }} ({{ $crs->duration_months }} Months) - ₹{{ number_format($crs->total_fee) }}
+                                    <option value="{{ $crs->id }}" data-fee="{{ $crs->course_fee ?: $crs->total_fee }}" {{ old('course_id') == $crs->id ? 'selected' : '' }}>
+                                        [{{ $crs->course_code }}] {{ $crs->course_name }} ({{ $crs->duration }}) - ₹{{ number_format($crs->course_fee ?: $crs->total_fee) }}
                                     </option>
                                 @endforeach
                             </select>
@@ -138,16 +138,45 @@
 @push('scripts')
 <script>
 document.addEventListener('DOMContentLoaded', function() {
+    const studentSelect = document.getElementById('studentSelect');
+    const centreSelect = document.getElementById('centreSelect');
     const courseSelect = document.getElementById('courseSelect');
     const courseFeeInput = document.getElementById('courseFeeInput');
 
-    courseSelect.addEventListener('change', function() {
-        const selectedOption = this.options[this.selectedIndex];
-        const fee = selectedOption.getAttribute('data-fee');
-        if (fee) {
-            courseFeeInput.value = fee;
+    if (studentSelect && centreSelect) {
+        studentSelect.addEventListener('change', function() {
+            const selectedOpt = this.options[this.selectedIndex];
+            const centreId = selectedOpt.getAttribute('data-centre-id');
+            if (centreId && (!centreSelect.value || centreSelect.value == '')) {
+                centreSelect.value = centreId;
+            }
+        });
+    }
+
+    if (courseSelect && courseFeeInput) {
+        function updateCourseFee() {
+            const selectedOption = courseSelect.options[courseSelect.selectedIndex];
+            if (selectedOption) {
+                const fee = selectedOption.getAttribute('data-fee');
+                if (fee && (!courseFeeInput.value || parseFloat(courseFeeInput.value) <= 0)) {
+                    courseFeeInput.value = fee;
+                }
+            }
         }
-    });
+
+        courseSelect.addEventListener('change', function() {
+            const selectedOption = this.options[this.selectedIndex];
+            const fee = selectedOption ? selectedOption.getAttribute('data-fee') : null;
+            if (fee) {
+                courseFeeInput.value = fee;
+            }
+        });
+
+        // Initial check if preselected
+        if (courseSelect.value) {
+            updateCourseFee();
+        }
+    }
 });
 </script>
 @endpush

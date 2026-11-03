@@ -25,6 +25,35 @@
     </div>
 </div>
 
+@if($errors->any())
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+        <div class="d-flex align-items-center mb-1">
+            <i class="fa-solid fa-triangle-exclamation fs-5 me-2"></i>
+            <strong class="fs-6">Please resolve the following issues:</strong>
+        </div>
+        <ul class="mb-0 small ps-4 mt-2">
+            @foreach($errors->all() as $err)
+                <li>{{ $err }}</li>
+            @endforeach
+        </ul>
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if(session('success'))
+    <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+        <i class="fa-solid fa-circle-check me-2"></i>{{ session('success') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
+@if(session('error'))
+    <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+        <i class="fa-solid fa-triangle-exclamation me-2"></i>{{ session('error') }}
+        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+    </div>
+@endif
+
 <form method="POST" action="{{ route('admin.students.update', $student->id) }}" enctype="multipart/form-data">
     @csrf
     @method('PUT')
@@ -39,7 +68,7 @@
                 </div>
                 <div class="card-body">
                     <div class="row g-3">
-                        <div class="col-md-5">
+                        <div class="col-md-4">
                             <label class="form-label fw-semibold">Allocated Study Centre <span class="text-danger">*</span></label>
                             <select name="centre_id" class="form-select @error('centre_id') is-invalid @enderror" required>
                                 @foreach($centres as $c)
@@ -53,8 +82,23 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-4">
-                            <label class="form-label fw-semibold">Student Academic Status <span class="text-danger">*</span></label>
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Allocated Batch</label>
+                            <select name="batch_id" class="form-select @error('batch_id') is-invalid @enderror">
+                                <option value="">-- Select Active Batch --</option>
+                                @foreach($batches as $b)
+                                    <option value="{{ $b->id }}" {{ old('batch_id', $currentAdmission?->batch_id) == $b->id ? 'selected' : '' }}>
+                                        {{ $b->batch_name }} ({{ $b->start_time ? date('h:i A', strtotime($b->start_time)) : 'Standard' }})
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('batch_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
+                        <div class="col-md-3">
+                            <label class="form-label fw-semibold">Academic Status <span class="text-danger">*</span></label>
                             <select name="status" class="form-select @error('status') is-invalid @enderror" required>
                                 <option value="enrolled" {{ old('status', $student->status) == 'enrolled' ? 'selected' : '' }}>Enrolled</option>
                                 <option value="ongoing" {{ old('status', $student->status) == 'ongoing' ? 'selected' : '' }}>Ongoing Course</option>
@@ -66,8 +110,8 @@
                             @enderror
                         </div>
 
-                        <div class="col-md-3">
-                            <label class="form-label fw-semibold">Registration Number</label>
+                        <div class="col-md-2">
+                            <label class="form-label fw-semibold">Registration No</label>
                             <input type="text" class="form-control font-monospace bg-light" value="{{ $student->registration_no }}" readonly>
                         </div>
                     </div>

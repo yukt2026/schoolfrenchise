@@ -119,7 +119,7 @@ class CentreStudentController extends Controller
             'discount_amount' => 'nullable|numeric|min:0',
             'photo' => 'nullable|image|max:2048',
             'signature' => 'nullable|image|max:2048',
-            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp,gif|max:5120',
         ]);
 
         return DB::transaction(function () use ($request, $validated, $centre) {
@@ -251,7 +251,7 @@ class CentreStudentController extends Controller
             abort(403, 'Unauthorized access: This student is enrolled with another study centre.');
         }
 
-        $studentModel->load(['centre', 'admissions.course', 'admissions.batch']);
+        $studentModel->load(['centre.state', 'centre.district', 'admissions.course', 'admissions.batch', 'state', 'district']);
         $admission = $studentModel->admissions->first();
 
         return view('centre.students.id_card', ['centre' => $centre, 'student' => $studentModel, 'admission' => $admission]);
@@ -282,15 +282,17 @@ class CentreStudentController extends Controller
             abort(403, 'Unauthorized access: You can only edit student profiles assigned to your franchise.');
         }
 
-        $studentModel->load(['user', 'state', 'district', 'admissions.course']);
+        $studentModel->load(['user', 'state', 'district', 'admissions.course', 'admissions.batch']);
         $states = State::orderBy('name')->get();
         $districts = District::where('state_id', $studentModel->state_id)->where('status', true)->orderBy('name')->get();
+        $batches = Batch::where('centre_id', $centre->id)->orderBy('batch_name')->get();
 
         return view('centre.students.edit', [
             'centre'    => $centre,
             'student'   => $studentModel,
             'states'    => $states,
             'districts' => $districts,
+            'batches'   => $batches,
         ]);
     }
 
@@ -329,10 +331,11 @@ class CentreStudentController extends Controller
             'address'               => 'required|string',
             'pincode'               => 'required|string|max:10',
             'highest_qualification' => 'nullable|string|max:100',
+            'batch_id'              => 'nullable|exists:batches,id',
             'status'                => 'required|in:enrolled,ongoing,completed,dropped',
             'photo'                 => 'nullable|image|max:2048',
             'signature'             => 'nullable|image|max:2048',
-            'id_proof'              => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'id_proof'              => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp,gif|max:5120',
         ]);
 
         $oldValues = $studentModel->toArray();
@@ -347,8 +350,16 @@ class CentreStudentController extends Controller
             $validated['id_proof_doc'] = FileUploadService::uploadDocument($request->file('id_proof'), 'uploads/students/docs');
         }
 
-        return DB::transaction(function () use ($studentModel, $validated, $oldValues, $centre) {
+        return DB::transaction(function () use ($studentModel, $validated, $oldValues, $centre, $request) {
             $studentModel->update($validated);
+
+            // Update student batch assignment if provided
+            if ($request->has('batch_id')) {
+                $admission = $studentModel->admissions()->where('centre_id', $centre->id)->latest('id')->first();
+                if ($admission) {
+                    $admission->update(['batch_id' => $request->batch_id ?: null]);
+                }
+            }
 
             // Update associated User credentials (email, mobile, password, name)
             if ($studentModel->user) {

@@ -64,7 +64,12 @@ class AdminWalletController extends Controller
 
         $centres = Centre::where('status', 'active')->orderBy('centre_name')->get();
 
-        return view('admin.wallet.index', compact('transactions', 'stats', 'centres'));
+        $pendingRequests = CentreWalletTransaction::where('status', 'pending')
+            ->with(['centre.state'])
+            ->latest('id')
+            ->get();
+
+        return view('admin.wallet.index', compact('transactions', 'stats', 'centres', 'pendingRequests'));
     }
 
     public function adjust()
@@ -157,7 +162,7 @@ class AdminWalletController extends Controller
             return back()->with('error', 'Only pending top-up requests can be approved.');
         }
 
-        DB::transaction(function () use ($transaction) {
+        DB::transaction(function () use ($transaction, $request) {
             $wallet = CentreWallet::firstOrCreate(
                 ['centre_id' => $transaction->centre_id],
                 [
@@ -175,9 +180,11 @@ class AdminWalletController extends Controller
             $wallet->total_credited = (float) $wallet->total_credited + (float) $transaction->amount;
             $wallet->save();
 
+            $remarks = $request->input('remarks');
             $transaction->update([
                 'status'        => 'approved',
                 'balance_after' => $newBalance,
+                'admin_remarks' => $remarks ?: 'Verified & Approved by Head Office Accounts Admin',
                 'approved_by'   => Auth::id(),
             ]);
 
@@ -185,6 +192,7 @@ class AdminWalletController extends Controller
                 'amount'        => $transaction->amount,
                 'balance_after' => $newBalance,
                 'approved_by'   => Auth::id(),
+                'remarks'       => $remarks,
             ]);
 
             // Dispatch Wallet Alert Notification
@@ -209,9 +217,10 @@ class AdminWalletController extends Controller
         ]);
 
         $transaction->update([
-            'status'      => 'rejected',
-            'description' => $transaction->description . " [Rejected: {$validated['reason']}]",
-            'approved_by' => Auth::id(),
+            'status'        => 'rejected',
+            'admin_remarks' => $validated['reason'],
+            'description'   => $transaction->description . " [Rejected: {$validated['reason']}]",
+            'approved_by'   => Auth::id(),
         ]);
 
         AuditLog::record('wallet_recharge_rejected', $transaction, null, [

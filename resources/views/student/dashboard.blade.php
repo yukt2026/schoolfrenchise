@@ -126,40 +126,67 @@
 
     <!-- 2. Quick Action Shortcuts Row -->
     <div class="row g-2 g-md-3 mb-4">
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-sm-4 col-md-3 col-lg">
             <a href="{{ route('student.fees.history') }}" class="card border border-light-subtle shadow-sm rounded-3 p-2.5 p-md-3 bg-white text-decoration-none text-center h-100 hover-scale">
-                <div class="rounded-2 bg-success-subtle text-success mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                <div class="rounded-2 bg-success-subtle text-success mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
                     <i class="fa-solid fa-receipt fs-5"></i>
                 </div>
                 <div class="fw-bold text-dark small">Recent Payments</div>
-                <div class="text-muted d-none d-sm-block" style="font-size: 0.72rem;">Download fee receipts</div>
+                <div class="text-muted d-none d-sm-block" style="font-size: 0.70rem;">Fee receipts</div>
             </a>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-sm-4 col-md-3 col-lg">
             <a href="{{ route('student.id-card') }}" class="card border border-light-subtle shadow-sm rounded-3 p-2.5 p-md-3 bg-white text-decoration-none text-center h-100 hover-scale">
-                <div class="rounded-2 bg-primary-subtle text-primary mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                <div class="rounded-2 bg-primary-subtle text-primary mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
                     <i class="fa-solid fa-id-card fs-5"></i>
                 </div>
                 <div class="fw-bold text-dark small">Digital ID Card</div>
-                <div class="text-muted d-none d-sm-block" style="font-size: 0.72rem;">Print & download card</div>
+                <div class="text-muted d-none d-sm-block" style="font-size: 0.70rem;">CR80 ID card</div>
             </a>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-sm-4 col-md-3 col-lg">
             <a href="{{ route('student.admission-form') }}" class="card border border-light-subtle shadow-sm rounded-3 p-2.5 p-md-3 bg-white text-decoration-none text-center h-100 hover-scale">
-                <div class="rounded-2 bg-info-subtle text-info mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                <div class="rounded-2 bg-info-subtle text-info mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
                     <i class="fa-solid fa-file-contract fs-5"></i>
                 </div>
                 <div class="fw-bold text-dark small">Admission Form</div>
-                <div class="text-muted d-none d-sm-block" style="font-size: 0.72rem;">View verified dossier</div>
+                <div class="text-muted d-none d-sm-block" style="font-size: 0.70rem;">Verified dossier</div>
             </a>
         </div>
-        <div class="col-6 col-md-3">
+        <div class="col-6 col-sm-4 col-md-3 col-lg">
             <a href="{{ route('student.study-materials') }}" class="card border border-light-subtle shadow-sm rounded-3 p-2.5 p-md-3 bg-white text-decoration-none text-center h-100 hover-scale">
-                <div class="rounded-2 bg-warning-subtle text-warning mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 44px; height: 44px;">
+                <div class="rounded-2 bg-warning-subtle text-warning mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
                     <i class="fa-solid fa-book-bookmark fs-5"></i>
                 </div>
                 <div class="fw-bold text-dark small">Study Materials</div>
-                <div class="text-muted d-none d-sm-block" style="font-size: 0.72rem;">Access PDF course notes</div>
+                <div class="text-muted d-none d-sm-block" style="font-size: 0.70rem;">Notes & PDFs</div>
+            </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg">
+            <a href="{{ route('student.attendance') }}" class="card border border-light-subtle shadow-sm rounded-3 p-2.5 p-md-3 bg-white text-decoration-none text-center h-100 hover-scale">
+                <div class="rounded-2 bg-success-subtle text-success mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                    <i class="fa-solid fa-clipboard-user fs-5"></i>
+                </div>
+                <div class="fw-bold text-dark small">Attendance Ledger</div>
+                <div class="text-muted d-none d-sm-block" style="font-size: 0.70rem;">Sessions log</div>
+            </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg">
+            <a href="{{ route('student.results') }}" class="card border border-light-subtle shadow-sm rounded-3 p-2.5 p-md-3 bg-white text-decoration-none text-center h-100 hover-scale">
+                <div class="rounded-2 bg-primary-subtle text-primary mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                    <i class="fa-solid fa-square-poll-vertical fs-5"></i>
+                </div>
+                <div class="fw-bold text-dark small">Marksheets</div>
+                <div class="text-muted d-none d-sm-block" style="font-size: 0.70rem;">Grades & marks</div>
+            </a>
+        </div>
+        <div class="col-6 col-sm-4 col-md-3 col-lg">
+            <a href="{{ route('student.certificates') }}" class="card border border-light-subtle shadow-sm rounded-3 p-2.5 p-md-3 bg-white text-decoration-none text-center h-100 hover-scale">
+                <div class="rounded-2 bg-warning-subtle text-warning mx-auto mb-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px;">
+                    <i class="fa-solid fa-award fs-5"></i>
+                </div>
+                <div class="fw-bold text-dark small">Certificates</div>
+                <div class="text-muted d-none d-sm-block" style="font-size: 0.70rem;">Diploma & degree</div>
             </a>
         </div>
     </div>
@@ -367,9 +394,9 @@
     </div>
 
     <!-- 5. Study Materials & Notifications Section -->
-    <div class="row g-4">
+    <div class="row g-4 mb-4">
         <!-- Study Materials -->
-        <!-- <div class="col-12 col-lg-7">
+        <div class="col-12 col-lg-7">
             <div class="card border border-light-subtle shadow-sm rounded-3 h-100 bg-white">
                 <div class="card-header bg-white border-bottom border-light p-3 p-md-4 d-flex align-items-center justify-content-between">
                     <h5 class="fw-bold mb-0 text-dark fs-6 fs-md-5">
@@ -408,14 +435,14 @@
                     </div>
                 </div>
             </div>
-        </div> -->
+        </div>
 
         <!-- Notifications & Announcements -->
         <div class="col-12 col-lg-5">
             <div class="card border border-light-subtle shadow-sm rounded-3 h-100 bg-white">
-                <div class="card-header bg-white border-bottom border-light p-4 d-flex align-items-center justify-content-between">
+                <div class="card-header bg-white border-bottom border-light p-3 p-md-4 d-flex align-items-center justify-content-between">
                     <div class="d-flex align-items-center gap-2">
-                        <h5 class="fw-bold mb-0 text-dark">
+                        <h5 class="fw-bold mb-0 text-dark fs-6 fs-md-5">
                             <i class="fa-solid fa-bell text-warning me-2"></i> Recent Alerts
                         </h5>
                         @if($unreadNotificationsCount > 0)
@@ -426,7 +453,7 @@
                         All Alerts <i class="fa-solid fa-arrow-right ms-1"></i>
                     </a>
                 </div>
-                <div class="card-body p-4">
+                <div class="card-body p-3 p-md-4">
                     <div class="list-group list-group-flush">
                         @forelse($recentNotifications as $notif)
                             <div class="list-group-item px-0 py-3 border-light {{ is_null($notif->read_at) ? 'fw-semibold' : '' }}">

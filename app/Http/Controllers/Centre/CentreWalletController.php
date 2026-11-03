@@ -8,8 +8,10 @@ use App\Models\Centre;
 use App\Models\CentreWallet;
 use App\Models\CentreWalletTransaction;
 use App\Models\OnlineTransaction;
+use App\Models\Setting;
 use App\Services\FileUploadService;
 use App\Services\PaymentGatewayService;
+use App\Services\QrCodeService;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 
@@ -74,7 +76,48 @@ class CentreWalletController extends Controller
         $centre = $this->getAuthCentre();
         $wallet = $centre->wallet;
 
-        return view('centre.wallet.topup', compact('centre', 'wallet'));
+        $adminUpiId = Setting::get('admin_upi_id', '9162384660@upi');
+        $adminUpiName = Setting::get('admin_upi_name', 'TECH ERA COMPUTER');
+        $adminQrCode = Setting::get('admin_qr_code');
+        $adminBank = [
+            'name'       => Setting::get('admin_bank_name', 'State Bank of India'),
+            'account_no' => Setting::get('admin_bank_account_no', '38491028472'),
+            'ifsc'       => Setting::get('admin_bank_ifsc', 'SBIN0001234'),
+            'holder'     => Setting::get('admin_bank_holder', 'TECH ERA COMPUTER'),
+        ];
+
+        $defaultAmount = 1000.00;
+        $upiUri = "upi://pay?pa=" . rawurlencode($adminUpiId) . "&pn=" . rawurlencode($adminUpiName) . "&am=" . number_format($defaultAmount, 2, '.', '') . "&cu=INR&tn=" . rawurlencode("Recharge " . $centre->centre_code);
+        $qrSvg = QrCodeService::generateSvg($upiUri, 220);
+
+        return view('centre.wallet.topup', compact('centre', 'wallet', 'adminUpiId', 'adminUpiName', 'adminQrCode', 'adminBank', 'defaultAmount', 'upiUri', 'qrSvg'));
+    }
+
+    /**
+     * AJAX endpoint to generate a live dynamic UPI QR code for the exact amount.
+     */
+    public function generateQr(Request $request)
+    {
+        $centre = $this->getAuthCentre();
+        $amount = (float) $request->input('amount', 1000);
+        if ($amount < 1) {
+            $amount = 100.00;
+        }
+
+        $adminUpiId = Setting::get('admin_upi_id', '9162384660@upi');
+        $adminUpiName = Setting::get('admin_upi_name', 'TECH ERA COMPUTER');
+
+        $upiUri = "upi://pay?pa=" . rawurlencode($adminUpiId) . "&pn=" . rawurlencode($adminUpiName) . "&am=" . number_format($amount, 2, '.', '') . "&cu=INR&tn=" . rawurlencode("Recharge " . $centre->centre_code);
+        $qrSvg = QrCodeService::generateSvg($upiUri, 220);
+
+        return response()->json([
+            'amount'         => $amount,
+            'amount_formatted' => number_format($amount, 2),
+            'admin_upi_id'   => $adminUpiId,
+            'admin_upi_name' => $adminUpiName,
+            'upi_uri'        => $upiUri,
+            'qr_svg'         => $qrSvg,
+        ]);
     }
 
     public function storeTopup(Request $request)
@@ -83,39 +126,49 @@ class CentreWalletController extends Controller
 
         $validated = $request->validate([
             'amount' => 'required|numeric|min:100',
-            'payment_mode' => 'required|in:upi,bank_transfer,neft,rtgs,imps,cheque',
+            'payment_mode' => 'nullable|string|in:upi,bank_transfer,neft,rtgs,imps,cheque',
             'reference_no' => 'required|string|max:100',
             'notes' => 'nullable|string|max:255',
-            'payment_slip' => 'nullable|file|mimes:pdf,jpg,jpeg,png|max:5120',
+            'payment_slip' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp,gif|max:5120',
         ]);
 
-        $slipPath = $request->hasFile('payment_slip')
-            ? FileUploadService::uploadDocument($request->file('payment_slip'), 'uploads/wallet/slips')
-            : null;
+        $mode = $validated['payment_mode'] ?? 'upi';
 
-        $desc = "Recharge request via " . strtoupper($validated['payment_mode']) . " (Ref: {$validated['reference_no']})";
+        try {
+            $slipPath = $request->hasFile('payment_slip')
+                ? FileUploadService::uploadDocument($request->file('payment_slip'), 'uploads/wallet/slips')
+                : null;
+        } catch (\InvalidArgumentException $e) {
+            return back()->withInput()->withErrors(['payment_slip' => $e->getMessage()]);
+        }
+
+        $desc = "Recharge request via " . strtoupper($mode) . " (Ref: " . strtoupper(trim($validated['reference_no'])) . ")";
         if (!empty($validated['notes'])) {
             $desc .= " - " . $validated['notes'];
         }
 
         $txn = CentreWalletTransaction::create([
-            'centre_id' => $centre->id,
-            'type' => 'credit',
-            'amount' => (float) $validated['amount'],
+            'centre_id'     => $centre->id,
+            'type'          => 'credit',
+            'amount'        => (float) $validated['amount'],
             'balance_after' => (float) ($centre->wallet?->balance ?? 0.00),
-            'reference_no' => strtoupper(trim($validated['reference_no'])),
-            'description' => $desc,
-            'status' => 'pending',
+            'reference_no'  => strtoupper(trim($validated['reference_no'])),
+            'payment_mode'  => $mode,
+            'payment_slip'  => $slipPath,
+            'description'   => $desc,
+            'status'        => 'pending',
         ]);
 
         AuditLog::record('centre_wallet_topup_requested', $txn, null, [
-            'centre_id' => $centre->id,
-            'amount' => $txn->amount,
+            'centre_id'    => $centre->id,
+            'amount'       => $txn->amount,
             'reference_no' => $txn->reference_no,
+            'payment_mode' => $mode,
+            'payment_slip' => $slipPath,
         ]);
 
         return redirect()->route('centre.wallet.index')
-            ->with('success', "Top-up request for ₹" . number_format($txn->amount, 2) . " submitted successfully! Central Accounts team will verify your UTR and credit your balance.");
+            ->with('success', "Top-up request for ₹" . number_format($txn->amount, 2) . " (Ref #{$txn->reference_no}) submitted successfully! It is now pending Admin approval. Your wallet balance will be credited as soon as verified.");
     }
 
     /**

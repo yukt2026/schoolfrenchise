@@ -54,6 +54,15 @@ class AdminSettingController extends Controller
             'payment_gateway_mode'         => 'sandbox',
             'sms_alerts_enabled'           => '0',
             'whatsapp_alerts_enabled'      => '0',
+
+            // Head Office UPI & Franchise Wallet QR Settings
+            'admin_upi_id'                 => '9162384660@upi',
+            'admin_upi_name'               => 'TECH ERA COMPUTER',
+            'admin_qr_code'                => null,
+            'admin_bank_name'              => 'State Bank of India',
+            'admin_bank_account_no'        => '38491028472',
+            'admin_bank_ifsc'              => 'SBIN0001234',
+            'admin_bank_holder'            => 'TECH ERA COMPUTER',
         ];
 
         $settings = array_merge($defaults, $savedSettings);
@@ -71,9 +80,9 @@ class AdminSettingController extends Controller
             'institute_name'              => ['required', 'string', 'max:191'],
             'institute_tagline'           => ['nullable', 'string', 'max:255'],
             'affiliation_text'            => ['nullable', 'string', 'max:500'],
-            'institute_logo'              => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
-            'institute_favicon'           => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:1024'],
-            'institute_seal'              => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'institute_logo'              => ['nullable', 'image', 'mimes:jpeg,png,webp,gif', 'max:2048'],
+            'institute_favicon'           => ['nullable', 'image', 'mimes:jpeg,png,webp,gif,ico', 'max:1024'],
+            'institute_seal'              => ['nullable', 'image', 'mimes:jpeg,png,webp,gif', 'max:2048'],
 
             // Contact
             'contact_email'               => ['required', 'email', 'max:191'],
@@ -101,6 +110,15 @@ class AdminSettingController extends Controller
             'payment_gateway_mode'        => ['required', 'string', 'in:sandbox,live'],
             'sms_alerts_enabled'          => ['nullable', 'boolean'],
             'whatsapp_alerts_enabled'     => ['nullable', 'boolean'],
+
+            // Head Office UPI & Bank Details
+            'admin_upi_id'                => ['nullable', 'string', 'max:100'],
+            'admin_upi_name'              => ['nullable', 'string', 'max:191'],
+            'admin_qr_code'               => ['nullable', 'image', 'mimes:jpeg,png,webp,gif', 'max:2048'],
+            'admin_bank_name'             => ['nullable', 'string', 'max:100'],
+            'admin_bank_account_no'       => ['nullable', 'string', 'max:50'],
+            'admin_bank_ifsc'             => ['nullable', 'string', 'max:50'],
+            'admin_bank_holder'           => ['nullable', 'string', 'max:191'],
         ]);
 
         return DB::transaction(function () use ($request, $validated) {
@@ -150,6 +168,30 @@ class AdminSettingController extends Controller
             Setting::set('payment_gateway_mode', $validated['payment_gateway_mode'], 'integrations');
             Setting::set('sms_alerts_enabled', $request->boolean('sms_alerts_enabled') ? '1' : '0', 'integrations');
             Setting::set('whatsapp_alerts_enabled', $request->boolean('whatsapp_alerts_enabled') ? '1' : '0', 'integrations');
+
+            // Group 6: Head Office UPI & Wallet Recharge Settings
+            if (isset($validated['admin_upi_id'])) {
+                Setting::set('admin_upi_id', trim($validated['admin_upi_id']), 'payment');
+            }
+            if (isset($validated['admin_upi_name'])) {
+                Setting::set('admin_upi_name', trim($validated['admin_upi_name']), 'payment');
+            }
+            if ($request->hasFile('admin_qr_code')) {
+                $qrPath = FileUploadService::uploadImage($request->file('admin_qr_code'), 'uploads/settings');
+                Setting::set('admin_qr_code', $qrPath, 'payment');
+            }
+            if (isset($validated['admin_bank_name'])) {
+                Setting::set('admin_bank_name', trim($validated['admin_bank_name']), 'payment');
+            }
+            if (isset($validated['admin_bank_account_no'])) {
+                Setting::set('admin_bank_account_no', trim($validated['admin_bank_account_no']), 'payment');
+            }
+            if (isset($validated['admin_bank_ifsc'])) {
+                Setting::set('admin_bank_ifsc', strtoupper(trim($validated['admin_bank_ifsc'])), 'payment');
+            }
+            if (isset($validated['admin_bank_holder'])) {
+                Setting::set('admin_bank_holder', trim($validated['admin_bank_holder']), 'payment');
+            }
 
             AuditLog::record('settings_updated', null, null, [
                 'updated_by' => auth()->id(),

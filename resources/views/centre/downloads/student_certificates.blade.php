@@ -11,7 +11,10 @@
         <p class="text-muted small mb-0">Central Board issued diplomas and course completion certificates for your centre's successful candidates.</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('centre.downloads.certificate') }}" class="btn btn-warning text-dark fw-bold btn-sm rounded-2 px-3 shadow-sm">
+        <a href="{{ route('centre.downloads.student-certificates.create') }}" class="btn btn-primary fw-bold btn-sm rounded-2 px-3 shadow-sm">
+            <i class="fa-solid fa-stamp me-1"></i> Issue New Certificate
+        </a>
+        <a href="{{ route('centre.downloads.certificate') }}" target="_blank" class="btn btn-warning text-dark fw-bold btn-sm rounded-2 px-3 shadow-sm">
             <i class="fa-solid fa-certificate me-1"></i>Centre Affiliation Certificate
         </a>
     </div>
@@ -159,7 +162,10 @@
                         <td colspan="7" class="text-center py-5 text-muted">
                             <i class="fa-solid fa-certificate fs-1 text-black-50 mb-3 d-block"></i>
                             <h5>No Student Certificates Issued Yet</h5>
-                            <p class="small text-muted mb-0">Certificates approved by the Central Directorate for your candidates will appear here.</p>
+                            <p class="small text-muted mb-3">You can issue official course completion certificates and marksheets for your centre's eligible students.</p>
+                            <a href="{{ route('centre.downloads.student-certificates.create') }}" class="btn btn-primary btn-sm fw-bold px-3">
+                                <i class="fa-solid fa-stamp me-1"></i> Issue First Certificate
+                            </a>
                         </td>
                     </tr>
                     @endforelse

@@ -93,6 +93,8 @@ class AdminAdmissionModuleTest extends TestCase
         $response = $this->actingAs($this->superAdmin)->get(route('admin.admissions.create'));
         $response->assertStatus(200);
         $response->assertSee('Direct Course Admission');
+        $response->assertSee($this->course->course_name);
+        $response->assertSee('Select Course (');
     }
 
     public function test_admin_can_store_direct_admission(): void

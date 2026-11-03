@@ -29,8 +29,9 @@ class StudentPortalController extends Controller
         $admission = $this->getActiveAdmission($student);
 
         // Financial Ledger Data
-        $totalFees = $admission ? (float) $admission->net_fee : 0.00;
-        $totalPaid = $admission ? (float) $admission->total_paid : 0.00;
+        $totalFees = $admission ? (float) ($admission->net_fee ?: $admission->course_fee ?: ($admission->course?->course_fee ?? 0.00)) : 0.00;
+        $paymentsSum = (float) $student->payments()->sum('amount');
+        $totalPaid = max($admission ? (float) $admission->total_paid : 0.00, $paymentsSum);
         $totalDues = max(0.00, $totalFees - $totalPaid);
 
         // Recent Payments (Latest 5)
@@ -141,7 +142,7 @@ class StudentPortalController extends Controller
                     }
                 },
             ],
-            'photo'            => ['nullable', 'image', 'mimes:jpeg,png,webp', 'max:2048'],
+            'photo'            => ['nullable', 'image', 'mimes:jpeg,png,webp,jpg,gif', 'max:2048'],
         ]);
 
         if ($request->hasFile('photo')) {
@@ -164,7 +165,16 @@ class StudentPortalController extends Controller
 
         $student->alternate_mobile = $validated['alternate_mobile'] ?? $student->alternate_mobile;
         if (!empty($validated['phone']) || !empty($validated['mobile'])) {
-            $student->mobile = $validated['phone'] ?? $validated['mobile'];
+            $newMobile = $validated['phone'] ?? $validated['mobile'];
+            $student->mobile = $newMobile;
+            if ($student->user) {
+                $mobileTaken = \App\Models\User::where('mobile', $newMobile)
+                    ->where('id', '!=', $student->user->id)
+                    ->exists();
+                if (!$mobileTaken) {
+                    $student->user->update(['mobile' => $newMobile]);
+                }
+            }
         }
         $student->address = $validated['address'] ?? $student->address;
         $student->city = $validated['city'] ?? $student->city;
@@ -208,7 +218,7 @@ class StudentPortalController extends Controller
     public function idCard()
     {
         $student = $this->getStudent();
-        $student->load(['centre', 'admissions.course', 'admissions.batch']);
+        $student->load(['centre.state', 'centre.district', 'admissions.course', 'admissions.batch', 'state', 'district']);
         $admission = $this->getActiveAdmission($student);
 
         return view('student.id_card', compact('student', 'admission'));

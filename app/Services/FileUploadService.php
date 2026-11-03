@@ -21,16 +21,16 @@ class FileUploadService
      */
     public static function uploadImage(UploadedFile $file, string $folder = 'uploads/images', int $maxKb = 2048): string
     {
-        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp'];
+        $allowedMimes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         return self::processUpload($file, $folder, $allowedMimes, $maxKb);
     }
 
     /**
-     * Upload a document (identity proof, marksheet, affiliation certificate, study material)
+     * Upload a document (identity proof, marksheet, affiliation certificate, study material, payment slip)
      */
     public static function uploadDocument(UploadedFile $file, string $folder = 'uploads/docs', int $maxKb = 5120): string
     {
-        $allowedMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp'];
+        $allowedMimes = ['application/pdf', 'image/jpeg', 'image/png', 'image/webp', 'image/gif'];
         return self::processUpload($file, $folder, $allowedMimes, $maxKb);
     }
 

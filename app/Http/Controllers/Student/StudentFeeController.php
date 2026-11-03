@@ -26,8 +26,9 @@ class StudentFeeController extends Controller
         $student = $this->getStudent();
         $admission = $this->getActiveAdmission($student);
 
-        $totalFees = $admission ? (float) $admission->net_fee : 0.00;
-        $totalPaid = $admission ? (float) $admission->total_paid : 0.00;
+        $totalFees = $admission ? (float) ($admission->net_fee ?: $admission->course_fee ?: ($admission->course?->course_fee ?? 0.00)) : 0.00;
+        $paymentsSum = (float) $student->payments()->sum('amount');
+        $totalPaid = max($admission ? (float) $admission->total_paid : 0.00, $paymentsSum);
         $totalDues = max(0.00, $totalFees - $totalPaid);
 
         $installments = $student->fees()->orderBy('installment_no')->get();

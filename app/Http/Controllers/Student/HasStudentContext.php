@@ -48,6 +48,12 @@ trait HasStudentContext
      */
     protected function getActiveAdmission(Student $student): ?Admission
     {
-        return $student->admissions()->with(['course.subjects', 'batch', 'centre'])->latest()->first();
+        $admission = $student->admissions()->with(['course.subjects', 'batch', 'centre'])->latest()->first();
+
+        if ($admission) {
+            \App\Services\FeeService::reconcileAdmissionPayments($admission);
+        }
+
+        return $admission;
     }
 }

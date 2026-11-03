@@ -130,6 +130,51 @@ class AdminBatchController extends Controller
             ->with('success', "Batch [{$name}] soft-deleted successfully.");
     }
 
+    public function enrollStudents(Request $request, Batch $batch)
+    {
+        $validated = $request->validate([
+            'student_ids'   => 'required|array|min:1',
+            'student_ids.*' => 'exists:students,id',
+        ]);
+
+        $enrolledCount = 0;
+        DB::transaction(function () use ($batch, $validated, &$enrolledCount) {
+            foreach ($validated['student_ids'] as $studentId) {
+                $admission = Admission::where('student_id', $studentId)
+                    ->where('centre_id', $batch->centre_id)
+                    ->latest('id')
+                    ->first();
+
+                if ($admission) {
+                    $admission->update(['batch_id' => $batch->id]);
+                    $enrolledCount++;
+                }
+            }
+
+            AuditLog::record('admin_batch_students_enrolled', $batch, null, [
+                'batch_id'       => $batch->id,
+                'enrolled_count' => $enrolledCount,
+                'student_ids'    => $validated['student_ids'],
+            ]);
+        });
+
+        return back()->with('success', "Successfully enrolled {$enrolledCount} student(s) into batch [{$batch->batch_name}].");
+    }
+
+    public function unenrollStudent(Batch $batch, \App\Models\Student $student)
+    {
+        Admission::where('student_id', $student->id)
+            ->where('batch_id', $batch->id)
+            ->update(['batch_id' => null]);
+
+        AuditLog::record('admin_batch_student_unenrolled', $batch, null, [
+            'batch_id'   => $batch->id,
+            'student_id' => $student->id,
+        ]);
+
+        return back()->with('success', "Student [{$student->full_name}] un-enrolled from batch.");
+    }
+
     public function attendanceSheet(Request $request, Batch $batch)
     {
         $batch->load(['centre', 'course', 'admissions.student']);
@@ -141,7 +186,15 @@ class AdminBatchController extends Controller
             ->get()
             ->keyBy('student_id');
 
-        return view('admin.batches.attendance_sheet', compact('batch', 'attendanceDate', 'existingRecords'));
+        $enrolledIds = $batch->admissions->pluck('student_id')->toArray();
+        $availableStudents = \App\Models\Student::where('centre_id', $batch->centre_id)
+            ->whereIn('status', ['enrolled', 'ongoing'])
+            ->whereNotIn('id', $enrolledIds)
+            ->with(['admissions.course', 'admissions.batch'])
+            ->orderBy('full_name')
+            ->get();
+
+        return view('admin.batches.attendance_sheet', compact('batch', 'attendanceDate', 'existingRecords', 'availableStudents'));
     }
 
     public function markAttendance(Request $request, Batch $batch)

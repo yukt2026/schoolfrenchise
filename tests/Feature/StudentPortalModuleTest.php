@@ -606,6 +606,9 @@ class StudentPortalModuleTest extends TestCase
         $response->assertSee('DCE-CERT-2026-0089');
         $response->assertSee('ISSUED');
         $response->assertSee('VALID');
+        $response->assertSee('cert-header-dark');
+        $response->assertSee('OFFICIAL CERTIFICATE');
+        $response->assertSee($this->course->course_name);
         $response->assertSee('e3b0c44298fc1c149afbf4c8996fb92427ae41e4649b934ca495991b7852b855');
 
         // Test student certificate printable view
@@ -779,5 +782,121 @@ class StudentPortalModuleTest extends TestCase
             $redirectTarget = $response->headers->get('Location');
             $this->assertEquals(200, $response->getStatusCode(), "Route {$url} failed with status {$response->getStatusCode()}, redirect: {$redirectTarget}");
         }
+    }
+
+    /**
+     * Test enrolled course page renders non-zero course fee and dynamic subject marks breakdown.
+     */
+    public function test_student_course_displays_dynamic_subjects_and_enrolled_fee(): void
+    {
+        // Add course subject with distinct marks
+        CourseSubject::create([
+            'course_id'       => $this->course->id,
+            'subject_code'    => 'TEST-101',
+            'subject_name'    => 'Advanced Computing Concepts',
+            'theory_max'      => 75,
+            'practical_max'   => 25,
+            'viva_max'        => 0,
+            'total_max'       => 100,
+            'min_pass_marks'  => 40,
+            'sort_order'      => 1,
+        ]);
+
+        $response = $this->actingAs($this->studentUser)->get(route('student.course'));
+
+        $response->assertStatus(200);
+        $response->assertSee('TEST-101');
+        $response->assertSee('Advanced Computing Concepts');
+        $response->assertSee('75');
+        $response->assertSee('25');
+        $response->assertDontSee('₹0.00');
+        $response->assertSee(number_format($this->admission->net_fee, 2));
+    }
+
+    /**
+     * Test admissions with total_paid > 0 are auto-reconciled with real payment transactions and receipts.
+     */
+    public function test_admissions_with_paid_fees_are_auto_reconciled_with_payments_and_receipts(): void
+    {
+        // Create student with admission having paid amount but no prior fee payment rows
+        $freshUser = User::create([
+            'name'      => 'Reconciled Student',
+            'email'     => 'reconcile.' . uniqid() . '@example.com',
+            'password'  => Hash::make('Password@123'),
+            'role'      => 'student',
+            'is_active' => true,
+        ]);
+        $freshUser->roles()->syncWithoutDetaching([Role::where('name', 'student')->first()->id]);
+
+        $freshStudent = Student::create([
+            'user_id'         => $freshUser->id,
+            'centre_id'       => $this->centre->id,
+            'registration_no' => 'REG-REC-' . rand(1000, 9999),
+            'roll_no'         => 'ROL-REC-' . rand(1000, 9999),
+            'full_name'       => 'Reconciled Student',
+            'father_name'     => 'Father Rec',
+            'mobile'          => '9876123450',
+            'gender'          => 'male',
+            'dob'             => '2003-01-01',
+            'state_id'        => $this->centre->state_id,
+            'district_id'     => $this->centre->district_id,
+            'city'            => 'Patna',
+            'address'         => 'Main Road',
+            'pincode'         => '800001',
+            'status'          => 'enrolled',
+        ]);
+
+        $admission = Admission::create([
+            'student_id'      => $freshStudent->id,
+            'centre_id'       => $this->centre->id,
+            'course_id'       => $this->course->id,
+            'batch_id'        => $this->batch->id,
+            'admission_date'  => '2026-02-01',
+            'course_fee'      => 5000.00,
+            'discount_amount' => 0.00,
+            'net_fee'         => 5000.00,
+            'total_paid'      => 5000.00,
+            'status'          => 'active',
+            'remarks'         => 'Full fee paid at counter',
+        ]);
+
+        // Prior to visiting, 0 payments
+        $this->assertEquals(0, FeePayment::where('admission_id', $admission->id)->count());
+
+        // Visiting dashboard triggers self-healing reconciliation
+        $response = $this->actingAs($freshUser)->get(route('student.dashboard'));
+        $response->assertStatus(200);
+
+        // Assert payment record and receipt now exist
+        $payment = FeePayment::where('admission_id', $admission->id)->first();
+        $this->assertNotNull($payment);
+        $this->assertEquals(5000.00, (float) $payment->amount);
+
+        // Dashboard must show this receipt and not "No payment transactions"
+        $response->assertSee($payment->receipt_no);
+        $response->assertSee('5,000.00');
+
+        // Fees page must also show the payment and receipts ledger
+        $feeResponse = $this->actingAs($freshUser)->get(route('student.fees'));
+        $feeResponse->assertStatus(200);
+        $feeResponse->assertSee($payment->receipt_no);
+        $feeResponse->assertSee('5,000.00');
+    }
+
+    /**
+     * Test dashboard quick links contain all seven essential modules.
+     */
+    public function test_dashboard_quick_links_include_all_seven_student_modules(): void
+    {
+        $response = $this->actingAs($this->studentUser)->get(route('student.dashboard'));
+
+        $response->assertStatus(200);
+        $response->assertSee(route('student.fees.history'));
+        $response->assertSee(route('student.id-card'));
+        $response->assertSee(route('student.admission-form'));
+        $response->assertSee(route('student.study-materials'));
+        $response->assertSee(route('student.attendance'));
+        $response->assertSee(route('student.results'));
+        $response->assertSee(route('student.certificates'));
     }
 }

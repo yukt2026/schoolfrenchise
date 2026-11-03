@@ -165,11 +165,16 @@
                         </td>
                         <td class="text-end pe-3">
                             <div class="btn-group btn-group-sm">
-                                <a href="{{ route('centre.exams.results.marksheet', $res->id) }}" class="btn btn-outline-info rounded-start-2" target="_blank" title="View & Print Official Marksheet">
+                                <a href="{{ route('centre.exams.results.marksheet', $res->id) }}" class="btn btn-outline-info" target="_blank" title="View & Print Official Marksheet">
                                     <i class="fa-solid fa-file-invoice me-1"></i>Marksheet
                                 </a>
+                                @if($res->certificate)
+                                <a href="{{ route('centre.downloads.student-certificates.show', $res->certificate->id) }}" class="btn btn-outline-success" target="_blank" title="View & Print Official Certificate">
+                                    <i class="fa-solid fa-certificate me-1"></i>Certificate
+                                </a>
+                                @endif
                                 @if($res->exam_id)
-                                <a href="{{ route('centre.exams.marks', [$res->exam_id, 'student_id' => $res->student_id]) }}" class="btn btn-outline-secondary rounded-end-2" title="Edit Marks Evaluation">
+                                <a href="{{ route('centre.exams.marks', [$res->exam_id, 'student_id' => $res->student_id]) }}" class="btn btn-outline-secondary" title="Edit Marks Evaluation">
                                     <i class="fa-solid fa-pen-to-square"></i>
                                 </a>
                                 @endif

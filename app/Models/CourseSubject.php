@@ -25,4 +25,19 @@ class CourseSubject extends Model
     {
         return $this->belongsTo(Course::class);
     }
+
+    public function getTheoryMarksAttribute()
+    {
+        return $this->theory_max;
+    }
+
+    public function getPracticalMarksAttribute()
+    {
+        return $this->practical_max;
+    }
+
+    public function getTotalMarksAttribute()
+    {
+        return $this->total_max;
+    }
 }

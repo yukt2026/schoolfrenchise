@@ -330,6 +330,100 @@
             </div>
         </div>
 
+        <!-- SECTION 6: Head Office UPI & Franchise Wallet Recharge QR -->
+        <div class="card border-0 shadow-sm rounded-3 bg-white mb-4">
+            <div class="card-header bg-white border-0 pt-4 px-4 pb-0">
+                <div class="d-flex justify-content-between align-items-center">
+                    <div>
+                        <h5 class="fw-bold text-dark mb-1">
+                            <i class="fa-solid fa-qrcode me-2 text-success"></i> 6. Head Office UPI & Wallet Recharge Settings
+                        </h5>
+                        <p class="text-muted small mb-0">Configure the Head Office UPI ID, Payee Name, and official bank accounts. When franchises recharge their wallet, the system automatically generates an exact-amount UPI QR code with these details.</p>
+                    </div>
+                    <span class="badge bg-success-subtle text-success px-3 py-2 fw-semibold">
+                        <i class="fa-solid fa-shield-check me-1"></i> Admin Supervised
+                    </span>
+                </div>
+            </div>
+            <div class="card-body p-4">
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label for="admin_upi_id" class="form-label small fw-bold">Head Office Official UPI ID <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fa-solid fa-at text-success"></i></span>
+                            <input type="text" name="admin_upi_id" id="admin_upi_id" class="form-control font-monospace fw-bold @error('admin_upi_id') is-invalid @enderror" value="{{ old('admin_upi_id', $settings['admin_upi_id'] ?? '9162384660@upi') }}" placeholder="e.g. 9162384660@upi or techeracomputer@okaxis">
+                        </div>
+                        <div class="form-text small">This UPI ID is embedded into the dynamic QR code generated for franchises to scan and pay.</div>
+                        @error('admin_upi_id')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="admin_upi_name" class="form-label small fw-bold">Payee / Account Display Name <span class="text-danger">*</span></label>
+                        <div class="input-group">
+                            <span class="input-group-text bg-light"><i class="fa-solid fa-building text-primary"></i></span>
+                            <input type="text" name="admin_upi_name" id="admin_upi_name" class="form-control fw-semibold @error('admin_upi_name') is-invalid @enderror" value="{{ old('admin_upi_name', $settings['admin_upi_name'] ?? 'TECH ERA COMPUTER') }}" placeholder="e.g. TECH ERA COMPUTER">
+                        </div>
+                        <div class="form-text small">Displayed on PhonePe, GPay, Paytm as the verified receiver name.</div>
+                        @error('admin_upi_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="admin_qr_code" class="form-label small fw-bold">Official Standee / Merchant QR Image <small class="text-muted">(Optional)</small></label>
+                        <input type="file" name="admin_qr_code" id="admin_qr_code" class="form-control form-control-sm @error('admin_qr_code') is-invalid @enderror" accept="image/jpeg,image/png,image/webp">
+                        <div class="form-text small">Upload your physical shop/office QR code image (PNG/JPG/WebP, max 2MB) if you wish to display it alongside the dynamic QR.</div>
+                        @error('admin_qr_code')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                        @if(!empty($settings['admin_qr_code']))
+                            <div class="mt-2 p-2 border rounded bg-light d-flex align-items-center gap-3">
+                                <img src="{{ asset('storage/' . $settings['admin_qr_code']) }}" alt="Uploaded QR Code" class="img-thumbnail" style="max-height: 80px;">
+                                <div class="small">
+                                    <span class="badge bg-success">Uploaded Merchant QR</span>
+                                    <div class="text-muted mt-1 font-monospace" style="font-size: 0.72rem;">{{ $settings['admin_qr_code'] }}</div>
+                                </div>
+                            </div>
+                        @endif
+                    </div>
+
+                    <div class="col-md-6">
+                        <label for="admin_bank_holder" class="form-label small fw-bold">Bank Account Holder Name</label>
+                        <input type="text" name="admin_bank_holder" id="admin_bank_holder" class="form-control @error('admin_bank_holder') is-invalid @enderror" value="{{ old('admin_bank_holder', $settings['admin_bank_holder'] ?? 'TECH ERA COMPUTER') }}" placeholder="TECH ERA COMPUTER">
+                        @error('admin_bank_holder')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="admin_bank_name" class="form-label small fw-bold">Bank Name</label>
+                        <input type="text" name="admin_bank_name" id="admin_bank_name" class="form-control @error('admin_bank_name') is-invalid @enderror" value="{{ old('admin_bank_name', $settings['admin_bank_name'] ?? 'State Bank of India') }}" placeholder="e.g. State Bank of India">
+                        @error('admin_bank_name')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="admin_bank_account_no" class="form-label small fw-bold">Bank Account Number</label>
+                        <input type="text" name="admin_bank_account_no" id="admin_bank_account_no" class="form-control font-monospace @error('admin_bank_account_no') is-invalid @enderror" value="{{ old('admin_bank_account_no', $settings['admin_bank_account_no'] ?? '38491028472') }}" placeholder="e.g. 38491028472">
+                        @error('admin_bank_account_no')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+
+                    <div class="col-md-4">
+                        <label for="admin_bank_ifsc" class="form-label small fw-bold">Bank IFSC Code</label>
+                        <input type="text" name="admin_bank_ifsc" id="admin_bank_ifsc" class="form-control font-monospace text-uppercase @error('admin_bank_ifsc') is-invalid @enderror" value="{{ old('admin_bank_ifsc', $settings['admin_bank_ifsc'] ?? 'SBIN0001234') }}" placeholder="e.g. SBIN0001234">
+                        @error('admin_bank_ifsc')
+                            <div class="invalid-feedback">{{ $message }}</div>
+                        @enderror
+                    </div>
+                </div>
+            </div>
+        </div>
+
         <!-- Sticky Submit Footer -->
         <div class="d-flex justify-content-end gap-2 pt-3 pb-5">
             <button type="submit" class="btn btn-primary px-5 py-2 shadow">

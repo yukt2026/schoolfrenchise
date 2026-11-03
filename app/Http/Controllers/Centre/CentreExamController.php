@@ -139,6 +139,41 @@ class CentreExamController extends Controller
         return view('centre.exams.hall_tickets', compact('centre', 'exam', 'students'));
     }
 
+    public function studentMarks(Request $request, Student $student)
+    {
+        $centre = $this->getAuthCentre();
+        if ($student->centre_id !== $centre->id) {
+            abort(403, 'Unauthorized access to student evaluation.');
+        }
+
+        $admission = $student->admissions()->latest()->first();
+        if (!$admission || !$admission->course_id) {
+            return redirect()->route('centre.students.show', $student->id)
+                ->with('error', 'Student must have an active course enrollment before entering marks.');
+        }
+
+        $course = Course::findOrFail($admission->course_id);
+        $year = date('Y');
+
+        $exam = Exam::firstOrCreate(
+            [
+                'course_id' => $course->id,
+                'exam_code' => 'EXAM-' . $year . '-' . strtoupper($course->course_code),
+            ],
+            [
+                'exam_title'   => 'Assessment Examination - ' . $course->course_name,
+                'session_name' => ($year - 1) . '-' . $year,
+                'exam_date'    => now()->toDateString(),
+                'status'       => 'published',
+            ]
+        );
+
+        return redirect()->route('centre.exams.marks', [
+            'exam'       => $exam->id,
+            'student_id' => $student->id,
+        ]);
+    }
+
     public function marksIndex(Request $request)
     {
         $centre = $this->getAuthCentre();
@@ -146,6 +181,38 @@ class CentreExamController extends Controller
         if ($request->filled('exam_id')) {
             $exam = Exam::findOrFail($request->exam_id);
             return $this->marksForm($request, $exam);
+        }
+
+        // Auto-provision standard exam sessions for active courses with enrolled candidates at this centre
+        $year = date('Y');
+        $enrolledCourseIds = Student::where('centre_id', $centre->id)
+            ->whereHas('admissions', function ($q) {
+                $q->where('status', 'active');
+            })
+            ->with('admissions')
+            ->get()
+            ->pluck('admissions')
+            ->flatten()
+            ->pluck('course_id')
+            ->unique()
+            ->filter();
+
+        foreach ($enrolledCourseIds as $cId) {
+            $course = Course::find($cId);
+            if ($course) {
+                Exam::firstOrCreate(
+                    [
+                        'course_id' => $course->id,
+                        'exam_code' => 'EXAM-' . $year . '-' . strtoupper($course->course_code),
+                    ],
+                    [
+                        'exam_title'   => 'Assessment Examination - ' . $course->course_name,
+                        'session_name' => ($year - 1) . '-' . $year,
+                        'exam_date'    => now()->toDateString(),
+                        'status'       => 'published',
+                    ]
+                );
+            }
         }
 
         $exams = Exam::with(['course'])
@@ -324,7 +391,7 @@ class CentreExamController extends Controller
                 $existingMarksheet = Marksheet::where('exam_result_id', $result->id)->first();
                 if (!$existingMarksheet) {
                     $lastMsId = Marksheet::max('id') + 1;
-                    $msNo = sprintf('DCE/MS/%s/%04d', $year, $lastMsId);
+                    $msNo = sprintf('TEC/MS/%s/%04d', $year, $lastMsId);
                     $msHash = hash('sha256', "{$msNo}-{$student->roll_no}-" . config('app.key'));
 
                     Marksheet::create([
@@ -343,7 +410,7 @@ class CentreExamController extends Controller
                 $existingCert = Certificate::where('exam_result_id', $result->id)->first();
                 if (!$existingCert) {
                     $lastId = Certificate::max('id') + 1;
-                    $certNo = sprintf('DCE/CERT/%s/%04d', $year, $lastId);
+                    $certNo = sprintf('TEC/CERT/%s/%04d', $year, $lastId);
                     $certHash = hash('sha256', "{$certNo}-{$student->roll_no}-" . config('app.key'));
                     $qrUrl = url('/verify/cert/' . urlencode($certNo));
 
@@ -384,7 +451,7 @@ class CentreExamController extends Controller
     public function results(Request $request)
     {
         $centre = $this->getAuthCentre();
-        $query = ExamResult::where('centre_id', $centre->id)->with(['exam', 'student', 'course', 'subjectResults.subject']);
+        $query = ExamResult::where('centre_id', $centre->id)->with(['exam', 'student', 'course', 'subjectResults.subject', 'certificate', 'marksheet']);
 
         if ($request->filled('search')) {
             $s = trim($request->search);

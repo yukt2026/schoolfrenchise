@@ -270,4 +270,141 @@ class AdminCertificateModuleTest extends TestCase
         $certificate->refresh();
         $this->assertEquals('issued', $certificate->status);
     }
+
+    public function test_admin_can_directly_issue_certificate_to_enrolled_student(): void
+    {
+        $newStudent = Student::create([
+            'centre_id'       => $this->centre->id,
+            'roll_no'         => 'ROLL-TEST-DIRECT-' . uniqid(),
+            'registration_no' => 'REG-TEST-DIRECT-' . uniqid(),
+            'full_name'       => 'Direct Certificate Candidate',
+            'father_name'     => 'Direct Father',
+            'mother_name'     => 'Direct Mother',
+            'dob'             => '2001-05-15',
+            'gender'          => 'female',
+            'mobile'          => '9888877799',
+            'state_id'        => 1,
+            'district_id'     => 1,
+            'city'            => 'Noida',
+            'address'         => 'Test Sector 62',
+            'pincode'         => '201301',
+        ]);
+
+        Admission::create([
+            'student_id'     => $newStudent->id,
+            'centre_id'      => $this->centre->id,
+            'course_id'      => $this->course->id,
+            'admission_no'   => 'ADM-DIR-' . uniqid(),
+            'admission_date' => now()->toDateString(),
+            'course_fee'     => 6000.00,
+            'net_fee'        => 6000.00,
+            'status'         => 'active',
+        ]);
+
+        $response = $this->actingAs($this->admin)->post(route('admin.certificates.store'), [
+            'student_id' => $newStudent->id,
+            'course_id'  => $this->course->id,
+            'percentage' => 84.5,
+            'issue_date' => now()->toDateString(),
+        ]);
+
+        $response->assertRedirect();
+        
+        $certificate = Certificate::where('student_id', $newStudent->id)->first();
+        $this->assertNotNull($certificate);
+        $this->assertEquals('issued', $certificate->status);
+        $this->assertNotNull($certificate->verification_token);
+        $this->assertNotNull($certificate->serial_no);
+
+        $marksheet = Marksheet::where('student_id', $newStudent->id)->first();
+        $this->assertNotNull($marksheet);
+        $this->assertEquals($certificate->exam_result_id, $marksheet->exam_result_id);
+
+        // Verify QR route resolves
+        $verifyRes = $this->get('/verify/certificate/' . $certificate->verification_token);
+        $verifyRes->assertStatus(200);
+        $verifyRes->assertSee('Direct Certificate Candidate');
+        $verifyRes->assertSee('TECH ERA COMPUTER');
+    }
+
+    public function test_franchise_can_access_student_marks_and_issue_certificate(): void
+    {
+        $franchiseUser = User::firstOrCreate(
+            ['email' => 'centre_eval@drishti.com'],
+            [
+                'name'      => 'Centre Director Eval',
+                'password'  => bcrypt('Password@123'),
+                'role'      => 'centre',
+                'centre_id' => $this->centre->id,
+                'is_active' => true,
+            ]
+        );
+        $centreRole = Role::firstOrCreate(['name' => 'centre'], ['display_name' => 'Centre Director']);
+        $franchiseUser->roles()->syncWithoutDetaching([$centreRole->id]);
+
+        $franchiseStudent = Student::create([
+            'centre_id'       => $this->centre->id,
+            'roll_no'         => 'ROLL-TEST-FC-' . uniqid(),
+            'registration_no' => 'REG-TEST-FC-' . uniqid(),
+            'full_name'       => 'Franchise Evaluated Student',
+            'father_name'     => 'Evaluation Father',
+            'mother_name'     => 'Evaluation Mother',
+            'dob'             => '2002-04-10',
+            'gender'          => 'male',
+            'mobile'          => '9888877798',
+            'state_id'        => 1,
+            'district_id'     => 1,
+            'city'            => 'Noida',
+            'address'         => 'Test Centre Road',
+            'pincode'         => '201301',
+        ]);
+
+        Admission::create([
+            'student_id'     => $franchiseStudent->id,
+            'centre_id'      => $this->centre->id,
+            'course_id'      => $this->course->id,
+            'admission_no'   => 'ADM-FC-' . uniqid(),
+            'admission_date' => now()->toDateString(),
+            'course_fee'     => 6000.00,
+            'net_fee'        => 6000.00,
+            'status'         => 'active',
+        ]);
+
+        // Access student marks shortcut
+        $shortcutRes = $this->actingAs($franchiseUser)->get(route('centre.students.marks', $franchiseStudent->id));
+        $shortcutRes->assertRedirect();
+
+        // Get created exam
+        $exam = Exam::where('course_id', $this->course->id)->first();
+        $this->assertNotNull($exam);
+
+        // Submit passed marks
+        $storeMarksRes = $this->actingAs($franchiseUser)->post(route('centre.exams.marks.store', $exam->id), [
+            'student_id' => $franchiseStudent->id,
+            'subjects'   => [
+                [
+                    'id'                 => $this->subject->id,
+                    'theory_obtained'    => 55,
+                    'practical_obtained' => 15,
+                    'viva_obtained'      => 8,
+                ],
+            ],
+        ]);
+
+        $storeMarksRes->assertRedirect();
+
+        // Check Certificate and Marksheet were automatically issued
+        $cert = Certificate::where('student_id', $franchiseStudent->id)->first();
+        $this->assertNotNull($cert);
+        $this->assertEquals('issued', $cert->status);
+
+        $ms = Marksheet::where('student_id', $franchiseStudent->id)->first();
+        $this->assertNotNull($ms);
+
+        // Check Franchise Download Certificate view
+        $viewCertRes = $this->actingAs($franchiseUser)->get(route('centre.downloads.student-certificates.show', $cert->id));
+        $viewCertRes->assertStatus(200);
+        $viewCertRes->assertSee('Franchise Evaluated Student');
+        $viewCertRes->assertSee('AUTHORIZED BY: TECH ERA COMPUTER');
+    }
 }

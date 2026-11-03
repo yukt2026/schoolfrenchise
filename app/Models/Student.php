@@ -34,11 +34,122 @@ class Student extends Model
         'signature_path',
         'id_proof_doc',
         'status',
+        'verification_token',
+        'id_card_status',
+        'id_card_issued_at',
+        'id_card_expires_at',
     ];
 
     protected $casts = [
-        'dob' => 'date',
+        'dob'                => 'date',
+        'id_card_issued_at'  => 'datetime',
+        'id_card_expires_at' => 'date',
     ];
+
+    public static function boot()
+    {
+        parent::boot();
+
+        static::creating(function ($student) {
+            if (empty($student->verification_token)) {
+                $student->verification_token = static::generateUniqueVerificationToken();
+            }
+            if (empty($student->id_card_status)) {
+                $student->id_card_status = 'valid';
+            }
+            if (empty($student->id_card_issued_at)) {
+                $student->id_card_issued_at = now();
+            }
+        });
+    }
+
+    /**
+     * Generate a unique, unguessable cryptographic verification token.
+     */
+    public static function generateUniqueVerificationToken(): string
+    {
+        do {
+            $token = 'STU-' . strtoupper(\Illuminate\Support\Str::random(10)) . '-' . rand(1000, 9999);
+        } while (static::where('verification_token', $token)->exists());
+
+        return $token;
+    }
+
+    /**
+     * Ensure student has a verification token, generating one if missing.
+     */
+    public function ensureVerificationToken(): string
+    {
+        if (empty($this->verification_token)) {
+            $this->verification_token = static::generateUniqueVerificationToken();
+            $this->saveQuietly();
+        }
+        return $this->verification_token;
+    }
+
+    /**
+     * Public verification URL for QR code encoding.
+     */
+    public function getVerificationUrlAttribute(): string
+    {
+        $token = $this->ensureVerificationToken();
+        return route('verify.student', ['token' => $token]);
+    }
+
+    /**
+     * Calculate card expiry date dynamically from enrolled course duration or 1 year.
+     */
+    public function getCalculatedExpiryDateAttribute(): ?\Illuminate\Support\Carbon
+    {
+        if ($this->id_card_expires_at) {
+            return \Illuminate\Support\Carbon::parse($this->id_card_expires_at);
+        }
+
+        $admission = $this->admissions->first() ?? $this->admissions()->first();
+        if ($admission && $admission->admission_date) {
+            $months = 12; // default 12 months
+            if ($admission->course && !empty($admission->course->duration)) {
+                $dur = strtolower($admission->course->duration);
+                if (preg_match('/(\d+)\s*month/i', $dur, $m)) {
+                    $months = (int) $m[1];
+                } elseif (preg_match('/(\d+)\s*year/i', $dur, $m)) {
+                    $months = (int) $m[1] * 12;
+                }
+            }
+            return \Illuminate\Support\Carbon::parse($admission->admission_date)->addMonths($months);
+        }
+
+        return now()->addYear();
+    }
+
+    /**
+     * Determine effective status of ID card (valid, expired, revoked, invalid).
+     */
+    public function getEffectiveIdCardStatusAttribute(): string
+    {
+        if ($this->id_card_status === 'revoked') {
+            return 'revoked';
+        }
+
+        if ($this->id_card_status === 'invalid') {
+            return 'invalid';
+        }
+
+        $expiry = $this->calculated_expiry_date;
+        if ($expiry && $expiry->isPast()) {
+            return 'expired';
+        }
+
+        return $this->id_card_status ?: 'valid';
+    }
+
+    /**
+     * Get vector SVG Data URI QR code for student ID card.
+     */
+    public function getQrCodeDataUriAttribute(): string
+    {
+        return \App\Services\QrCodeService::generateDataUri($this->verification_url, 140);
+    }
 
     public function user()
     {

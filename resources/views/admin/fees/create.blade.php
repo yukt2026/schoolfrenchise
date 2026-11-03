@@ -44,15 +44,15 @@
                                             $due = max(0, (float) $adm->net_fee - (float) $adm->total_paid);
                                         @endphp
                                         <option value="{{ $adm->id }}"
-                                            data-student="{{ $adm->student->full_name }}"
-                                            data-roll="{{ $adm->student->roll_no }}"
-                                            data-course="{{ $adm->course->course_name }}"
+                                            data-student="{{ $adm->student?->full_name ?? 'N/A' }}"
+                                            data-roll="{{ $adm->student?->roll_no ?? 'N/A' }}"
+                                            data-course="{{ $adm->course?->course_name ?? 'N/A' }}"
                                             data-centre="{{ $adm->centre->centre_name ?? 'Head Office' }}"
                                             data-net="{{ $adm->net_fee }}"
                                             data-paid="{{ $adm->total_paid }}"
                                             data-due="{{ $due }}"
                                             {{ (old('admission_id') == $adm->id || ($selectedAdmission && $selectedAdmission->id == $adm->id)) ? 'selected' : '' }}>
-                                            {{ $adm->student->full_name }} (Roll: {{ $adm->student->roll_no }}) - {{ $adm->course->course_name }} - Due: ₹{{ number_format($due, 2) }}
+                                            {{ $adm->student?->full_name ?? 'Student' }} (Roll: {{ $adm->student?->roll_no ?? 'N/A' }}) - {{ $adm->course?->course_name ?? 'Course' }} - Due: ₹{{ number_format($due, 2) }}
                                         </option>
                                     @endforeach
                                 </select>

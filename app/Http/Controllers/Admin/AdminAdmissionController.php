@@ -86,9 +86,9 @@ class AdminAdmissionController extends Controller
 
     public function create()
     {
-        $centres = Centre::where('status', 'active')->get();
-        $courses = Course::where('status', 'active')->get();
-        $batches = Batch::where('status', 'active')->get();
+        $centres = Centre::where('status', 'active')->orderBy('centre_name')->get();
+        $courses = Course::where('status', true)->orderBy('course_name')->get();
+        $batches = Batch::where('status', 'active')->orderBy('batch_name')->get();
         $students = Student::where('status', 'enrolled')->orWhere('status', 'ongoing')->latest()->take(50)->get();
 
         return view('admin.admissions.create', compact('centres', 'courses', 'batches', 'students'));
@@ -308,8 +308,8 @@ class AdminAdmissionController extends Controller
     public function edit(Admission $admission)
     {
         $admission->load(['student', 'course', 'centre', 'batch']);
-        $courses = Course::where('status', 'active')->get();
-        $batches = Batch::where('status', 'active')->get();
+        $courses = Course::where('status', true)->orderBy('course_name')->get();
+        $batches = Batch::where('status', 'active')->orderBy('batch_name')->get();
 
         return view('admin.admissions.edit', compact('admission', 'courses', 'batches'));
     }

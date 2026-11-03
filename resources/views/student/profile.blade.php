@@ -19,16 +19,34 @@
         </div>
     </div>
 
-    <!-- Official Dossier Advisory Banner -->
-    <div class="alert alert-info border-0 rounded-3 shadow-sm d-flex align-items-center gap-3 p-3 mb-4">
-        <div class="bg-primary text-white rounded-circle p-2 d-flex align-items-center justify-content-center" style="width: 42px; height: 42px; min-width: 42px;">
-            <i class="fa-solid fa-user-lock fs-5"></i>
+    @if(session('success'))
+        <div class="alert alert-success alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="fa-solid fa-circle-check me-2"></i>{{ session('success') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-        <div>
-            <div class="fw-bold text-dark mb-0">Official Student Dossier (Managed by Study Centre)</div>
-            <div class="small text-muted">To maintain academic data integrity, your profile particulars and credentials are maintained by your Authorized Study Centre (<strong>{{ $student->centre?->centre_name ?? 'Study Centre' }}</strong>). If any corrections or updates are required, please contact your franchise centre administrator.</div>
+    @endif
+
+    @if(session('error'))
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <i class="fa-solid fa-triangle-exclamation me-2"></i>{{ session('error') }}
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
-    </div>
+    @endif
+
+    @if($errors->any())
+        <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
+            <div class="d-flex align-items-center mb-1">
+                <i class="fa-solid fa-triangle-exclamation fs-5 me-2"></i>
+                <strong class="fs-6">Please correct the following:</strong>
+            </div>
+            <ul class="mb-0 small ps-4 mt-2">
+                @foreach($errors->all() as $err)
+                    <li>{{ $err }}</li>
+                @endforeach
+            </ul>
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+    @endif
 
     <form method="POST" action="{{ route('student.profile.update') }}" enctype="multipart/form-data">
         @csrf
@@ -37,7 +55,7 @@
             <div class="col-12 col-lg-4">
                 <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 text-center mb-4">
                     <div class="position-relative d-inline-block mx-auto mb-3">
-                        <div class="rounded-circle bg-light border border-3 border-primary shadow-sm overflow-hidden d-flex align-items-center justify-content-center mx-auto" style="width: 130px; height: 130px;">
+                        <div class="rounded-circle bg-light border border-3 border-primary shadow-sm overflow-hidden d-flex align-items-center justify-content-center mx-auto" style="width: 140px; height: 140px;">
                             @if($student->photo_url)
                                 <img id="studentAvatarPreview" src="{{ $student->photo_url }}" alt="{{ $student->full_name }}" class="w-100 h-100 object-fit-cover" onerror="this.onerror=null;this.classList.add('d-none');document.getElementById('studentAvatarPlaceholder').classList.remove('d-none');">
                                 <i id="studentAvatarPlaceholder" class="fa-solid fa-user fa-4x text-secondary opacity-50 d-none"></i>
@@ -48,8 +66,16 @@
                         </div>
                     </div>
 
+                    <div class="mb-3">
+                        <label for="studentPhotoInput" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm" style="cursor: pointer;">
+                            <i class="fa-solid fa-camera me-1"></i> Upload / Change Photo
+                        </label>
+                        <input type="file" name="photo" id="studentPhotoInput" accept="image/jpeg,image/png,image/webp,image/gif" class="d-none" onchange="previewStudentPhoto(this)">
+                        <div class="text-muted small mt-1" id="photoHelpText" style="font-size: 0.72rem;">JPG, PNG, WebP &bull; Max 2MB</div>
+                    </div>
+
                     <h5 class="fw-bold text-dark mb-1">{{ $student->full_name }}</h5>
-                    <div class="text-muted small mb-2">{{ $student->email }}</div>
+                    <div class="text-muted small mb-2">{{ $student->email ?? 'No email on record' }}</div>
 
                     <div class="d-flex justify-content-center gap-2 mb-3">
                         <span class="badge bg-primary-subtle text-primary font-monospace px-3 py-1 rounded-1">
@@ -61,7 +87,7 @@
                     </div>
 
                     <div class="p-2 bg-light rounded-2 text-muted small mt-2">
-                        <i class="fa-solid fa-shield me-1 text-primary"></i> Photo & Profile verified by Centre
+                        <i class="fa-solid fa-shield-halved me-1 text-primary"></i> Affiliated with {{ $student->centre?->centre_name ?? 'TECH ERA COMPUTER' }}
                     </div>
                 </div>
 
@@ -97,25 +123,25 @@
             <div class="col-12 col-lg-8">
                 <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 mb-4">
                     <h5 class="fw-bold text-dark mb-3">
-                        <i class="fa-solid fa-address-card text-primary me-2"></i> Personal Particulars
+                        <i class="fa-solid fa-address-card text-primary me-2"></i> Certified Personal Particulars
                     </h5>
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-muted">Full Name (Official Record)</label>
-                            <input type="text" class="form-control bg-light" value="{{ $student->full_name }}" readonly>
+                            <label class="form-label small fw-semibold text-muted">Full Legal Name</label>
+                            <input type="text" class="form-control bg-light font-monospace" value="{{ $student->full_name }}" readonly>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-muted">Father's Name</label>
-                            <input type="text" name="father_name" class="form-control bg-light" value="{{ old('father_name', $student->father_name) }}" readonly>
+                            <input type="text" class="form-control bg-light font-monospace" value="{{ $student->father_name }}" readonly>
                         </div>
                         <div class="col-md-6">
                             <label class="form-label small fw-semibold text-muted">Mother's Name</label>
-                            <input type="text" name="mother_name" class="form-control bg-light" value="{{ old('mother_name', $student->mother_name) }}" readonly>
+                            <input type="text" class="form-control bg-light" value="{{ $student->mother_name ?? 'N/A' }}" readonly>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-semibold text-muted">Date of Birth</label>
-                            <input type="text" name="date_of_birth" class="form-control bg-light" value="{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d-m-Y') : ($student->date_of_birth ? $student->date_of_birth->format('d-m-Y') : 'N/A') }}" readonly>
+                            <input type="text" class="form-control bg-light" value="{{ $student->dob ? \Carbon\Carbon::parse($student->dob)->format('d-m-Y') : 'N/A' }}" readonly>
                         </div>
                         <div class="col-md-3">
                             <label class="form-label small fw-semibold text-muted">Gender</label>
@@ -131,41 +157,90 @@
 
                     <div class="row g-3">
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-muted">Primary Phone / WhatsApp</label>
+                            <label class="form-label small fw-semibold">Primary Mobile / WhatsApp <span class="text-danger">*</span></label>
                             <div class="input-group">
                                 <span class="input-group-text bg-light">+91</span>
-                                <input type="text" name="phone" class="form-control bg-light" value="{{ old('phone', $student->phone ?? $student->mobile) }}" readonly>
+                                <input type="tel" name="mobile" maxlength="10" class="form-control @error('mobile') is-invalid @enderror" value="{{ old('mobile', $student->mobile) }}" required>
                             </div>
+                            @error('mobile')
+                                <div class="invalid-feedback d-block">{{ $message }}</div>
+                            @enderror
                         </div>
+
                         <div class="col-md-6">
-                            <label class="form-label small fw-semibold text-muted">Email Address</label>
-                            <input type="email" name="email" class="form-control bg-light" value="{{ old('email', $student->email) }}" readonly>
+                            <label class="form-label small fw-semibold">Alternate Mobile</label>
+                            <input type="tel" name="alternate_mobile" maxlength="20" class="form-control @error('alternate_mobile') is-invalid @enderror" value="{{ old('alternate_mobile', $student->alternate_mobile) }}">
+                            @error('alternate_mobile')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">Email Address</label>
+                            <input type="email" class="form-control bg-light" value="{{ $student->email ?? 'N/A' }}" readonly>
+                            <div class="form-text small">Email login credential managed via study centre.</div>
+                        </div>
+
+                        <div class="col-md-6">
+                            <label class="form-label small fw-semibold">City / Town <span class="text-danger">*</span></label>
+                            <input type="text" name="city" class="form-control @error('city') is-invalid @enderror" value="{{ old('city', $student->city) }}" required>
+                            @error('city')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
+                        </div>
+
                         <div class="col-12">
-                            <label class="form-label small fw-semibold text-muted">Permanent / Postal Address</label>
-                            <textarea name="address" rows="2" class="form-control bg-light" readonly>{{ old('address', $student->address) }}</textarea>
+                            <label class="form-label small fw-semibold">Permanent / Postal Address <span class="text-danger">*</span></label>
+                            <textarea name="address" rows="2" class="form-control @error('address') is-invalid @enderror" required>{{ old('address', $student->address) }}</textarea>
+                            @error('address')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-semibold text-muted">State</label>
-                            <input type="text" class="form-control bg-light" value="{{ $student->state?->name ?? 'N/A' }}" readonly>
+
+                        <div class="col-md-5">
+                            <label class="form-label small fw-semibold">State <span class="text-danger">*</span></label>
+                            <select name="state_id" id="stateSelect" class="form-select @error('state_id') is-invalid @enderror" required>
+                                @foreach($states as $st)
+                                    <option value="{{ $st->id }}" {{ old('state_id', $student->state_id) == $st->id ? 'selected' : '' }}>
+                                        {{ $st->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('state_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
+
                         <div class="col-md-4">
-                            <label class="form-label small fw-semibold text-muted">District</label>
-                            <input type="text" class="form-control bg-light" value="{{ $student->district?->name ?? 'N/A' }}" readonly>
+                            <label class="form-label small fw-semibold">District <span class="text-danger">*</span></label>
+                            <select name="district_id" id="districtSelect" class="form-select @error('district_id') is-invalid @enderror" required>
+                                @foreach($districts as $dt)
+                                    <option value="{{ $dt->id }}" {{ old('district_id', $student->district_id) == $dt->id ? 'selected' : '' }}>
+                                        {{ $dt->name }}
+                                    </option>
+                                @endforeach
+                            </select>
+                            @error('district_id')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
-                        <div class="col-md-4">
-                            <label class="form-label small fw-semibold text-muted">PIN Code</label>
-                            <input type="text" name="pincode" class="form-control bg-light" value="{{ old('pincode', $student->pincode) }}" readonly>
+
+                        <div class="col-md-3">
+                            <label class="form-label small fw-semibold">PIN Code <span class="text-danger">*</span></label>
+                            <input type="text" name="pincode" maxlength="6" class="form-control @error('pincode') is-invalid @enderror" value="{{ old('pincode', $student->pincode) }}" required>
+                            @error('pincode')
+                                <div class="invalid-feedback">{{ $message }}</div>
+                            @enderror
                         </div>
                     </div>
 
-                    <div class="alert alert-light border rounded-3 mt-4 mb-0 d-flex align-items-center justify-content-between p-3">
+                    <div class="d-flex justify-content-between align-items-center mt-4 pt-3 border-top">
                         <div class="small text-muted">
-                            <i class="fa-solid fa-circle-info text-primary me-1"></i> Need to update your address, mobile number or particulars?
+                            <i class="fa-solid fa-circle-info text-primary me-1"></i> Updates will sync with your digital ID card & records.
                         </div>
-                        <span class="badge bg-secondary-subtle text-dark border px-3 py-2">
-                            <i class="fa-solid fa-hand-holding-hand me-1 text-primary"></i> Contact Your Study Centre Coordinator
-                        </span>
+                        <button type="submit" class="btn btn-primary px-4 fw-bold rounded-2 shadow-sm">
+                            <i class="fa-solid fa-cloud-arrow-up me-1"></i> Save Profile Changes
+                        </button>
                     </div>
                 </div>
             </div>
@@ -178,10 +253,12 @@
 <script>
 function previewStudentPhoto(input) {
     if (input.files && input.files[0]) {
+        const file = input.files[0];
         const reader = new FileReader();
         reader.onload = function(e) {
             const preview = document.getElementById('studentAvatarPreview');
             const placeholder = document.getElementById('studentAvatarPlaceholder');
+            const helpText = document.getElementById('photoHelpText');
             if (preview) {
                 preview.src = e.target.result;
                 preview.classList.remove('d-none');
@@ -189,27 +266,43 @@ function previewStudentPhoto(input) {
             if (placeholder) {
                 placeholder.classList.add('d-none');
             }
+            if (helpText) {
+                helpText.textContent = 'Selected: ' + file.name;
+                helpText.className = 'small text-success fw-bold mt-1';
+            }
         };
-        reader.readAsDataURL(input.files[0]);
+        reader.readAsDataURL(file);
     }
 }
 
-document.getElementById('stateSelect')?.addEventListener('change', function() {
-    const stateId = this.value;
+document.addEventListener('DOMContentLoaded', function() {
+    const stateSelect = document.getElementById('stateSelect');
     const districtSelect = document.getElementById('districtSelect');
-    if (!stateId) return;
 
-    fetch(`/api/districts/${stateId}`)
-        .then(res => res.json())
-        .then(data => {
-            districtSelect.innerHTML = '<option value="">Select District</option>';
-            data.forEach(d => {
-                const opt = document.createElement('option');
-                opt.value = d.id;
-                opt.textContent = d.name;
-                districtSelect.appendChild(opt);
-            });
+    if (stateSelect && districtSelect) {
+        stateSelect.addEventListener('change', function() {
+            const stateId = this.value;
+            if (!stateId) return;
+
+            districtSelect.innerHTML = '<option value="">Loading districts...</option>';
+
+            fetch('/api/districts/' + stateId)
+                .then(res => res.json())
+                .then(data => {
+                    districtSelect.innerHTML = '<option value="">Select District</option>';
+                    data.forEach(d => {
+                        const opt = document.createElement('option');
+                        opt.value = d.id;
+                        opt.textContent = d.name;
+                        districtSelect.appendChild(opt);
+                    });
+                })
+                .catch(err => {
+                    console.error('Failed to load districts:', err);
+                    districtSelect.innerHTML = '<option value="">Error loading districts</option>';
+                });
         });
+    }
 });
 </script>
 @endpush

@@ -22,6 +22,15 @@
         <a href="{{ route('centre.students.admission-form', $student->id) }}" class="btn btn-outline-warning text-dark rounded-2 px-3" target="_blank">
             <i class="fa-solid fa-file-lines me-1"></i>Admission Form
         </a>
+        @if($student->certificates->first())
+        <a href="{{ route('centre.downloads.student-certificates.show', $student->certificates->first()->id) }}" class="btn btn-outline-success rounded-2 px-3" target="_blank">
+            <i class="fa-solid fa-stamp me-1"></i>Certificate
+        </a>
+        @else
+        <a href="{{ route('centre.students.marks', $student->id) }}" class="btn btn-outline-success rounded-2 px-3">
+            <i class="fa-solid fa-file-circle-check me-1"></i>Enter Marks / Cert
+        </a>
+        @endif
         @if($student->admissions->first())
         <a href="{{ route('centre.fees.create', ['admission_id' => $student->admissions->first()->id]) }}" class="btn btn-success rounded-2 px-3">
             <i class="fa-solid fa-indian-rupee-sign me-1"></i>Collect Fee
@@ -189,7 +198,7 @@
                     <div class="table-scroll-hint d-md-none text-muted small px-3 py-1 bg-light border-bottom">
                         <i class="fa-solid fa-arrows-left-right me-1 text-primary"></i> Scroll horizontally to view complete details
                     </div>
-                    <table class="table table-custom align-middle mb-0" style="min-width: 580px;">
+                    <table class="table table-custom align-middle mb-0" style="min-width: 640px;">
                         <thead>
                             <tr>
                                 <th>Exam / Session</th>
@@ -198,6 +207,7 @@
                                 <th>Percentage</th>
                                 <th>Grade</th>
                                 <th>Status</th>
+                                <th class="text-end">Actions</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -209,10 +219,27 @@
                                 <td>{{ $res->percentage }}%</td>
                                 <td><span class="badge bg-primary rounded-2">{{ $res->grade }}</span></td>
                                 <td><span class="badge {{ $res->result_status === 'passed' ? 'bg-success' : 'bg-danger' }} rounded-2">{{ ucfirst($res->result_status) }}</span></td>
+                                <td class="text-end">
+                                    <div class="d-inline-flex gap-1">
+                                        <a href="{{ route('centre.exams.results.marksheet', $res->id) }}" class="btn btn-sm btn-outline-primary" target="_blank" title="View Official Marksheet">
+                                            <i class="fa-solid fa-file-invoice me-1"></i>Marksheet
+                                        </a>
+                                        @if($res->result_status === 'passed' && $res->certificate)
+                                        <a href="{{ route('centre.downloads.student-certificates.show', $res->certificate->id) }}" class="btn btn-sm btn-outline-success" target="_blank" title="View Official Certificate">
+                                            <i class="fa-solid fa-stamp me-1"></i>Certificate
+                                        </a>
+                                        @endif
+                                    </div>
+                                </td>
                             </tr>
                             @empty
                             <tr>
-                                <td colspan="6" class="text-center py-4 text-muted">No examination evaluations registered.</td>
+                                <td colspan="7" class="text-center py-4 text-muted">
+                                    <p class="mb-2">No examination evaluations registered for this candidate.</p>
+                                    <a href="{{ route('centre.students.marks', $student->id) }}" class="btn btn-sm btn-primary fw-semibold">
+                                        <i class="fa-solid fa-pen-to-square me-1"></i> Enter Marks & Issue Certificate
+                                    </a>
+                                </td>
                             </tr>
                             @endforelse
                         </tbody>

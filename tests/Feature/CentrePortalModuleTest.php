@@ -398,6 +398,97 @@ class CentrePortalModuleTest extends TestCase
         ]);
     }
 
+    public function test_centre_director_can_enroll_and_unenroll_students_in_batch(): void
+    {
+        $batch = Batch::create([
+            'centre_id' => $this->centreA->id,
+            'course_id' => $this->course->id,
+            'batch_name' => 'Evening Batch Beta',
+            'start_time' => '16:00',
+            'end_time' => '18:00',
+            'days' => 'Mon-Sat',
+            'status' => 'active',
+        ]);
+
+        $student = Student::create([
+            'centre_id' => $this->centreA->id,
+            'registration_no' => 'DCE/2026/' . $this->centreA->centre_code . '/888',
+            'roll_no' => 'DCE26' . rand(10000, 99999),
+            'full_name' => 'Kavita Singh',
+            'father_name' => 'Sanjay Singh',
+            'dob' => '2005-05-15',
+            'gender' => 'female',
+            'mobile' => '9876543299',
+            'state_id' => $this->state->id,
+            'district_id' => $this->district->id,
+            'city' => 'Patna',
+            'address' => 'Kankarbagh',
+            'pincode' => '800020',
+            'status' => 'enrolled',
+        ]);
+
+        $admission = Admission::create([
+            'student_id' => $student->id,
+            'centre_id' => $this->centreA->id,
+            'course_id' => $this->course->id,
+            'batch_id' => null, // Initially unassigned
+            'admission_date' => now()->toDateString(),
+            'course_fee' => 7500.00,
+            'discount_amount' => 0.00,
+            'net_fee' => 7500.00,
+            'total_paid' => 0.00,
+            'status' => 'active',
+        ]);
+
+        // Access Daily Attendance Hub
+        $hubRes = $this->actingAs($this->centreUserA)->get(route('centre.attendance.index'));
+        $hubRes->assertStatus(200);
+        $hubRes->assertSee('Daily Classroom Attendance Hub');
+        $hubRes->assertSee('Evening Batch Beta');
+
+        // Enroll student into batch
+        $enrollRes = $this->actingAs($this->centreUserA)->post(route('centre.batches.enroll', $batch->id), [
+            'student_ids' => [$student->id],
+        ]);
+        $enrollRes->assertSessionHas('success');
+
+        $admission->refresh();
+        $this->assertEquals($batch->id, $admission->batch_id);
+
+        // View attendance sheet for this batch - student must be visible
+        $sheetRes = $this->actingAs($this->centreUserA)->get(route('centre.batches.attendance', $batch->id));
+        $sheetRes->assertStatus(200);
+        $sheetRes->assertSee('Kavita Singh');
+        $sheetRes->assertSee($student->roll_no);
+
+        // Un-enroll student
+        $unenrollRes = $this->actingAs($this->centreUserA)->post(route('centre.batches.unenroll', [$batch->id, $student->id]));
+        $unenrollRes->assertSessionHas('success');
+
+        $admission->refresh();
+        $this->assertNull($admission->batch_id);
+
+        // Assign batch via student edit form
+        $editRes = $this->actingAs($this->centreUserA)->put(route('centre.students.update', $student->id), [
+            'full_name' => 'Kavita Singh',
+            'father_name' => 'Sanjay Singh',
+            'dob' => '2005-05-15',
+            'gender' => 'female',
+            'mobile' => '9876543299',
+            'state_id' => $this->state->id,
+            'district_id' => $this->district->id,
+            'city' => 'Patna',
+            'address' => 'Kankarbagh Colony',
+            'pincode' => '800020',
+            'status' => 'enrolled',
+            'batch_id' => $batch->id,
+        ]);
+        $editRes->assertSessionHas('success');
+
+        $admission->refresh();
+        $this->assertEquals($batch->id, $admission->batch_id);
+    }
+
     public function test_centre_director_can_view_exams_and_submit_marks(): void
     {
         $subject = CourseSubject::create([
@@ -873,6 +964,7 @@ class CentrePortalModuleTest extends TestCase
             route('centre.wallet.topup'),
             route('centre.downloads.index'),
             route('centre.downloads.student-certificates'),
+            route('centre.downloads.student-certificates.create'),
             route('centre.downloads.student-certificates.show', $certificate->id),
             route('centre.downloads.certificate'),
             route('centre.support.index'),
@@ -885,5 +977,128 @@ class CentrePortalModuleTest extends TestCase
             $res = $this->actingAs($this->centreUserA)->get($uri);
             $this->assertEquals(200, $res->status(), "Failed asserting that {$uri} returns 200 OK.");
         }
+    }
+
+    protected function createStudentForCentre(Centre $centre): Student
+    {
+        $studentUser = User::create([
+            'name' => 'Candidate ' . uniqid(),
+            'email' => 'cand_' . uniqid() . '@example.com',
+            'mobile' => '98' . rand(10000000, 99999999),
+            'password' => Hash::make('password123'),
+            'role_id' => Role::where('name', 'student')->first()->id,
+            'status' => 'active',
+        ]);
+
+        $student = Student::create([
+            'user_id' => $studentUser->id,
+            'centre_id' => $centre->id,
+            'registration_no' => 'DCE/2026/' . $centre->centre_code . '/' . rand(100, 999),
+            'roll_no' => 'DCE26' . rand(10000, 99999),
+            'full_name' => 'Candidate ' . uniqid(),
+            'father_name' => 'Father ' . uniqid(),
+            'dob' => '2004-05-15',
+            'gender' => 'male',
+            'mobile' => '98' . rand(10000000, 99999999),
+            'state_id' => $this->state->id,
+            'district_id' => $this->district->id,
+            'city' => 'Patna',
+            'address' => 'Main Road, Boring Canal Road',
+            'pincode' => '800001',
+            'status' => 'enrolled',
+        ]);
+
+        Admission::create([
+            'student_id' => $student->id,
+            'course_id' => $this->course->id,
+            'centre_id' => $centre->id,
+            'admission_no' => 'ADM/' . date('Y') . '/' . rand(1000, 9999),
+            'admission_date' => now()->toDateString(),
+            'course_fee' => 4500.00,
+            'discount_amount' => 0.00,
+            'net_fee' => 4500.00,
+            'total_paid' => 0.00,
+            'status' => 'active',
+        ]);
+
+        return $student;
+    }
+
+    /**
+     * Test franchise owner can access certificate creation form and see eligible students.
+     */
+    public function test_franchise_can_access_create_certificate_page(): void
+    {
+        $student = $this->createStudentForCentre($this->centreA);
+
+        $response = $this->actingAs($this->centreUserA)->get(route('centre.downloads.student-certificates.create'));
+        $response->assertStatus(200);
+        $response->assertSee('Issue Student Certificate');
+        $response->assertSee($student->full_name);
+        $response->assertSee($this->centreA->centre_code);
+    }
+
+    /**
+     * Test franchise owner can directly issue an official certificate and marksheet for their centre's student.
+     */
+    public function test_franchise_can_directly_issue_certificate_for_enrolled_student(): void
+    {
+        $student = $this->createStudentForCentre($this->centreA);
+
+        $postData = [
+            'student_id'     => $student->id,
+            'course_id'      => $this->course->id,
+            'percentage'     => 82.5,
+            'grade'          => 'A',
+            'certificate_no' => 'TEC/CERT/2026/9991',
+            'marksheet_no'   => 'TEC/MS/2026/9991',
+            'issue_date'     => now()->toDateString(),
+        ];
+
+        $response = $this->actingAs($this->centreUserA)
+            ->post(route('centre.downloads.student-certificates.store'), $postData);
+
+        $cert = Certificate::where('certificate_no', 'TEC/CERT/2026/9991')->first();
+        $this->assertNotNull($cert, 'Certificate should be created in database.');
+        $this->assertEquals($student->id, $cert->student_id);
+        $this->assertEquals($this->centreA->id, $cert->centre_id);
+        $this->assertEquals('issued', $cert->status);
+
+        $response->assertRedirect(route('centre.downloads.student-certificates.show', $cert->id));
+        $response->assertSessionHas('success');
+
+        // Verify marksheet was also generated
+        $marksheet = \App\Models\Marksheet::where('marksheet_no', 'TEC/MS/2026/9991')->first();
+        $this->assertNotNull($marksheet, 'Marksheet should be generated along with certificate.');
+        $this->assertEquals($student->id, $marksheet->student_id);
+
+        // Verify public certificate verification works
+        $verifyResp = $this->get(route('verify.cert.direct', ['cert_no' => $cert->certificate_no]));
+        $verifyResp->assertStatus(200);
+        $verifyResp->assertSee($student->full_name);
+    }
+
+    /**
+     * Multi-tenant Security: Franchise owner cannot issue certificate for another centre's candidate.
+     */
+    public function test_franchise_cannot_issue_certificate_for_another_centre_student(): void
+    {
+        // Student belonging to Centre B
+        $studentB = $this->createStudentForCentre($this->centreB);
+
+        $postData = [
+            'student_id'     => $studentB->id,
+            'course_id'      => $this->course->id,
+            'percentage'     => 75.0,
+            'grade'          => 'A',
+            'issue_date'     => now()->toDateString(),
+        ];
+
+        // Centre User A attempts to issue for student of Centre B -> must 404
+        $response = $this->actingAs($this->centreUserA)
+            ->post(route('centre.downloads.student-certificates.store'), $postData);
+
+        $response->assertStatus(404);
+        $this->assertFalse(Certificate::where('student_id', $studentB->id)->exists());
     }
 }

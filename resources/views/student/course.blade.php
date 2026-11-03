@@ -53,10 +53,26 @@
                     </div>
                 </div>
                 <div class="col-md-4 text-md-end">
-                    <div class="p-3 bg-light rounded-3 border text-center">
-                        <div class="text-muted small mb-1">Standard Course Fee</div>
-                        <h3 class="fw-bold text-primary mb-1">₹{{ number_format($course->course_fee, 2) }}</h3>
-                        <div class="text-muted small">Inclusive of curriculum & study notes</div>
+                    <div class="p-3 bg-light rounded-3 border text-center text-md-end">
+                        <div class="text-muted small mb-1">
+                            {{ $admission ? 'Enrolled Course Fee' : 'Standard Course Fee' }}
+                        </div>
+                        <h3 class="fw-bold text-primary mb-1">
+                            ₹{{ number_format($admission ? (float) $admission->net_fee : (float) ($course->course_fee ?? $course->default_course_fee), 2) }}
+                        </h3>
+                        @if($admission && (float) $admission->discount_amount > 0)
+                            <div class="text-success small fw-semibold">
+                                <i class="fa-solid fa-tag me-1"></i> Discount Applied: ₹{{ number_format($admission->discount_amount, 2) }}
+                            </div>
+                        @endif
+                        @if($admission)
+                            <div class="d-flex align-items-center justify-content-between text-muted small mt-2 pt-2 border-top">
+                                <span>Paid: <strong class="text-success">₹{{ number_format((float) $admission->total_paid, 2) }}</strong></span>
+                                <span>Due: <strong class="{{ ((float) $admission->net_fee - (float) $admission->total_paid) > 0 ? 'text-danger' : 'text-success' }}">₹{{ number_format(max(0, (float) $admission->net_fee - (float) $admission->total_paid), 2) }}</strong></span>
+                            </div>
+                        @else
+                            <div class="text-muted small">Inclusive of curriculum & study notes</div>
+                        @endif
                     </div>
                 </div>
             </div>
@@ -81,15 +97,17 @@
                     </div>
                 @endif
                 <div class="table-responsive">
-                    <table class="table-custom table-hover align-middle mb-0" style="min-width: 580px;">
+                    <table class="table-custom table-hover align-middle mb-0" style="min-width: 680px;">
                         <thead>
                             <tr>
                                 <th class="ps-4" style="width: 50px;">#</th>
                                 <th style="width: 140px;">Subject Code</th>
                                 <th>Subject Title</th>
-                                <th class="text-center" style="width: 120px;">Theory Marks</th>
-                                <th class="text-center" style="width: 120px;">Practical Marks</th>
-                                <th class="pe-4 text-center" style="width: 120px;">Total Marks</th>
+                                <th class="text-center" style="width: 110px;">Theory Max</th>
+                                <th class="text-center" style="width: 110px;">Practical Max</th>
+                                <th class="text-center" style="width: 90px;">Viva</th>
+                                <th class="text-center" style="width: 100px;">Pass Marks</th>
+                                <th class="pe-4 text-center" style="width: 110px;">Total Max</th>
                             </tr>
                         </thead>
                         <tbody>
@@ -105,18 +123,28 @@
                                         <div class="fw-bold text-dark">{{ $subject->subject_name }}</div>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-light text-secondary border rounded-1 px-2 py-1">
-                                            {{ $subject->theory_marks ?? 50 }}
+                                        <span class="badge bg-light text-dark border rounded-1 px-2 py-1">
+                                            {{ $subject->theory_max ?? ($subject->theory_marks ?? 70) }}
                                         </span>
                                     </td>
                                     <td class="text-center">
-                                        <span class="badge bg-light text-secondary border rounded-1 px-2 py-1">
-                                            {{ $subject->practical_marks ?? 50 }}
+                                        <span class="badge bg-light text-dark border rounded-1 px-2 py-1">
+                                            {{ $subject->practical_max ?? ($subject->practical_marks ?? 20) }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-light text-muted border rounded-1 px-2 py-1">
+                                            {{ $subject->viva_max ?? 0 }}
+                                        </span>
+                                    </td>
+                                    <td class="text-center">
+                                        <span class="badge bg-secondary-subtle text-secondary rounded-1 px-2 py-1">
+                                            {{ $subject->min_pass_marks ?? 40 }}
                                         </span>
                                     </td>
                                     <td class="pe-4 text-center">
                                         <span class="badge bg-success-subtle text-success px-2.5 py-1 rounded-1 fw-bold fs-7">
-                                            {{ $subject->total_marks ?? 100 }}
+                                            {{ $subject->total_max ?? ($subject->total_marks ?? 100) }}
                                         </span>
                                     </td>
                                 </tr>

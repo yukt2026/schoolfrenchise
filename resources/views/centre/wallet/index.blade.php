@@ -115,6 +115,18 @@
                         </td>
                         <td>
                             <div class="text-dark small fw-semibold">{{ $txn->description }}</div>
+                            @if(!empty($txn->admin_remarks))
+                                <div class="small {{ $txn->status === 'rejected' ? 'text-danger' : 'text-success' }} mt-1" style="font-size: 0.72rem;">
+                                    <i class="fa-solid fa-message me-1"></i>Admin: {{ $txn->admin_remarks }}
+                                </div>
+                            @endif
+                            @if(!empty($txn->payment_slip))
+                                <div class="mt-1">
+                                    <a href="{{ $txn->payment_slip_url }}" target="_blank" class="btn btn-outline-secondary btn-sm py-0 px-2" style="font-size: 0.7rem;">
+                                        <i class="fa-solid fa-paperclip me-1"></i>View Uploaded Slip
+                                    </a>
+                                </div>
+                            @endif
                         </td>
                         <td class="font-monospace fw-bold {{ $txn->type === 'credit' ? 'text-success' : 'text-danger' }}">
                             {{ $txn->type === 'credit' ? '+' : '-' }}₹{{ number_format($txn->amount, 2) }}
@@ -123,7 +135,7 @@
                             ₹{{ number_format($txn->balance_after, 2) }}
                         </td>
                         <td class="text-end pe-3">
-                            <span class="badge {{ $txn->status === 'completed' ? 'bg-success' : ($txn->status === 'pending' ? 'bg-warning text-dark' : 'bg-danger') }} rounded-2 text-capitalize">
+                            <span class="badge {{ in_array($txn->status, ['approved', 'completed', 'success']) ? 'bg-success' : ($txn->status === 'pending' ? 'bg-warning text-dark' : 'bg-danger') }} rounded-2 text-capitalize">
                                 {{ $txn->status }}
                             </span>
                         </td>

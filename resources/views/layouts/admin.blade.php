@@ -149,6 +149,9 @@
 
                 <!-- OPERATIONS -->
                 <div class="sidebar-heading">Operations</div>
+                <a class="nav-link {{ request()->routeIs('admin.cms.enquiries*') ? 'active' : '' }}" href="{{ Route::has('admin.cms.enquiries') ? route('admin.cms.enquiries') : '#' }}">
+                    <i class="fa-solid fa-envelope-open-text"></i> Public Enquiries
+                </a>
                 <a class="nav-link {{ request()->routeIs('admin.support*') ? 'active' : '' }}" href="{{ Route::has('admin.support.index') ? route('admin.support.index') : '#' }}">
                     <i class="fa-solid fa-headset"></i> Help & Support
                 </a>
