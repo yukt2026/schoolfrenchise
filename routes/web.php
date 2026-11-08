@@ -479,6 +479,8 @@ Route::middleware(['role:super_admin,student'])->prefix('student')->name('studen
     Route::get('/fees', [StudentFeeController::class, 'index'])->name('fees');
     Route::get('/fees/list', [StudentFeeController::class, 'index'])->name('fees.index');
     Route::get('/fees/pay', [StudentFeeController::class, 'payFeeForm'])->name('fees.pay');
+    Route::post('/fees/initiate', [StudentFeeController::class, 'initiatePayment'])->name('fees.pay.initiate');
+    Route::post('/fees/verify', [StudentFeeController::class, 'verifyPayment'])->name('fees.pay.verify');
     Route::post('/fees/pay', [StudentFeeController::class, 'processPayment'])->name('fees.pay.submit');
     Route::get('/fees/history', [StudentFeeController::class, 'history'])->name('fees.history');
     Route::get('/fees/receipts/{id}', [StudentFeeController::class, 'receipt'])->name('fees.receipt');

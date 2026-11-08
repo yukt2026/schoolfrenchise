@@ -55,6 +55,12 @@ class AdminSettingController extends Controller
             'sms_alerts_enabled'           => '0',
             'whatsapp_alerts_enabled'      => '0',
 
+            // Razorpay Gateway Parameters
+            'razorpay_key_id'                  => '',
+            'razorpay_key_secret'              => '',
+            'razorpay_webhook_secret'          => '',
+            'razorpay_wallet_recharge_enabled' => '1',
+
             // Head Office UPI & Franchise Wallet QR Settings
             'admin_upi_id'                 => '9162384660@upi',
             'admin_upi_name'               => 'TECH ERA COMPUTER',
@@ -111,6 +117,12 @@ class AdminSettingController extends Controller
             'sms_alerts_enabled'          => ['nullable', 'boolean'],
             'whatsapp_alerts_enabled'     => ['nullable', 'boolean'],
 
+            // Razorpay Gateway Credentials
+            'razorpay_key_id'                  => ['nullable', 'string', 'max:100'],
+            'razorpay_key_secret'              => ['nullable', 'string', 'max:100'],
+            'razorpay_webhook_secret'          => ['nullable', 'string', 'max:100'],
+            'razorpay_wallet_recharge_enabled' => ['nullable', 'boolean'],
+
             // Head Office UPI & Bank Details
             'admin_upi_id'                => ['nullable', 'string', 'max:100'],
             'admin_upi_name'              => ['nullable', 'string', 'max:191'],
@@ -163,11 +175,15 @@ class AdminSettingController extends Controller
             Setting::set('tax_percentage', (string) ($validated['tax_percentage'] ?? '0.00'), 'financial');
             Setting::set('franchise_admission_commission', (string) ($validated['franchise_admission_commission'] ?? '200.00'), 'financial');
 
-            // Group 5: Integrations
+            // Group 5: Integrations & Razorpay
             Setting::set('online_payments_enabled', $request->boolean('online_payments_enabled') ? '1' : '0', 'integrations');
             Setting::set('payment_gateway_mode', $validated['payment_gateway_mode'], 'integrations');
             Setting::set('sms_alerts_enabled', $request->boolean('sms_alerts_enabled') ? '1' : '0', 'integrations');
             Setting::set('whatsapp_alerts_enabled', $request->boolean('whatsapp_alerts_enabled') ? '1' : '0', 'integrations');
+            Setting::set('razorpay_key_id', trim($validated['razorpay_key_id'] ?? ''), 'payment');
+            Setting::set('razorpay_key_secret', trim($validated['razorpay_key_secret'] ?? ''), 'payment');
+            Setting::set('razorpay_webhook_secret', trim($validated['razorpay_webhook_secret'] ?? ''), 'payment');
+            Setting::set('razorpay_wallet_recharge_enabled', $request->boolean('razorpay_wallet_recharge_enabled') ? '1' : '0', 'payment');
 
             // Group 6: Head Office UPI & Wallet Recharge Settings
             if (isset($validated['admin_upi_id'])) {

@@ -272,6 +272,25 @@ class StudentPortalModuleTest extends TestCase
         $this->assertEquals('House 14B, New Rajendra Nagar, Patna', $this->student->address);
     }
 
+    public function test_student_cannot_update_own_profile_photo(): void
+    {
+        \Illuminate\Support\Facades\Storage::fake('public');
+
+        $originalPhotoPath = $this->student->photo_path;
+
+        $fakePhoto = \Illuminate\Http\UploadedFile::fake()->image('new_photo.jpg', 200, 200);
+
+        $response = $this->actingAs($this->studentUser)->post(route('student.profile.update'), [
+            'photo' => $fakePhoto,
+        ]);
+
+        $response->assertSessionHas('error');
+        $this->assertStringContainsString('Profile photo modification is locked', session('error'));
+
+        $this->student->refresh();
+        $this->assertEquals($originalPhotoPath, $this->student->photo_path);
+    }
+
     /**
      * Test 3: Printable admission form dossier loads actual enrolled student records.
      */
@@ -898,5 +917,61 @@ class StudentPortalModuleTest extends TestCase
         $response->assertSee(route('student.attendance'));
         $response->assertSee(route('student.results'));
         $response->assertSee(route('student.certificates'));
+    }
+
+    /**
+     * Test payment requires actual gateway verification:
+     * - Order initiation creates pending transaction without modifying fees
+     * - Direct submission without gateway confirmation does NOT add fees
+     * - Fake / invalid signature is rejected without modifying fees
+     * - Legitimate signature reconciliation credits fees and issues receipt
+     */
+    public function test_student_portal_payment_requires_actual_gateway_verification_and_rejects_fake_credit(): void
+    {
+        $initialPaid = (float) $this->admission->total_paid;
+
+        // 1. Order initiation creates pending transaction without modifying total_paid
+        $initiateResp = $this->actingAs($this->studentUser)->postJson(route('student.fees.pay.initiate'), [
+            'amount'       => 1500.00,
+            'payment_mode' => 'upi',
+        ]);
+        $initiateResp->assertStatus(200);
+        $orderData = $initiateResp->json();
+        $this->assertNotEmpty($orderData['order_id']);
+
+        $this->admission->refresh();
+        $this->assertEquals($initialPaid, (float) $this->admission->total_paid, 'Order initiation must not credit fee amount.');
+
+        // 2. Reject verification when fake / invalid signature is supplied
+        $fakeVerifyResp = $this->actingAs($this->studentUser)->post(route('student.fees.pay.verify'), [
+            'order_id'           => $orderData['order_id'],
+            'gateway_payment_id' => 'pay_fake_123456',
+            'gateway_signature'  => 'fake_invalid_signature_hash',
+        ]);
+        $fakeVerifyResp->assertRedirect(route('student.fees.pay'));
+        $fakeVerifyResp->assertSessionHas('error');
+
+        $this->admission->refresh();
+        $this->assertEquals($initialPaid, (float) $this->admission->total_paid, 'Invalid signature must not credit fee amount.');
+
+        // 3. Legitimate cryptographic signature verification successfully credits fee
+        $validPaymentId = 'pay_real_' . \Illuminate\Support\Str::random(10);
+        $validSignature = \App\Services\PaymentGatewayService::generateSignature($orderData['order_id'], $validPaymentId);
+
+        $validVerifyResp = $this->actingAs($this->studentUser)->post(route('student.fees.pay.verify'), [
+            'order_id'           => $orderData['order_id'],
+            'gateway_payment_id' => $validPaymentId,
+            'gateway_signature'  => $validSignature,
+            'payment_mode'       => 'upi',
+        ]);
+        $validVerifyResp->assertRedirect();
+        $validVerifyResp->assertSessionHas('success');
+
+        $this->admission->refresh();
+        $this->assertEquals($initialPaid + 1500.00, (float) $this->admission->total_paid, 'Valid signature must credit exact fee amount.');
+
+        $payment = \App\Models\FeePayment::where('student_id', $this->student->id)->where('transaction_ref', $validPaymentId)->first();
+        $this->assertNotNull($payment);
+        $this->assertEquals(1500.00, (float) $payment->amount);
     }
 }

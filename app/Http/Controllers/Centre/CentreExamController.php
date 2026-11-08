@@ -385,7 +385,20 @@ class CentreExamController extends Controller
 
             // Auto-generate or update Marksheet & Certificate upon passing
             if ($resultStatus === 'passed') {
-                $year = date('Y');
+                $admission = $student->admissions()->where('course_id', $course->id)->latest('admission_date')->first()
+                          ?? $student->admissions()->latest('admission_date')->first();
+
+                if ($admission && $admission->admission_date) {
+                    $calculatedIssueDate = \Carbon\Carbon::parse($admission->admission_date)
+                        ->addMonths($course->duration_months)
+                        ->toDateString();
+                } else {
+                    $calculatedIssueDate = $exam->exam_date
+                        ? \Carbon\Carbon::parse($exam->exam_date)->toDateString()
+                        : now()->toDateString();
+                }
+
+                $year = date('Y', strtotime($calculatedIssueDate));
 
                 // 1. Marksheet
                 $existingMarksheet = Marksheet::where('exam_result_id', $result->id)->first();
@@ -400,7 +413,7 @@ class CentreExamController extends Controller
                         'centre_id'      => $centre->id,
                         'course_id'      => $course->id,
                         'marksheet_no'   => $msNo,
-                        'issue_date'     => now()->toDateString(),
+                        'issue_date'     => $calculatedIssueDate,
                         'security_hash'  => $msHash,
                         'is_issued'      => true,
                     ]);
@@ -420,7 +433,7 @@ class CentreExamController extends Controller
                         'centre_id'      => $centre->id,
                         'course_id'      => $course->id,
                         'certificate_no' => $certNo,
-                        'issue_date'     => now()->toDateString(),
+                        'issue_date'     => $calculatedIssueDate,
                         'security_hash'  => $certHash,
                         'qr_code_url'    => $qrUrl,
                         'status'         => 'issued',

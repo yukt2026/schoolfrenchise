@@ -41,6 +41,27 @@
 <body>
 
 <!-- Interactive Control Bar -->
+@php
+    $studentName = $certificate->student->full_name ?? 'Student';
+    $rollNo = $certificate->student->roll_no ?? 'N/A';
+    $certNo = $certificate->certificate_no;
+    $courseName = $certificate->course->course_name ?? 'Course';
+    $issueDate = $certificate->issue_date ? \Carbon\Carbon::parse($certificate->issue_date)->format('d M, Y') : date('d M, Y');
+    $instituteName = $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER';
+    $verifyUrl = $certificate->verification_url ?? route('verify.cert.direct', ['cert_no' => $certificate->certificate_no]);
+    $studentMobile = preg_replace('/[^0-9]/', '', $certificate->student->mobile ?? '');
+    if (strlen($studentMobile) === 10) { $studentMobile = '91' . $studentMobile; }
+
+    $waCertMsg = "🎓 *Official Course Completion Certificate Issued!*\n\n"
+        . "🏛️ *Institution:* {$instituteName}\n"
+        . "👤 *Student Name:* {$studentName}\n"
+        . "🆔 *Roll No:* {$rollNo}\n"
+        . "🏷️ *Certificate No:* {$certNo}\n"
+        . "📚 *Course:* {$courseName}\n"
+        . "📅 *Issue Date:* {$issueDate}\n\n"
+        . "✅ *Verify Certificate Online (Live QR Link):*\n{$verifyUrl}\n\n"
+        . "Congratulations on successfully completing your course! 🎉";
+@endphp
 <div class="no-print-bar">
     <div class="d-flex align-items-center gap-2">
         <span class="badge bg-danger px-3 py-2 font-monospace fs-6">CERT: {{ $certificate->certificate_no }}</span>
@@ -49,6 +70,9 @@
     <div class="d-flex gap-2">
         <a href="{{ $certificate->verification_url }}" target="_blank" class="btn btn-outline-info btn-sm fw-bold">
             <i class="fa-solid fa-qrcode me-1"></i> Verify QR Link
+        </a>
+        <a href="https://api.whatsapp.com/send?{{ !empty($studentMobile) ? 'phone=' . $studentMobile . '&' : '' }}text={{ urlencode($waCertMsg) }}" target="_blank" class="btn btn-success px-3 fw-bold shadow-sm" style="background-color: #16a34a; border-color: #16a34a;" title="Share Certificate on WhatsApp">
+            <i class="fa-brands fa-whatsapp me-1 fs-5 align-middle"></i> Share on WhatsApp
         </a>
         <button onclick="window.print()" class="btn btn-primary px-4 fw-bold shadow-sm" style="background-color: #2563eb; border-color: #2563eb;">
             <i class="fa-solid fa-print me-1"></i> Print / Download PDF

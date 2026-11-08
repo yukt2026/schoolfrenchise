@@ -1,44 +1,46 @@
 @extends('layouts.admin')
 
-@section('title', 'Issue Certificate & Marksheet')
+@section('title', 'Issue Certificate & Marksheet - TECH ERA COMPUTER')
 
 @section('content')
-<div class="container-fluid p-0">
-    <div class="d-flex align-items-center justify-content-between mb-4">
+<div class="container-fluid px-4">
+    <!-- Header -->
+    <div class="d-flex justify-content-between align-items-center mb-4">
         <div>
-            <h4 class="fw-bold mb-1" style="color: #0f172a;">
-                <i class="fa-solid fa-stamp me-2" style="color: #0891b2;"></i>Issue Official Certificate & Marksheet
-            </h4>
-            <nav aria-label="breadcrumb">
-                <ol class="breadcrumb mb-0 small">
-                    <li class="breadcrumb-item"><a href="{{ route('admin.dashboard') }}">Dashboard</a></li>
-                    <li class="breadcrumb-item"><a href="{{ route('admin.certificates.index') }}">Certificates</a></li>
-                    <li class="breadcrumb-item active" aria-current="page">Issue Certificate</li>
-                </ol>
-            </nav>
+            <h1 class="h3 mb-0 text-gray-800 fw-bold">Issue Official Certificate & Marksheet</h1>
+            <p class="text-muted small mb-0">Generate verified completion certificates and official marksheets with automatic duration-based issue date calibration.</p>
         </div>
         <a href="{{ route('admin.certificates.index') }}" class="btn btn-outline-secondary">
             <i class="fa-solid fa-arrow-left me-1"></i> Back to Certificates
         </a>
     </div>
 
-    @if(session('error'))
+    <!-- Error Messages -->
+    @if($errors->any())
         <div class="alert alert-danger alert-dismissible fade show rounded-3 shadow-sm mb-4" role="alert">
-            <i class="fa-solid fa-triangle-exclamation me-2"></i>{{ session('error') }}
+            <div class="fw-bold mb-1"><i class="fa-solid fa-circle-exclamation me-2"></i>Please correct the following errors:</div>
+            <ul class="mb-0 small ps-3">
+                @foreach($errors->all() as $error)
+                    <li>{{ $error }}</li>
+                @endforeach
+            </ul>
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
         </div>
     @endif
 
-    <div class="row">
-        <div class="col-lg-8 mx-auto">
-            <div class="card border-0 shadow-sm rounded-3">
-                <div class="card-header bg-white py-3 border-0">
-                    <h6 class="fw-bold mb-0 text-dark">
-                        <i class="fa-solid fa-file-shield me-2 text-primary"></i>Issuance Credentials Particulars
+    <div class="row justify-content-center">
+        <div class="col-lg-9">
+            <div class="card shadow-sm border-0 mb-4">
+                <div class="card-header bg-white py-3 border-bottom d-flex align-items-center justify-content-between">
+                    <h6 class="m-0 fw-bold text-primary">
+                        <i class="fa-solid fa-file-shield me-2"></i>Official Certification Particulars
                     </h6>
+                    <span class="badge bg-primary-subtle text-primary border px-2 py-1 font-monospace">
+                        Board Controller Office
+                    </span>
                 </div>
                 <div class="card-body p-4">
-                    <form method="POST" action="{{ route('admin.certificates.store') }}" id="certificateIssueForm">
+                    <form action="{{ route('admin.certificates.store') }}" method="POST" id="certificateForm">
                         @csrf
 
                         <!-- Hidden fields bound dynamically via JavaScript -->
@@ -47,39 +49,22 @@
 
                         <div class="row g-3">
                             <div class="col-md-12">
-                                <label for="candidate_select" class="form-label fw-semibold">
-                                    Select Candidate <span class="text-danger">*</span>
-                                </label>
+                                <label for="candidate_select" class="form-label fw-semibold">Select Candidate <span class="text-danger">*</span></label>
                                 <select class="form-select @error('exam_result_id') is-invalid @enderror @error('student_id') is-invalid @enderror" id="candidate_select" required>
-                                    <option value="">-- Choose Candidate to Issue Certificate --</option>
+                                    <option value="">-- Choose Candidate to Issue Certificate & Marksheet --</option>
                                     
-                                    @if($eligibleResults->count() > 0)
-                                        <optgroup label="Candidates with Passed Exam Results ({{ $eligibleResults->count() }})">
-                                            @foreach($eligibleResults as $res)
-                                                <option value="result:{{ $res->id }}"
-                                                    data-type="result"
-                                                    data-id="{{ $res->id }}"
-                                                    data-student="{{ $res->student->full_name }}"
-                                                    data-roll="{{ $res->student->roll_no }}"
-                                                    data-reg="{{ $res->student->registration_no }}"
-                                                    data-course-id="{{ $res->course_id }}"
-                                                    data-course="{{ $res->course->course_name }}"
-                                                    data-centre="{{ $res->centre->centre_name ?? 'Head Office' }}"
-                                                    data-pct="{{ $res->percentage }}"
-                                                    data-grade="{{ $res->grade }}"
-                                                    {{ (old('exam_result_id') == $res->id || ($selectedResult && $selectedResult->id == $res->id)) ? 'selected' : '' }}>
-                                                    [Passed Result] {{ $res->student->full_name }} (Roll: {{ $res->student->roll_no }}) - {{ $res->course->course_code }} - {{ $res->percentage }}% (Grade {{ $res->grade }})
-                                                </option>
-                                            @endforeach
-                                        </optgroup>
-                                    @endif
-
                                     @if($eligibleStudents->count() > 0)
                                         <optgroup label="Enrolled Students (Direct Board Issuance - {{ $eligibleStudents->count() }})">
                                             @foreach($eligibleStudents as $stu)
                                                 @php
-                                                    $adm = $stu->admissions->first();
+                                                    $adm = $stu->admissions->first() ?? $stu->admissions()->latest('admission_date')->first();
                                                     $crs = $adm?->course;
+                                                    $admDate = $adm?->admission_date ? \Carbon\Carbon::parse($adm->admission_date)->format('Y-m-d') : '';
+                                                    $admDateHuman = $adm?->admission_date ? \Carbon\Carbon::parse($adm->admission_date)->format('d M Y') : 'N/A';
+                                                    $durMonths = $crs?->duration_months ?? 6;
+                                                    $durText = $crs?->duration ?? ($durMonths . ' Months');
+                                                    $calcIssueDate = $adm?->admission_date ? \Carbon\Carbon::parse($adm->admission_date)->addMonths($durMonths)->format('Y-m-d') : date('Y-m-d');
+                                                    $calcIssueDateHuman = $adm?->admission_date ? \Carbon\Carbon::parse($adm->admission_date)->addMonths($durMonths)->format('d M Y') : date('d M Y');
                                                 @endphp
                                                 <option value="student:{{ $stu->id }}"
                                                     data-type="student"
@@ -90,10 +75,52 @@
                                                     data-course-id="{{ $crs?->id }}"
                                                     data-course="{{ $crs?->course_name ?? 'Unassigned Course' }}"
                                                     data-centre="{{ $stu->centre->centre_name ?? 'Head Office' }}"
+                                                    data-admission-date="{{ $admDate }}"
+                                                    data-admission-date-human="{{ $admDateHuman }}"
+                                                    data-duration-months="{{ $durMonths }}"
+                                                    data-duration-text="{{ $durText }}"
+                                                    data-calc-issue-date="{{ $calcIssueDate }}"
+                                                    data-calc-issue-date-human="{{ $calcIssueDateHuman }}"
                                                     data-pct="75.0"
                                                     data-grade="A"
                                                     {{ (old('student_id') == $stu->id || ($selectedStudent && $selectedStudent->id == $stu->id)) ? 'selected' : '' }}>
-                                                    [Enrolled] {{ $stu->full_name }} (Roll: {{ $stu->roll_no }}) - {{ $crs?->course_code ?? 'Course N/A' }} - {{ $stu->centre->centre_name ?? 'Main Centre' }}
+                                                    [Direct] {{ $stu->full_name }} (Roll: {{ $stu->roll_no }}) - {{ $crs?->course_code ?? 'Course N/A' }} | Adm: {{ $admDateHuman }} (Dur: {{ $durText }})
+                                                </option>
+                                            @endforeach
+                                        </optgroup>
+                                    @endif
+
+                                    @if($eligibleResults->count() > 0)
+                                        <optgroup label="Candidates with Passed Exam Results ({{ $eligibleResults->count() }})">
+                                            @foreach($eligibleResults as $res)
+                                                @php
+                                                    $adm = $res->student->admissions->where('course_id', $res->course_id)->first() ?? $res->student->admissions->first();
+                                                    $admDate = $adm?->admission_date ? \Carbon\Carbon::parse($adm->admission_date)->format('Y-m-d') : '';
+                                                    $admDateHuman = $adm?->admission_date ? \Carbon\Carbon::parse($adm->admission_date)->format('d M Y') : 'N/A';
+                                                    $durMonths = $res->course?->duration_months ?? 6;
+                                                    $durText = $res->course?->duration ?? ($durMonths . ' Months');
+                                                    $calcIssueDate = $adm?->admission_date ? \Carbon\Carbon::parse($adm->admission_date)->addMonths($durMonths)->format('Y-m-d') : ($res->exam?->exam_date ? \Carbon\Carbon::parse($res->exam->exam_date)->format('Y-m-d') : date('Y-m-d'));
+                                                    $calcIssueDateHuman = \Carbon\Carbon::parse($calcIssueDate)->format('d M Y');
+                                                @endphp
+                                                <option value="result:{{ $res->id }}"
+                                                    data-type="result"
+                                                    data-id="{{ $res->id }}"
+                                                    data-student="{{ $res->student->full_name }}"
+                                                    data-roll="{{ $res->student->roll_no }}"
+                                                    data-reg="{{ $res->student->registration_no }}"
+                                                    data-course-id="{{ $res->course_id }}"
+                                                    data-course="{{ $res->course->course_name }}"
+                                                    data-centre="{{ $res->student->centre->centre_name ?? 'Main Centre' }}"
+                                                    data-admission-date="{{ $admDate }}"
+                                                    data-admission-date-human="{{ $admDateHuman }}"
+                                                    data-duration-months="{{ $durMonths }}"
+                                                    data-duration-text="{{ $durText }}"
+                                                    data-calc-issue-date="{{ $calcIssueDate }}"
+                                                    data-calc-issue-date-human="{{ $calcIssueDateHuman }}"
+                                                    data-pct="{{ $res->percentage }}"
+                                                    data-grade="{{ $res->grade }}"
+                                                    {{ (old('exam_result_id') == $res->id || ($selectedResult && $selectedResult->id == $res->id)) ? 'selected' : '' }}>
+                                                    [Exam Result] {{ $res->student->full_name }} (Roll: {{ $res->student->roll_no }}) - {{ $res->course->course_code }} - {{ $res->percentage }}% (Grade {{ $res->grade }})
                                                 </option>
                                             @endforeach
                                         </optgroup>
@@ -116,6 +143,11 @@
                                             <div class="small text-muted mt-1" id="previewRollReg">Roll No: - | Reg No: -</div>
                                             <div class="small text-muted" id="previewCentre">Centre: -</div>
                                             <div class="small text-primary fw-semibold mt-1" id="previewCourse">Course: -</div>
+                                            <div class="mt-2" id="previewTimeline" style="display: none;">
+                                                <span class="badge bg-white text-dark border me-1"><i class="fa-solid fa-calendar-check text-info me-1"></i>Admission: <strong id="previewAdmDate">-</strong></span>
+                                                <span class="badge bg-white text-dark border me-1"><i class="fa-solid fa-clock text-warning me-1"></i>Duration: <strong id="previewDuration">-</strong></span>
+                                                <span class="badge bg-success-subtle text-success border border-success-subtle"><i class="fa-solid fa-certificate me-1"></i>Auto Issue Date: <strong id="previewCalcDate">-</strong></span>
+                                            </div>
                                         </div>
                                         <div class="text-end">
                                             <span class="badge bg-success px-3 py-2 fs-6" id="previewBadge">Standing: -</span>
@@ -136,8 +168,11 @@
                                             <select class="form-select @error('course_id') is-invalid @enderror" id="course_id" name="course_id">
                                                 <option value="">Select Course</option>
                                                 @foreach($courses as $course)
-                                                    <option value="{{ $course->id }}" {{ old('course_id') == $course->id ? 'selected' : '' }}>
-                                                        {{ $course->course_name }} ({{ $course->course_code }})
+                                                    <option value="{{ $course->id }}" 
+                                                            data-duration="{{ $course->duration }}"
+                                                            data-duration-months="{{ $course->duration_months }}"
+                                                            {{ old('course_id') == $course->id ? 'selected' : '' }}>
+                                                        {{ $course->course_name }} ({{ $course->course_code }}) - [{{ $course->duration }}]
                                                     </option>
                                                 @endforeach
                                             </select>
@@ -190,8 +225,22 @@
                             </div>
 
                             <div class="col-md-6">
-                                <label for="issue_date" class="form-label fw-semibold">Official Issuance Date <span class="text-danger">*</span></label>
-                                <input type="date" class="form-control @error('issue_date') is-invalid @enderror" id="issue_date" name="issue_date" value="{{ old('issue_date', date('Y-m-d')) }}" required>
+                                <label for="issue_date" class="form-label fw-semibold">
+                                    Official Issuance Date <span class="text-danger">*</span>
+                                </label>
+                                <div class="input-group">
+                                    <span class="input-group-text bg-light"><i class="fa-solid fa-calendar-day text-primary"></i></span>
+                                    <input type="date" class="form-control @error('issue_date') is-invalid @enderror font-monospace fw-bold" id="issue_date" name="issue_date" value="{{ old('issue_date') }}" required>
+                                    <button type="button" class="btn btn-outline-secondary" id="resetCalcDateBtn" title="Re-calculate date based on Admission Date + Course Duration">
+                                        <i class="fa-solid fa-wand-magic-sparkles me-1"></i> Auto-Set
+                                    </button>
+                                </div>
+                                <div id="issueDateCalcHint" class="form-text text-success fw-semibold mt-1" style="display: none;">
+                                    <i class="fa-solid fa-circle-check me-1"></i> <span id="issueDateCalcText"></span>
+                                </div>
+                                <div class="form-text small text-muted">
+                                    Automatically calibrated: <strong>Admission Date + Course Duration</strong>.
+                                </div>
                                 @error('issue_date')
                                     <div class="invalid-feedback">{{ $message }}</div>
                                 @enderror
@@ -223,22 +272,70 @@ document.addEventListener('DOMContentLoaded', function () {
     const courseSelect = document.getElementById('course_id');
     const pctInput = document.getElementById('percentage');
     const gradeInput = document.getElementById('grade');
+    const issueDateInput = document.getElementById('issue_date');
+    const resetCalcBtn = document.getElementById('resetCalcDateBtn');
+    const issueDateCalcHint = document.getElementById('issueDateCalcHint');
+    const issueDateCalcText = document.getElementById('issueDateCalcText');
 
     const previewStudent = document.getElementById('previewStudent');
     const previewRollReg = document.getElementById('previewRollReg');
     const previewCentre = document.getElementById('previewCentre');
     const previewCourse = document.getElementById('previewCourse');
     const previewBadge = document.getElementById('previewBadge');
+    const previewTimeline = document.getElementById('previewTimeline');
+    const previewAdmDate = document.getElementById('previewAdmDate');
+    const previewDuration = document.getElementById('previewDuration');
+    const previewCalcDate = document.getElementById('previewCalcDate');
+
+    let currentAdmDate = '';
+    let currentDurationMonths = 6;
+    let currentCalculatedDate = '';
 
     function calculateGrade(pct) {
         pct = parseFloat(pct);
         if (isNaN(pct)) return 'N/A';
-        if (pct >= 85) return 'S';
-        if (pct >= 75) return 'A';
+        if (pct >= 85) return 'A+';
+        if (pct >= 70) return 'A';
         if (pct >= 60) return 'B';
         if (pct >= 50) return 'C';
         if (pct >= 40) return 'D';
         return 'F';
+    }
+
+    function addMonthsToDate(dateStr, months) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return '';
+        let year = parseInt(parts[0], 10);
+        let month = parseInt(parts[1], 10) - 1; // 0-based
+        let day = parseInt(parts[2], 10);
+
+        const d = new Date(year, month, day);
+        d.setMonth(d.getMonth() + parseInt(months, 10));
+
+        const y = d.getFullYear();
+        const m = String(d.getMonth() + 1).padStart(2, '0');
+        const dayFormatted = String(d.getDate()).padStart(2, '0');
+        return `${y}-${m}-${dayFormatted}`;
+    }
+
+    function formatDateHuman(dateStr) {
+        if (!dateStr) return '';
+        const parts = dateStr.split('-');
+        if (parts.length !== 3) return dateStr;
+        const d = new Date(parseInt(parts[0], 10), parseInt(parts[1], 10) - 1, parseInt(parts[2], 10));
+        return d.toLocaleDateString('en-GB', { day: '2-digit', month: 'short', year: 'numeric' });
+    }
+
+    function applyCalculatedDate(dateStr, reasonText) {
+        if (dateStr) {
+            issueDateInput.value = dateStr;
+            currentCalculatedDate = dateStr;
+            if (issueDateCalcHint && issueDateCalcText) {
+                issueDateCalcText.textContent = reasonText || `Auto-set to ${formatDateHuman(dateStr)} (Admission + Duration)`;
+                issueDateCalcHint.style.display = 'block';
+            }
+        }
     }
 
     if (pctInput && gradeInput) {
@@ -262,16 +359,33 @@ document.addEventListener('DOMContentLoaded', function () {
             previewCourse.textContent = 'Course: -';
             previewBadge.textContent = 'Standing: -';
             previewBadge.className = 'badge bg-secondary px-3 py-2 fs-6';
+            if (previewTimeline) previewTimeline.style.display = 'none';
+            if (issueDateCalcHint) issueDateCalcHint.style.display = 'none';
+            currentAdmDate = '';
             return;
         }
 
         const type = opt.dataset.type;
         const id = opt.dataset.id;
 
+        currentAdmDate = opt.dataset.admissionDate || '';
+        const admHuman = opt.dataset.admissionDateHuman || 'N/A';
+        currentDurationMonths = parseInt(opt.dataset.durationMonths, 10) || 6;
+        const durText = opt.dataset.durationText || `${currentDurationMonths} Months`;
+        const calcDate = opt.dataset.calcIssueDate || '';
+        const calcHuman = opt.dataset.calcIssueDateHuman || '';
+
         previewStudent.textContent = 'Candidate: ' + (opt.dataset.student || 'Unknown');
         previewRollReg.textContent = `Roll No: ${opt.dataset.roll || 'N/A'} | Reg No: ${opt.dataset.reg || 'N/A'}`;
         previewCentre.textContent = 'Study Centre: ' + (opt.dataset.centre || 'Main Centre');
         previewCourse.textContent = 'Course Curriculum: ' + (opt.dataset.course || 'Unassigned');
+
+        if (previewTimeline) {
+            previewAdmDate.textContent = admHuman;
+            previewDuration.textContent = durText;
+            previewCalcDate.textContent = calcHuman || formatDateHuman(calcDate);
+            previewTimeline.style.display = 'block';
+        }
 
         if (type === 'result') {
             hiddenExamResultId.value = id;
@@ -295,9 +409,41 @@ document.addEventListener('DOMContentLoaded', function () {
             previewBadge.textContent = `Direct Issuance: ${currentPct}% (Grade ${gradeInput.value})`;
             previewBadge.className = 'badge bg-primary px-3 py-2 fs-6';
         }
+
+        // Apply automatic issue date
+        if (calcDate) {
+            applyCalculatedDate(calcDate, `Admission (${admHuman}) + ${durText} = ${calcHuman || formatDateHuman(calcDate)}`);
+        }
     }
 
     candidateSelect.addEventListener('change', updateSelection);
+
+    // If Course dropdown changes inside Direct Certification, recalculate issue date dynamically
+    if (courseSelect) {
+        courseSelect.addEventListener('change', function () {
+            const opt = courseSelect.options[courseSelect.selectedIndex];
+            if (opt && opt.dataset.durationMonths && currentAdmDate) {
+                const newMonths = parseInt(opt.dataset.durationMonths, 10);
+                const durName = opt.dataset.duration || `${newMonths} Months`;
+                const newDate = addMonthsToDate(currentAdmDate, newMonths);
+                applyCalculatedDate(newDate, `Recalibrated: Admission + ${durName} = ${formatDateHuman(newDate)}`);
+                if (previewDuration) previewDuration.textContent = durName;
+                if (previewCalcDate) previewCalcDate.textContent = formatDateHuman(newDate);
+            }
+        });
+    }
+
+    if (resetCalcBtn) {
+        resetCalcBtn.addEventListener('click', function () {
+            if (currentCalculatedDate) {
+                issueDateInput.value = currentCalculatedDate;
+                if (issueDateCalcHint) issueDateCalcHint.style.display = 'block';
+            } else if (currentAdmDate) {
+                const date = addMonthsToDate(currentAdmDate, currentDurationMonths);
+                applyCalculatedDate(date);
+            }
+        });
+    }
 
     // Initial trigger if prepopulated
     if (candidateSelect.value) {

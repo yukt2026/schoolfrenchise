@@ -83,12 +83,31 @@ class Course extends Model
         return (float) ($this->default_course_fee ?: $this->total_fee ?: 0);
     }
 
-    public function getDurationMonthsAttribute()
+    public function getDurationMonthsAttribute(): int
     {
-        if (preg_match('/(\d+)/', (string) $this->duration, $m)) {
+        $dur = strtolower(trim((string) $this->duration));
+        if (preg_match('/(\d+)\s*year/i', $dur, $m)) {
+            return ((int) $m[1]) * 12;
+        }
+        if (preg_match('/(\d+)\s*month/i', $dur, $m)) {
             return (int) $m[1];
         }
+        if (preg_match('/(\d+)/', $dur, $m)) {
+            $val = (int) $m[1];
+            if (str_contains($dur, 'yr')) {
+                return $val * 12;
+            }
+            return ($val <= 2) ? $val * 12 : $val;
+        }
         return 6;
+    }
+
+    public function calculateIssueDate(?string $admissionDate): string
+    {
+        if (!$admissionDate) {
+            return now()->toDateString();
+        }
+        return \Carbon\Carbon::parse($admissionDate)->addMonths($this->duration_months)->toDateString();
     }
 
     public function scopeActive($query)

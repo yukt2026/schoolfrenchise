@@ -8,11 +8,12 @@
         <h3 class="fw-bold text-dark mb-1">
             <i class="fa-solid fa-wallet text-warning me-2"></i>Franchise Wallet & Ledger
         </h3>
-        <p class="text-muted small mb-0">Study centre prepaid wallet for candidate admission fee, student kit deductions, and top-up recharges.</p>
+        <p class="text-muted small mb-0">Study centre prepaid wallet for candidate admission fee, student kit deductions, and instant top-up recharges.</p>
     </div>
     <div class="d-flex gap-2">
-        <a href="{{ route('centre.wallet.topup') }}" class="btn btn-warning text-dark btn-sm fw-bold rounded-2 px-3 shadow-sm">
-            <i class="fa-solid fa-plus-circle me-1"></i>Request Top-up
+        <a href="{{ route('centre.wallet.topup') }}" class="btn btn-success btn-sm fw-bold rounded-3 px-3 shadow-sm d-flex align-items-center gap-2">
+            <i class="fa-solid fa-bolt"></i>
+            <span>Instant Recharge (Razorpay)</span>
         </a>
     </div>
 </div>
@@ -29,8 +30,9 @@
             </div>
             <h2 class="fw-bolder text-warning my-1 font-monospace">₹{{ number_format($wallet->balance, 2) }}</h2>
             <div class="small text-white-50 mb-3" style="font-size: 0.75rem;">Instant credit for student registration & kit allocations</div>
-            <a href="{{ route('centre.wallet.topup') }}" class="btn btn-warning text-dark btn-sm fw-bold rounded-2 w-100 mt-auto shadow-sm">
-                <i class="fa-solid fa-arrow-up-right-from-square me-1"></i>Recharge Balance
+            <a href="{{ route('centre.wallet.topup') }}" class="btn btn-success btn-sm fw-bold rounded-3 w-100 mt-auto shadow-sm py-2 d-flex align-items-center justify-content-center gap-2">
+                <i class="fa-solid fa-bolt"></i>
+                <span>Recharge via Razorpay / UPI</span>
             </a>
         </div>
     </div>

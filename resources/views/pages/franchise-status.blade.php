@@ -29,7 +29,7 @@
                             @csrf
                             <div class="mb-3">
                                 <label class="form-label">Application ID or Registered Mobile <span class="text-danger">*</span></label>
-                                <input type="text" name="search_query" class="form-control" placeholder="e.g. FR-2026-AB12CD or 9942434236" value="{{ $searchQuery ?? old('search_query') }}" required>
+                                <input type="text" name="search_query" class="form-control" placeholder="e.g. FR-2026-AB12CD or 9876543210" value="{{ $searchQuery ?? old('search_query') }}" required>
                             </div>
                             <button type="submit" class="btn btn-dce-primary w-100 py-2 fw-bold">
                                 <i class="fa-solid fa-search me-1"></i> Track Status
@@ -92,7 +92,7 @@
                                         <strong class="d-block text-primary"><i class="fa-solid fa-circle-info me-1"></i> Board Review Note:</strong>
                                         @if($application->status == 'approved')
                                             <p class="text-success mb-0 mt-1">
-                                                <strong>Congratulations!</strong> Your franchise application has been approved by the board. Please contact the Head Office at 9942434236 for your Centre Code allocation and Affiliation Certificate dispatch.
+                                                <strong>Congratulations!</strong> Your franchise application has been approved by the board. Please contact the Head Office at {{ $instituteSettings['contact_phone'] ?? '9162384660' }} for your Centre Code allocation and Affiliation Certificate dispatch.
                                             </p>
                                         @elseif($application->status == 'rejected')
                                             <p class="text-danger mb-0 mt-1">

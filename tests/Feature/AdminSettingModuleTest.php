@@ -35,6 +35,12 @@ class AdminSettingModuleTest extends TestCase
         $this->admin->roles()->syncWithoutDetaching([$superAdminRole->id]);
     }
 
+    protected function tearDown(): void
+    {
+        Setting::set('payment_gateway_mode', 'sandbox');
+        parent::tearDown();
+    }
+
     public function test_guest_cannot_access_settings()
     {
         $response = $this->get(route('admin.settings.index'));
@@ -144,5 +150,35 @@ class AdminSettingModuleTest extends TestCase
             'contact_phone',
             'corporate_address',
         ]);
+    }
+
+    public function test_admin_can_update_razorpay_credentials_in_settings()
+    {
+        $payload = [
+            'institute_name'                   => 'Tech Era Computer Institute',
+            'contact_email'                    => 'info@techeracomputer.com',
+            'contact_phone'                    => '+91 91623 84660',
+            'corporate_address'                => 'Main Road, Patna, Bihar',
+            'academic_session'                 => '2026-2027',
+            'receipt_prefix'                   => 'RCP',
+            'certificate_prefix'               => 'TEC/CERT',
+            'marksheet_prefix'                 => 'TEC/MS',
+            'currency_symbol'                  => '₹',
+            'payment_gateway_mode'             => 'sandbox',
+            'razorpay_key_id'                  => 'rzp_test_CustomKey123',
+            'razorpay_key_secret'              => 'Secr3tToken987654321',
+            'razorpay_webhook_secret'          => 'WhSecr3t12345',
+            'razorpay_wallet_recharge_enabled' => 1,
+        ];
+
+        $response = $this->actingAs($this->admin)->post(route('admin.settings.update'), $payload);
+
+        $response->assertRedirect(route('admin.settings.index'));
+        $response->assertSessionHas('success');
+
+        $this->assertEquals('rzp_test_CustomKey123', Setting::get('razorpay_key_id'));
+        $this->assertEquals('Secr3tToken987654321', Setting::get('razorpay_key_secret'));
+        $this->assertEquals('WhSecr3t12345', Setting::get('razorpay_webhook_secret'));
+        $this->assertEquals('1', Setting::get('razorpay_wallet_recharge_enabled'));
     }
 }

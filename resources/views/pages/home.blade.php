@@ -529,6 +529,120 @@
     </section>
 
 
+    <!-- 3. Government & Global Accreditations Marquee Section -->
+    <section class="py-3 py-md-4 bg-white border-top border-bottom">
+        <div class="container">
+            <div class="d-flex flex-wrap justify-content-between align-items-center gap-2 mb-3">
+                <div>
+                    <span class="badge bg-primary-subtle text-primary border border-primary-subtle px-3 py-1.5 rounded-pill text-uppercase fw-bold" style="font-size: 0.72rem;">
+                        <i class="fa-solid fa-award text-warning me-1"></i> Authorized & Recognized By
+                    </span>
+                    <h4 class="fw-bold text-dark mt-2 mb-0 fs-5 fs-md-4">Government & National Accreditations</h4>
+                </div>
+                <div class="d-none d-md-flex align-items-center gap-2">
+                    <span class="badge bg-success-subtle text-success border border-success-subtle px-3 py-1.5 rounded-pill fw-semibold small">
+                        <i class="fa-solid fa-shield-check me-1"></i> ISO 9001:2015 Certified
+                    </span>
+                    <span class="badge bg-info-subtle text-info-emphasis border border-info-subtle px-3 py-1.5 rounded-pill fw-semibold small">
+                        <i class="fa-solid fa-building-columns me-1"></i> Govt. Recognized Body
+                    </span>
+                </div>
+            </div>
+
+            <div class="gov-accred-marquee-container rounded-4 p-2 p-md-3 shadow-xs">
+                <!-- Smooth Left & Right Gradient Masks -->
+                <div class="gov-accred-fade gov-accred-fade-left"></div>
+                <div class="gov-accred-fade gov-accred-fade-right"></div>
+
+                <marquee behavior="scroll" direction="left" scrollamount="5" onmouseover="this.stop();" onmouseout="this.start();">
+                    <div class="d-inline-flex align-items-center gap-2 gap-md-3 py-1">
+                        <!-- Set 1 -->
+                        <!-- MSME -->
+                        <div class="gov-accred-card" title="MSME - Ministry of Micro, Small & Medium Enterprises, Govt. of India">
+                            <img src="{{ asset('images/goverment_certificate/msme.jpeg') }}" alt="MSME - Govt. of India Registered">
+                        </div>
+
+                        <!-- ISO 9001:2015 -->
+                        <div class="gov-accred-card" title="ISO 9001:2015 Certified - Quality Management System">
+                            <img src="{{ asset('images/goverment_certificate/iso.jpeg') }}" alt="ISO 9001:2015 Certified">
+                        </div>
+
+                        <!-- MCA -->
+                        <div class="gov-accred-card" title="MCA - Ministry of Corporate Affairs, Govt. of India">
+                            <img src="{{ asset('images/goverment_certificate/mca.jpeg') }}" alt="Ministry of Corporate Affairs">
+                        </div>
+
+                        <!-- Skill India -->
+                        <div class="gov-accred-card" title="Skill India - कौशल भारत, कुशल भारत (Govt. of India)">
+                            <img src="{{ asset('images/goverment_certificate/skill_india.jpeg') }}" alt="Skill India - NSDC">
+                        </div>
+
+                        <!-- Startup India -->
+                        <div class="gov-accred-card" title="Startup India - DPIIT, Ministry of Commerce & Industry">
+                            <img src="{{ asset('images/goverment_certificate/startup_india.jpeg') }}" alt="Startup India - DPIIT">
+                        </div>
+
+                        <!-- Digital India -->
+                        <div class="gov-accred-card" title="Digital India - Power to Empower, Govt. of India">
+                            <img src="{{ asset('images/goverment_certificate/digital_india.jpeg') }}" alt="Digital India">
+                        </div>
+
+                        <!-- NITI Aayog -->
+                        <div class="gov-accred-card" title="NITI Aayog - National Institution for Transforming India">
+                            <img src="{{ asset('images/goverment_certificate/niti_aayog.jpeg') }}" alt="NITI Aayog">
+                        </div>
+
+                        <!-- IAF -->
+                        <div class="gov-accred-card" title="IAF - International Accreditation Forum">
+                            <img src="{{ asset('images/goverment_certificate/iaf.jpeg') }}" alt="IAF Accreditation">
+                        </div>
+
+                        <!-- Set 2 (Continuous smooth loop across any screen resolution) -->
+                        <!-- MSME -->
+                        <div class="gov-accred-card" title="MSME - Ministry of Micro, Small & Medium Enterprises, Govt. of India">
+                            <img src="{{ asset('images/goverment_certificate/msme.jpeg') }}" alt="MSME - Govt. of India Registered">
+                        </div>
+
+                        <!-- ISO 9001:2015 -->
+                        <div class="gov-accred-card" title="ISO 9001:2015 Certified - Quality Management System">
+                            <img src="{{ asset('images/goverment_certificate/iso.jpeg') }}" alt="ISO 9001:2015 Certified">
+                        </div>
+
+                        <!-- MCA -->
+                        <div class="gov-accred-card" title="MCA - Ministry of Corporate Affairs, Govt. of India">
+                            <img src="{{ asset('images/goverment_certificate/mca.jpeg') }}" alt="Ministry of Corporate Affairs">
+                        </div>
+
+                        <!-- Skill India -->
+                        <div class="gov-accred-card" title="Skill India - कौशल भारत, कुशल भारत (Govt. of India)">
+                            <img src="{{ asset('images/goverment_certificate/skill_india.jpeg') }}" alt="Skill India - NSDC">
+                        </div>
+
+                        <!-- Startup India -->
+                        <div class="gov-accred-card" title="Startup India - DPIIT, Ministry of Commerce & Industry">
+                            <img src="{{ asset('images/goverment_certificate/startup_india.jpeg') }}" alt="Startup India - DPIIT">
+                        </div>
+
+                        <!-- Digital India -->
+                        <div class="gov-accred-card" title="Digital India - Power to Empower, Govt. of India">
+                            <img src="{{ asset('images/goverment_certificate/digital_india.jpeg') }}" alt="Digital India">
+                        </div>
+
+                        <!-- NITI Aayog -->
+                        <div class="gov-accred-card" title="NITI Aayog - National Institution for Transforming India">
+                            <img src="{{ asset('images/goverment_certificate/niti_aayog.jpeg') }}" alt="NITI Aayog">
+                        </div>
+
+                        <!-- IAF -->
+                        <div class="gov-accred-card" title="IAF - International Accreditation Forum">
+                            <img src="{{ asset('images/goverment_certificate/iaf.jpeg') }}" alt="IAF Accreditation">
+                        </div>
+                    </div>
+                </marquee>
+            </div>
+        </div>
+    </section>
+
     <!-- 4. Key Impact & Numerical Statistics Strip -->
     <section class="py-4 py-md-5 bg-light border-top border-bottom">
         <div class="container">

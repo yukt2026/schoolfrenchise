@@ -56,6 +56,25 @@ class PublicWebsiteTest extends TestCase
         $response->assertSee($course->course_name);
     }
 
+    public function test_basic_computer_course_renders_dynamically_with_syllabus_and_subjects(): void
+    {
+        $bcc = Course::with('subjects')->where('slug', 'basic-computer-course')->first();
+        $this->assertNotNull($bcc, 'BCC course should exist in database.');
+
+        $response = $this->get('/course/basic-computer-course');
+        $response->assertStatus(200);
+        $response->assertSee($bcc->course_name);
+        $response->assertSee($bcc->course_code);
+        $response->assertSee($bcc->duration);
+        $response->assertSee(number_format($bcc->default_course_fee, 2));
+
+        if ($bcc->subjects->isNotEmpty()) {
+            foreach ($bcc->subjects as $subj) {
+                $response->assertSee($subj->subject_name);
+            }
+        }
+    }
+
     public function test_certificate_verification_searches_actual_records(): void
     {
         // Search by known seeded certificate student
@@ -204,6 +223,23 @@ class PublicWebsiteTest extends TestCase
         $response->assertSee('Franchise Login');
         $response->assertSee(route('student.login'));
         $response->assertSee(route('login'));
+    }
+
+    public function test_student_and_centre_login_pages_render_with_password_toggle_eye_icon(): void
+    {
+        // 1. Student Login Page
+        $studentLoginResp = $this->get(route('student.login'));
+        $studentLoginResp->assertStatus(200);
+        $studentLoginResp->assertSee('id="studentPasswordInput"', false);
+        $studentLoginResp->assertSee('id="toggleStudentPassword"', false);
+        $studentLoginResp->assertSee('id="toggleStudentIcon"', false);
+
+        // 2. Centre / Admin Login Page
+        $centreLoginResp = $this->get(route('login'));
+        $centreLoginResp->assertStatus(200);
+        $centreLoginResp->assertSee('id="centrePasswordInput"', false);
+        $centreLoginResp->assertSee('id="toggleCentrePassword"', false);
+        $centreLoginResp->assertSee('id="toggleCentreIcon"', false);
     }
 
     public function test_homepage_renders_hero_banner_slider_with_images_and_quick_service_cards(): void

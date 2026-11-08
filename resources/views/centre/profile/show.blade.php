@@ -99,7 +99,10 @@
 
                 <div class="row g-3">
                     <div class="col-md-4">
-                        <label class="form-label text-muted small fw-semibold">Centre Logo</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label text-muted small fw-semibold mb-0">Centre Logo</label>
+                            <span class="badge bg-secondary-subtle text-muted border small"><i class="fa-solid fa-lock me-1"></i>Locked</span>
+                        </div>
                         <div class="p-2 border rounded-2 bg-light text-center">
                             @if($centre->centre_logo_url)
                                 <img src="{{ $centre->centre_logo_url }}" alt="Logo" class="rounded bg-white p-1" style="height: 60px; max-width: 120px; object-fit: contain;">
@@ -109,7 +112,10 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-muted small fw-semibold">Director Photo</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label text-muted small fw-semibold mb-0">Director Photo</label>
+                            <span class="badge bg-secondary-subtle text-muted border small"><i class="fa-solid fa-lock me-1"></i>Locked</span>
+                        </div>
                         <div class="p-2 border rounded-2 bg-light text-center">
                             @if($centre->director_photo_url)
                                 <img src="{{ $centre->director_photo_url }}" alt="Director" class="rounded-circle border" style="height: 60px; width: 60px; object-fit: cover;">
@@ -119,7 +125,10 @@
                         </div>
                     </div>
                     <div class="col-md-4">
-                        <label class="form-label text-muted small fw-semibold">Director Specimen Signature</label>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <label class="form-label text-muted small fw-semibold mb-0">Director Specimen Signature</label>
+                            <span class="badge bg-secondary-subtle text-muted border small"><i class="fa-solid fa-lock me-1"></i>Locked</span>
+                        </div>
                         <div class="p-2 border rounded-2 bg-light text-center">
                             @if($centre->director_signature_url)
                                 <img src="{{ $centre->director_signature_url }}" alt="Signature" class="bg-white p-1 rounded" style="height: 35px; max-width: 120px; object-fit: contain;">

@@ -30,6 +30,16 @@ class PaymentGatewayService
      */
     public static function isSandbox(): bool
     {
+        if (app()->runningUnitTests()) {
+            $configMode = config('services.payment.mode');
+            if ($configMode !== null) {
+                return $configMode === 'sandbox';
+            }
+        }
+        $dbMode = \App\Models\Setting::get('payment_gateway_mode');
+        if (!empty($dbMode)) {
+            return $dbMode === 'sandbox';
+        }
         return config('services.payment.mode', 'sandbox') === 'sandbox';
     }
 
@@ -40,7 +50,17 @@ class PaymentGatewayService
     {
         $provider = self::getProvider();
 
-        if ($provider === 'cashfree') {
+        if ($provider === 'razorpay') {
+            $dbSecret = \App\Models\Setting::get('razorpay_key_secret');
+            $configSecret = config('services.payment.razorpay.key_secret');
+            if (app()->runningUnitTests() && $configSecret === null) {
+                $secret = null;
+            } elseif (!empty($dbSecret)) {
+                return trim($dbSecret);
+            } else {
+                $secret = $configSecret;
+            }
+        } elseif ($provider === 'cashfree') {
             $secret = config('services.payment.cashfree.secret_key');
         } else {
             $secret = config('services.payment.razorpay.key_secret');
@@ -48,7 +68,7 @@ class PaymentGatewayService
 
         if (empty($secret)) {
             if (!self::isSandbox()) {
-                throw new RuntimeException("Live payment gateway cannot be activated. Merchant credentials for [{$provider}] are not configured.");
+                throw new RuntimeException("Live payment gateway cannot be activated. Merchant credentials for [{$provider}] are not configured in Admin Settings.");
             }
             // In sandbox/test mode without credentials, use application salt
             return config('services.payment.salt', 'TECH_ERA_SECURE_SALT_KEY_2026');
@@ -64,7 +84,17 @@ class PaymentGatewayService
     {
         $provider = self::getProvider();
 
-        if ($provider === 'cashfree') {
+        if ($provider === 'razorpay') {
+            $dbKey = \App\Models\Setting::get('razorpay_key_id');
+            $configKey = config('services.payment.razorpay.key_id');
+            if (app()->runningUnitTests() && $configKey === null) {
+                $key = null;
+            } elseif (!empty($dbKey)) {
+                return trim($dbKey);
+            } else {
+                $key = $configKey;
+            }
+        } elseif ($provider === 'cashfree') {
             $key = config('services.payment.cashfree.app_id');
         } else {
             $key = config('services.payment.razorpay.key_id');
@@ -84,7 +114,13 @@ class PaymentGatewayService
     {
         $provider = self::getProvider();
 
-        if ($provider === 'cashfree') {
+        if ($provider === 'razorpay') {
+            $dbWh = \App\Models\Setting::get('razorpay_webhook_secret');
+            if (!empty($dbWh)) {
+                return trim($dbWh);
+            }
+            $secret = config('services.payment.razorpay.webhook_secret');
+        } elseif ($provider === 'cashfree') {
             $secret = config('services.payment.cashfree.webhook_secret');
         } else {
             $secret = config('services.payment.razorpay.webhook_secret');
@@ -126,6 +162,32 @@ class PaymentGatewayService
 
         $orderId = 'order_' . date('Ymd') . '_' . strtolower(Str::random(14));
         $transactionId = 'TXN-' . date('Ymd') . '-' . strtoupper(Str::random(8));
+
+        $publicKey = self::getPublicKey();
+        $secret = self::getKeySecret();
+
+        // If credentials look like real Razorpay keys (starts with rzp_), try creating order on Razorpay API
+        if (str_starts_with($publicKey, 'rzp_') && !empty($secret) && $secret !== 'TECH_ERA_SECURE_SALT_KEY_2026') {
+            try {
+                $response = \Illuminate\Support\Facades\Http::withBasicAuth($publicKey, $secret)
+                    ->timeout(10)
+                    ->post('https://api.razorpay.com/v1/orders', [
+                        'amount'   => (int) round($amount * 100),
+                        'currency' => 'INR',
+                        'receipt'  => $transactionId,
+                        'notes'    => [
+                            'centre_id' => (string) ($centreId ?? ''),
+                            'purpose'   => $purpose,
+                        ]
+                    ]);
+
+                if ($response->successful() && !empty($response->json('id'))) {
+                    $orderId = $response->json('id');
+                }
+            } catch (\Throwable $e) {
+                \Illuminate\Support\Facades\Log::warning('Razorpay Order API creation failed, using internal order ID: ' . $e->getMessage());
+            }
+        }
 
         // Create transaction in pending state
         $transaction = OnlineTransaction::create([
@@ -252,7 +314,7 @@ class PaymentGatewayService
             $transaction->save();
 
             // Check if this transaction is for a franchise wallet recharge
-            if ($transaction->centre_id || str_contains(strtolower($transaction->purpose), 'wallet')) {
+            if (str_contains(strtolower($transaction->purpose), 'wallet') || (!empty($transaction->centre_id) && empty($transaction->student_id) && empty($transaction->admission_id))) {
                 \App\Services\WalletService::creditFromOnlineRecharge($transaction, $gatewayPaymentId, $signature, $gatewayPayload);
                 return $transaction;
             }
@@ -292,7 +354,7 @@ class PaymentGatewayService
                     'receipt_no'      => $receiptNo,
                     'payment_date'    => now()->toDateString(),
                     'amount'          => $amount,
-                    'payment_mode'    => 'online',
+                    'payment_mode'    => $transaction->payment_method ?: 'online',
                     'transaction_ref' => $gatewayPaymentId,
                     'notes'           => "Online Payment ({$transaction->purpose}) - Ref: {$transaction->transaction_id}",
                 ]);

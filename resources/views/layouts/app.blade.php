@@ -323,6 +323,82 @@
             </div>
         </div>
         @endif
+
+        <!-- 3.5. Government & Global Authorizations Marquee (MSME, ISO, MCA, etc.) -->
+        @if(!request()->routeIs('home'))
+        <div class="govt-accreditation-marquee bg-white border-bottom shadow-xs py-1.5 overflow-hidden">
+            <div class="container-fluid px-2 px-md-3 d-flex align-items-center">
+                <div class="accred-marquee-badge d-none d-md-flex align-items-center gap-1.5 me-3 flex-shrink-0 bg-primary-subtle text-primary border border-primary-subtle px-3 py-1 rounded-pill small fw-bold text-uppercase" style="font-size: 0.72rem;">
+                    <i class="fa-solid fa-award text-warning"></i>
+                    <span>Govt. Approved:</span>
+                </div>
+                <div class="flex-grow-1 overflow-hidden position-relative">
+                    <marquee behavior="scroll" direction="left" scrollamount="5" onmouseover="this.stop();" onmouseout="this.start();">
+                        <div class="d-inline-flex align-items-center gap-2 gap-md-3 py-0.5">
+                            <!-- MSME -->
+                            <div class="govt-topbar-card" title="MSME - Ministry of Micro, Small & Medium Enterprises (Govt. of India)">
+                                <img src="{{ asset('images/goverment_certificate/msme.jpeg') }}" alt="MSME">
+                            </div>
+                            <!-- ISO 9001:2015 -->
+                            <div class="govt-topbar-card" title="ISO 9001:2015 Certified Quality Management System">
+                                <img src="{{ asset('images/goverment_certificate/iso.jpeg') }}" alt="ISO 9001:2015">
+                            </div>
+                            <!-- MCA -->
+                            <div class="govt-topbar-card" title="MCA - Ministry of Corporate Affairs (Govt. of India)">
+                                <img src="{{ asset('images/goverment_certificate/mca.jpeg') }}" alt="Ministry of Corporate Affairs">
+                            </div>
+                            <!-- Skill India -->
+                            <div class="govt-topbar-card" title="Skill India - कौशल भारत, कुशल भारत">
+                                <img src="{{ asset('images/goverment_certificate/skill_india.jpeg') }}" alt="Skill India">
+                            </div>
+                            <!-- Startup India -->
+                            <div class="govt-topbar-card" title="Startup India - DPIIT Govt. of India">
+                                <img src="{{ asset('images/goverment_certificate/startup_india.jpeg') }}" alt="Startup India">
+                            </div>
+                            <!-- Digital India -->
+                            <div class="govt-topbar-card" title="Digital India - Power to Empower">
+                                <img src="{{ asset('images/goverment_certificate/digital_india.jpeg') }}" alt="Digital India">
+                            </div>
+                            <!-- NITI Aayog -->
+                            <div class="govt-topbar-card" title="NITI Aayog - National Institution for Transforming India">
+                                <img src="{{ asset('images/goverment_certificate/niti_aayog.jpeg') }}" alt="NITI Aayog">
+                            </div>
+                            <!-- IAF -->
+                            <div class="govt-topbar-card" title="IAF - International Accreditation Forum">
+                                <img src="{{ asset('images/goverment_certificate/iaf.jpeg') }}" alt="IAF Accredited">
+                            </div>
+
+                            <!-- Continuous Loop Duplicate -->
+                            <div class="govt-topbar-card" title="MSME - Ministry of Micro, Small & Medium Enterprises (Govt. of India)">
+                                <img src="{{ asset('images/goverment_certificate/msme.jpeg') }}" alt="MSME">
+                            </div>
+                            <div class="govt-topbar-card" title="ISO 9001:2015 Certified Quality Management System">
+                                <img src="{{ asset('images/goverment_certificate/iso.jpeg') }}" alt="ISO 9001:2015">
+                            </div>
+                            <div class="govt-topbar-card" title="MCA - Ministry of Corporate Affairs (Govt. of India)">
+                                <img src="{{ asset('images/goverment_certificate/mca.jpeg') }}" alt="Ministry of Corporate Affairs">
+                            </div>
+                            <div class="govt-topbar-card" title="Skill India - कौशल भारत, कुशल भारत">
+                                <img src="{{ asset('images/goverment_certificate/skill_india.jpeg') }}" alt="Skill India">
+                            </div>
+                            <div class="govt-topbar-card" title="Startup India - DPIIT Govt. of India">
+                                <img src="{{ asset('images/goverment_certificate/startup_india.jpeg') }}" alt="Startup India">
+                            </div>
+                            <div class="govt-topbar-card" title="Digital India - Power to Empower">
+                                <img src="{{ asset('images/goverment_certificate/digital_india.jpeg') }}" alt="Digital India">
+                            </div>
+                            <div class="govt-topbar-card" title="NITI Aayog - National Institution for Transforming India">
+                                <img src="{{ asset('images/goverment_certificate/niti_aayog.jpeg') }}" alt="NITI Aayog">
+                            </div>
+                            <div class="govt-topbar-card" title="IAF - International Accreditation Forum">
+                                <img src="{{ asset('images/goverment_certificate/iaf.jpeg') }}" alt="IAF Accredited">
+                            </div>
+                        </div>
+                    </marquee>
+                </div>
+            </div>
+        </div>
+        @endif
     </header>
 
     <!-- 4. Flash Notifications & Alerts -->

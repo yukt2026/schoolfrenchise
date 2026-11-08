@@ -41,7 +41,14 @@
 
             <!-- Payment Form Card -->
             <div class="card border border-light-subtle shadow-sm rounded-3 bg-white p-4 p-md-5 mb-4">
-                @if(config('services.payment.mode', 'sandbox') === 'sandbox')
+                @if(session('error'))
+                    <div class="alert alert-danger border-0 rounded-3 mb-4 d-flex align-items-center gap-2">
+                        <i class="fa-solid fa-triangle-exclamation fs-5"></i>
+                        <div>{{ session('error') }}</div>
+                    </div>
+                @endif
+
+                @if(!empty($isSandbox))
                     <div class="alert alert-warning border-0 rounded-3 mb-4 d-flex align-items-center gap-3">
                         <i class="fa-solid fa-flask-vial fs-4 text-warning"></i>
                         <div class="small">
@@ -50,7 +57,7 @@
                     </div>
                 @endif
 
-                <form method="POST" action="{{ route('student.fees.pay.submit') }}" id="checkoutForm">
+                <form id="checkoutForm" onsubmit="return false;">
                     @csrf
 
                     <div class="mb-4">
@@ -112,15 +119,30 @@
                     <div class="p-3 rounded-3 bg-light border small text-muted mb-4 d-flex align-items-center gap-3">
                         <i class="fa-solid fa-shield-halved fs-3 text-success"></i>
                         <div>
-                            <strong>256-bit Encrypted Transaction:</strong> Server-side order creation and authoritative webhook reconciliation. We never store card numbers, CVVs, or bank passwords.
+                            <strong>256-bit Encrypted Transaction:</strong> Server-side order creation and authoritative webhook reconciliation. Fees will only be credited once actual payment is cryptographically verified by the gateway.
                         </div>
                     </div>
 
-                    <div class="text-center">
-                        <button type="submit" class="btn btn-primary rounded-2 px-5 py-3 fw-bold fs-6 shadow">
-                            <i class="fa-solid fa-lock me-2"></i> Proceed to Authorize Payment
+                    <div class="text-center d-flex flex-column align-items-center gap-2">
+                        <button type="button" id="btnProceedPay" class="btn btn-primary rounded-2 px-5 py-3 fw-bold fs-6 shadow w-100 w-md-auto">
+                            <i class="fa-solid fa-lock me-2"></i> Pay ₹<span id="btnAmountDisplay">{{ number_format(min($suggestedAmount, $totalDues), 2) }}</span> via Razorpay
                         </button>
+
+                        @if(!empty($isSandbox))
+                        <button type="button" id="btnSimulateSandbox" class="btn btn-outline-warning btn-sm rounded-2 mt-2 px-4 py-1.5 fw-semibold">
+                            <i class="fa-solid fa-bolt text-warning me-1"></i> Simulate Sandbox Payment (Testing Only)
+                        </button>
+                        @endif
                     </div>
+                </form>
+
+                <!-- Hidden Authoritative Razorpay Verification Form -->
+                <form id="razorpayVerifyForm" method="POST" action="{{ route('student.fees.pay.verify') }}" class="d-none">
+                    @csrf
+                    <input type="hidden" name="order_id" id="rzp_order_id">
+                    <input type="hidden" name="gateway_payment_id" id="rzp_payment_id">
+                    <input type="hidden" name="gateway_signature" id="rzp_signature">
+                    <input type="hidden" name="payment_mode" id="rzp_payment_mode" value="online">
                 </form>
             </div>
         </div>
@@ -144,4 +166,189 @@
     box-shadow: 0 0 0 2px #0284c7;
 }
 </style>
+@endpush
+
+@push('scripts')
+<!-- Official Razorpay Checkout Library -->
+<script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const amountInput = document.getElementById('amountInput');
+    const btnAmountDisplay = document.getElementById('btnAmountDisplay');
+    const btnProceedPay = document.getElementById('btnProceedPay');
+    const btnSimulateSandbox = document.getElementById('btnSimulateSandbox');
+    const verifyForm = document.getElementById('razorpayVerifyForm');
+    const originalBtnHtml = btnProceedPay ? btnProceedPay.innerHTML : '';
+
+    // Update button text when amount changes
+    if (amountInput && btnAmountDisplay) {
+        amountInput.addEventListener('input', function () {
+            const val = parseFloat(this.value) || 0;
+            btnAmountDisplay.textContent = val.toLocaleString('en-IN', { minimumFractionDigits: 2, maximumFractionDigits: 2 });
+        });
+    }
+
+    function getSelectedMode() {
+        const checked = document.querySelector('input[name="payment_mode"]:checked');
+        return checked ? checked.value : 'upi';
+    }
+
+    // 1. Proceed with real Razorpay Checkout
+    if (btnProceedPay) {
+        btnProceedPay.addEventListener('click', async function () {
+            const amount = parseFloat(amountInput.value);
+            const maxDues = parseFloat("{{ $totalDues }}");
+
+            if (isNaN(amount) || amount < 1) {
+                alert('Please enter a valid payment amount of at least ₹1.00');
+                amountInput.focus();
+                return;
+            }
+
+            if (amount > maxDues) {
+                alert('Amount cannot exceed current outstanding course balance (₹' + maxDues.toFixed(2) + ').');
+                amountInput.focus();
+                return;
+            }
+
+            const selectedMode = getSelectedMode();
+
+            // Set loading state
+            btnProceedPay.disabled = true;
+            btnProceedPay.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Connecting to Payment Gateway...';
+
+            try {
+                // Step 1: Create server-side order
+                const response = await fetch("{{ route('student.fees.pay.initiate') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: amount,
+                        payment_mode: selectedMode
+                    })
+                });
+
+                if (!response.ok) {
+                    const errData = await response.json().catch(() => ({}));
+                    throw new Error(errData.message || errData.error || 'Failed to initiate order with server.');
+                }
+
+                const orderData = await response.json();
+
+                if (!orderData.order_id) {
+                    throw new Error('Server did not return a valid order ID.');
+                }
+
+                // Step 2: Open Razorpay checkout modal
+                if (typeof Razorpay !== 'undefined') {
+                    const rzpOptions = {
+                        key: orderData.key_id,
+                        amount: orderData.amount_paise,
+                        currency: orderData.currency || 'INR',
+                        name: "{{ addslashes($instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER') }}",
+                        description: "Course Tuition Fee - {{ addslashes($admission->course?->course_name ?? 'Course') }}",
+                        image: "{{ $instituteSettings['logo_url'] ?? asset('images/tech-era-logo.png') }}",
+                        order_id: orderData.order_id,
+                        prefill: {
+                            name: "{{ addslashes($student->full_name) }}",
+                            contact: "{{ $student->mobile }}",
+                            email: "{{ $student->email ?? '' }}"
+                        },
+                        notes: {
+                            student_id: "{{ $student->id }}",
+                            roll_no: "{{ $student->roll_no }}"
+                        },
+                        theme: {
+                            color: "#0284c7"
+                        },
+                        handler: function (rzpResp) {
+                            // Step 3: Success callback - submit for server-side cryptographic signature verification
+                            btnProceedPay.innerHTML = '<span class="spinner-border spinner-border-sm me-2"></span> Verifying Gateway Signature...';
+                            document.getElementById('rzp_order_id').value = rzpResp.razorpay_order_id || orderData.order_id;
+                            document.getElementById('rzp_payment_id').value = rzpResp.razorpay_payment_id;
+                            document.getElementById('rzp_signature').value = rzpResp.razorpay_signature;
+                            document.getElementById('rzp_payment_mode').value = selectedMode;
+                            verifyForm.submit();
+                        },
+                        modal: {
+                            ondismiss: function () {
+                                // DO NOT SUBMIT FORM. Payment was not made!
+                                btnProceedPay.disabled = false;
+                                btnProceedPay.innerHTML = originalBtnHtml;
+                            }
+                        }
+                    };
+
+                    const rzpInstance = new Razorpay(rzpOptions);
+                    rzpInstance.on('payment.failed', function (failResp) {
+                        alert('Payment failed: ' + (failResp.error.description || 'Transaction was declined by bank/gateway.'));
+                        btnProceedPay.disabled = false;
+                        btnProceedPay.innerHTML = originalBtnHtml;
+                    });
+                    rzpInstance.open();
+                } else {
+                    alert('Razorpay Checkout library could not be loaded. Please ensure you have an active internet connection.');
+                    btnProceedPay.disabled = false;
+                    btnProceedPay.innerHTML = originalBtnHtml;
+                }
+            } catch (err) {
+                console.error('Payment Error:', err);
+                alert(err.message || 'An error occurred while contacting payment gateway.');
+                btnProceedPay.disabled = false;
+                btnProceedPay.innerHTML = originalBtnHtml;
+            }
+        });
+    }
+
+    // 2. Sandbox simulation button (Only visible in test/sandbox mode)
+    if (btnSimulateSandbox) {
+        btnSimulateSandbox.addEventListener('click', async function () {
+            const amount = parseFloat(amountInput.value);
+            const maxDues = parseFloat("{{ $totalDues }}");
+
+            if (isNaN(amount) || amount < 1 || amount > maxDues) {
+                alert('Please enter a valid payment amount between ₹1.00 and ₹' + maxDues.toFixed(2));
+                return;
+            }
+
+            btnSimulateSandbox.disabled = true;
+            btnSimulateSandbox.innerHTML = '<span class="spinner-border spinner-border-sm me-1"></span> Simulating Sandbox Payment...';
+
+            try {
+                const response = await fetch("{{ route('student.fees.pay.initiate') }}", {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'X-CSRF-TOKEN': "{{ csrf_token() }}",
+                        'Accept': 'application/json'
+                    },
+                    body: JSON.stringify({
+                        amount: amount,
+                        payment_mode: getSelectedMode()
+                    })
+                });
+
+                const orderData = await response.json();
+                if (!orderData.order_id) {
+                    throw new Error('Could not initiate sandbox order.');
+                }
+
+                document.getElementById('rzp_order_id').value = orderData.order_id;
+                document.getElementById('rzp_payment_id').value = 'pay_sim_' + Math.random().toString(36).substring(2, 12);
+                document.getElementById('rzp_signature').value = '';
+                document.getElementById('rzp_payment_mode').value = getSelectedMode();
+                verifyForm.submit();
+            } catch (e) {
+                alert('Simulation error: ' + e.message);
+                btnSimulateSandbox.disabled = false;
+                btnSimulateSandbox.innerHTML = '<i class="fa-solid fa-bolt text-warning me-1"></i> Simulate Sandbox Payment (Testing Only)';
+            }
+        });
+    }
+});
+</script>
 @endpush

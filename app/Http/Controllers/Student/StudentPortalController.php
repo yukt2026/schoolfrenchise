@@ -142,12 +142,11 @@ class StudentPortalController extends Controller
                     }
                 },
             ],
-            'photo'            => ['nullable', 'image', 'mimes:jpeg,png,webp,jpg,gif', 'max:2048'],
         ]);
 
+        // Security Policy: Students cannot modify their own profile photo
         if ($request->hasFile('photo')) {
-            $photoPath = FileUploadService::uploadImage($request->file('photo'), 'uploads/students/photos');
-            $student->photo_path = $photoPath;
+            return back()->with('error', 'Profile photo modification is locked. Please contact your Study Centre or Administration to update your photo.');
         }
 
         if (isset($validated['father_name'])) {

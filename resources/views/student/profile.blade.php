@@ -67,11 +67,12 @@
                     </div>
 
                     <div class="mb-3">
-                        <label for="studentPhotoInput" class="btn btn-sm btn-outline-primary rounded-pill px-3 shadow-sm" style="cursor: pointer;">
-                            <i class="fa-solid fa-camera me-1"></i> Upload / Change Photo
-                        </label>
-                        <input type="file" name="photo" id="studentPhotoInput" accept="image/jpeg,image/png,image/webp,image/gif" class="d-none" onchange="previewStudentPhoto(this)">
-                        <div class="text-muted small mt-1" id="photoHelpText" style="font-size: 0.72rem;">JPG, PNG, WebP &bull; Max 2MB</div>
+                        <span class="badge bg-secondary-subtle text-secondary border px-3 py-2 rounded-pill small">
+                            <i class="fa-solid fa-lock me-1"></i> Profile Photo Locked
+                        </span>
+                        <div class="text-muted small mt-2" style="font-size: 0.72rem;">
+                            Profile photo is locked for official identity verification. To change your photo, please contact your study centre.
+                        </div>
                     </div>
 
                     <h5 class="fw-bold text-dark mb-1">{{ $student->full_name }}</h5>

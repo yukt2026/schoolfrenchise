@@ -326,6 +326,89 @@
                             </div>
                         </div>
                     </div>
+
+                    <!-- Razorpay API Credentials Block -->
+                    <div class="col-12 mt-3">
+                        <div class="p-3 p-md-4 rounded-3 border bg-light">
+                            <div class="d-flex flex-wrap justify-content-between align-items-center mb-3">
+                                <div>
+                                    <h6 class="fw-bold text-dark mb-0">
+                                        <i class="fa-solid fa-credit-card text-primary me-2"></i>Razorpay Gateway API Credentials
+                                    </h6>
+                                    <span class="text-muted small">Client/Admin can configure Key ID and Secret Key from Razorpay Dashboard (Settings &gt; API Keys).</span>
+                                </div>
+                                <span class="badge {{ !empty($settings['razorpay_key_id']) ? 'bg-success' : 'bg-warning text-dark' }} px-3 py-2">
+                                    <i class="fa-solid {{ !empty($settings['razorpay_key_id']) ? 'fa-circle-check' : 'fa-triangle-exclamation' }} me-1"></i>
+                                    {{ !empty($settings['razorpay_key_id']) ? 'Razorpay Custom Keys Configured' : 'Sandbox Simulated Mode' }}
+                                </span>
+                            </div>
+
+                            <div class="row g-3">
+                                <div class="col-md-6">
+                                    <label for="razorpay_key_id" class="form-label small fw-bold">
+                                        Razorpay Key ID <small class="text-muted">(Key ID)</small>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-key text-primary"></i></span>
+                                        <input type="text" name="razorpay_key_id" id="razorpay_key_id" 
+                                               class="form-control font-monospace @error('razorpay_key_id') is-invalid @enderror" 
+                                               placeholder="e.g. rzp_live_xxxxxxxxxxxxxx or rzp_test_xxxxxxxxxxxxxx" 
+                                               value="{{ old('razorpay_key_id', $settings['razorpay_key_id'] ?? '') }}">
+                                    </div>
+                                    @error('razorpay_key_id')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="razorpay_key_secret" class="form-label small fw-bold">
+                                        Razorpay Key Secret <small class="text-muted">(Secret Key)</small>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-lock text-primary"></i></span>
+                                        <input type="password" name="razorpay_key_secret" id="razorpay_key_secret" 
+                                               class="form-control font-monospace @error('razorpay_key_secret') is-invalid @enderror" 
+                                               placeholder="e.g. ••••••••••••••••••••••••••••••••" 
+                                               value="{{ old('razorpay_key_secret', $settings['razorpay_key_secret'] ?? '') }}">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="toggleSecretVisibility('razorpay_key_secret', this)">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
+                                    @error('razorpay_key_secret')
+                                        <div class="invalid-feedback d-block">{{ $message }}</div>
+                                    @enderror
+                                </div>
+
+                                <div class="col-md-6">
+                                    <label for="razorpay_webhook_secret" class="form-label small fw-bold">
+                                        Razorpay Webhook Secret <small class="text-muted">(Optional)</small>
+                                    </label>
+                                    <div class="input-group">
+                                        <span class="input-group-text bg-white"><i class="fa-solid fa-bolt text-warning"></i></span>
+                                        <input type="password" name="razorpay_webhook_secret" id="razorpay_webhook_secret" 
+                                               class="form-control font-monospace @error('razorpay_webhook_secret') is-invalid @enderror" 
+                                               placeholder="Webhook signature secret" 
+                                               value="{{ old('razorpay_webhook_secret', $settings['razorpay_webhook_secret'] ?? '') }}">
+                                        <button class="btn btn-outline-secondary" type="button" onclick="toggleSecretVisibility('razorpay_webhook_secret', this)">
+                                            <i class="fa-solid fa-eye"></i>
+                                        </button>
+                                    </div>
+                                </div>
+
+                                <div class="col-md-6 d-flex align-items-center">
+                                    <div class="form-check form-switch mt-3">
+                                        <input class="form-check-input" type="checkbox" role="switch" 
+                                               id="razorpay_wallet_recharge_enabled" name="razorpay_wallet_recharge_enabled" 
+                                               value="1" {{ old('razorpay_wallet_recharge_enabled', $settings['razorpay_wallet_recharge_enabled'] ?? '1') == '1' ? 'checked' : '' }}>
+                                        <label class="form-check-label fw-semibold text-dark small" for="razorpay_wallet_recharge_enabled">
+                                            Allow Franchise Centres to Recharge Wallet via Razorpay
+                                        </label>
+                                        <div class="small text-muted">When enabled, franchise centres can pay directly via Razorpay UPI/Cards with instant balance credit.</div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -433,3 +516,19 @@
     </form>
 </div>
 @endsection
+
+@push('scripts')
+<script>
+function toggleSecretVisibility(id, btn) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    if (el.type === 'password') {
+        el.type = 'text';
+        btn.innerHTML = '<i class="fa-solid fa-eye-slash"></i>';
+    } else {
+        el.type = 'password';
+        btn.innerHTML = '<i class="fa-solid fa-eye"></i>';
+    }
+}
+</script>
+@endpush

@@ -153,8 +153,8 @@
 
                         <div class="text-center mt-3 pt-3 border-top">
                             <small class="text-muted">Or call our helpline directly:</small>
-                            <a href="tel:9942434236" class="fw-bold text-dark d-block fs-5 mt-1 text-decoration-none">
-                                <i class="fa-solid fa-phone text-warning me-1"></i> 9942434236
+                            <a href="tel:{{ $instituteSettings['contact_phone'] ?? '9162384660' }}" class="fw-bold text-dark d-block fs-5 mt-1 text-decoration-none">
+                                <i class="fa-solid fa-phone text-warning me-1"></i> {{ $instituteSettings['contact_phone'] ?? '9162384660' }}
                             </a>
                         </div>
                     </div>

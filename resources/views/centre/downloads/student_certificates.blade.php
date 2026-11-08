@@ -145,15 +145,31 @@
                             </span>
                         </td>
                         <td class="text-end pe-3">
+                            @php
+                                $rMob = preg_replace('/[^0-9]/', '', $cert->student->mobile ?? '');
+                                if (strlen($rMob) === 10) { $rMob = '91' . $rMob; }
+                                $instName = $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER';
+                                $vLink = $cert->verification_url ?? route('verify.cert.direct', ['cert_no' => $cert->certificate_no]);
+                                $rowWaText = "🎓 *Official Course Certificate Issued!*\n\n"
+                                    . "🏛️ *Institution:* {$instName}\n"
+                                    . "👤 *Student:* " . ($cert->student->full_name ?? 'Student') . "\n"
+                                    . "🆔 *Roll No:* " . ($cert->student->roll_no ?? 'N/A') . "\n"
+                                    . "🏷️ *Cert No:* {$cert->certificate_no}\n"
+                                    . "📚 *Course:* " . ($cert->course->course_name ?? 'Course') . "\n\n"
+                                    . "✅ *Verify Certificate Online:*\n{$vLink}";
+                            @endphp
                             <div class="btn-group btn-group-sm">
                                 <a href="{{ route('centre.downloads.student-certificates.show', $cert->id) }}" target="_blank" class="btn btn-outline-primary rounded-start-2 btn-sm" title="Print Certificate">
                                     <i class="fa-solid fa-print me-1"></i>Print
                                 </a>
                                 @if($cert->exam_result_id)
-                                <a href="{{ route('centre.exams.results.marksheet', $cert->exam_result_id) }}" target="_blank" class="btn btn-outline-info rounded-end-2 btn-sm" title="View Statement of Marks">
+                                <a href="{{ route('centre.exams.results.marksheet', $cert->exam_result_id) }}" target="_blank" class="btn btn-outline-info btn-sm" title="View Statement of Marks">
                                     <i class="fa-solid fa-file-invoice"></i>
                                 </a>
                                 @endif
+                                <a href="https://api.whatsapp.com/send?{{ !empty($rMob) ? 'phone=' . $rMob . '&' : '' }}text={{ urlencode($rowWaText) }}" target="_blank" class="btn btn-outline-success rounded-end-2 btn-sm" title="Share Certificate on WhatsApp">
+                                    <i class="fa-brands fa-whatsapp text-success"></i>
+                                </a>
                             </div>
                         </td>
                     </tr>

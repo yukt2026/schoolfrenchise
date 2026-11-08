@@ -16,11 +16,42 @@ use Illuminate\Support\Facades\Log;
 class WalletService
 {
     /**
+     * Get configured franchise admission fee deduction per student (Default ₹200).
+     */
+    public static function getRequiredAdmissionFee(): float
+    {
+        return (float) Setting::get('franchise_admission_commission', 200.00);
+    }
+
+    /**
+     * Check if centre wallet has sufficient balance for admission fee deduction.
+     */
+    public static function hasSufficientBalance(int $centreId, ?float $amount = null): bool
+    {
+        $required = $amount ?? self::getRequiredAdmissionFee();
+        if ($required <= 0) {
+            return true;
+        }
+
+        $wallet = CentreWallet::where('centre_id', $centreId)->first();
+        return $wallet && ((float) $wallet->balance >= $required);
+    }
+
+    /**
+     * Get current balance for a centre.
+     */
+    public static function getCentreBalance(int $centreId): float
+    {
+        $wallet = CentreWallet::where('centre_id', $centreId)->first();
+        return $wallet ? (float) $wallet->balance : 0.00;
+    }
+
+    /**
      * Deduct franchise fee (₹200) when a student admission is completed.
      * Requirement: "Student ke Admission lene par Franchise ke Wallet se 200 rs kat hona chahiye"
      * Prevents duplicate wallet debits for the same admission.
      */
-    public static function processAdmissionFeeDeduction(Admission $admission): bool
+    public static function processAdmissionFeeDeduction(Admission $admission, bool $strict = true): bool
     {
         if (empty($admission->centre_id)) {
             return false;
@@ -34,7 +65,7 @@ class WalletService
         $refNo = "ADM-DEBIT-{$admission->id}";
 
         // 2. Database transaction with row-level lock
-        return DB::transaction(function () use ($admission, $refNo) {
+        return DB::transaction(function () use ($admission, $refNo, $strict) {
             // Re-check under lock
             $freshAdmission = Admission::where('id', $admission->id)->lockForUpdate()->first();
             if (!$freshAdmission || $freshAdmission->commission_credited) {
@@ -52,7 +83,7 @@ class WalletService
             }
 
             // Configurable admission deduction from Admin Panel (Default ₹200)
-            $feeAmount = (float) Setting::get('franchise_admission_commission', 200.00);
+            $feeAmount = self::getRequiredAdmissionFee();
             if ($feeAmount <= 0) {
                 return false;
             }
@@ -71,6 +102,12 @@ class WalletService
             $wallet = CentreWallet::where('id', $wallet->id)->lockForUpdate()->first();
 
             $oldBalance = (float) $wallet->balance;
+
+            // Strict balance enforcement: fail if balance is less than required fee
+            if ($strict && $oldBalance < $feeAmount) {
+                throw new \RuntimeException("Insufficient wallet balance for Centre. Current Balance: ₹" . number_format($oldBalance, 2) . ", Required Admission Fee: ₹" . number_format($feeAmount, 2));
+            }
+
             $newBalance = $oldBalance - $feeAmount;
 
             $wallet->balance = $newBalance;

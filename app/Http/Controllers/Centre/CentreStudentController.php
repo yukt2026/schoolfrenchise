@@ -88,12 +88,29 @@ class CentreStudentController extends Controller
         $batches = Batch::where('centre_id', $centre->id)->where('status', 'active')->orderBy('batch_name')->get();
         $states = State::orderBy('name')->get();
 
-        return view('centre.students.create', compact('centre', 'courses', 'batches', 'states'));
+        $walletBalance = WalletService::getCentreBalance($centre->id);
+        $requiredAdmissionFee = WalletService::getRequiredAdmissionFee();
+        $hasSufficientBalance = ($walletBalance >= $requiredAdmissionFee);
+
+        return view('centre.students.create', compact(
+            'centre', 'courses', 'batches', 'states',
+            'walletBalance', 'requiredAdmissionFee', 'hasSufficientBalance'
+        ));
     }
 
     public function store(Request $request)
     {
         $centre = $this->getAuthCentre();
+
+        // 1. Enforce sufficient wallet balance for admission fee deduction
+        $requiredAdmissionFee = WalletService::getRequiredAdmissionFee();
+        $walletBalance = WalletService::getCentreBalance($centre->id);
+
+        if ($requiredAdmissionFee > 0 && $walletBalance < $requiredAdmissionFee) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', "Insufficient Wallet Balance! Student admission requires ₹" . number_format($requiredAdmissionFee, 2) . " wallet deduction, but your current balance is ₹" . number_format($walletBalance, 2) . ". Please recharge your wallet to proceed with admission.");
+        }
 
         $validated = $request->validate([
             'full_name' => 'required|string|max:191',
@@ -122,104 +139,110 @@ class CentreStudentController extends Controller
             'id_proof' => 'nullable|file|mimes:pdf,jpg,jpeg,png,webp,gif|max:5120',
         ]);
 
-        return DB::transaction(function () use ($request, $validated, $centre) {
-            $year = date('Y');
-            $randomSeq = str_pad(rand(100, 9999), 4, '0', STR_PAD_LEFT);
-            $regNo = "DCE/{$year}/{$centre->centre_code}/{$randomSeq}";
-            $rollNo = "DCE" . substr($year, -2) . rand(10000, 99999);
+        try {
+            return DB::transaction(function () use ($request, $validated, $centre) {
+                $year = date('Y');
+                $randomSeq = str_pad(rand(100, 9999), 4, '0', STR_PAD_LEFT);
+                $regNo = "DCE/{$year}/{$centre->centre_code}/{$randomSeq}";
+                $rollNo = "DCE" . substr($year, -2) . rand(10000, 99999);
 
-            $photoPath = $request->hasFile('photo') ? FileUploadService::uploadImage($request->file('photo'), 'uploads/students/photos') : null;
-            $sigPath = $request->hasFile('signature') ? FileUploadService::uploadImage($request->file('signature'), 'uploads/students/signatures') : null;
-            $docPath = $request->hasFile('id_proof') ? FileUploadService::uploadDocument($request->file('id_proof'), 'uploads/students/docs') : null;
+                $photoPath = $request->hasFile('photo') ? FileUploadService::uploadImage($request->file('photo'), 'uploads/students/photos') : null;
+                $sigPath = $request->hasFile('signature') ? FileUploadService::uploadImage($request->file('signature'), 'uploads/students/signatures') : null;
+                $docPath = $request->hasFile('id_proof') ? FileUploadService::uploadDocument($request->file('id_proof'), 'uploads/students/docs') : null;
 
-            // 1. Create or Find User Login
-            $userEmail = !empty($validated['email']) ? $validated['email'] : "student_{$rollNo}@techeracomputer.in";
-            $studentUser = User::create([
-                'name' => $validated['full_name'],
-                'email' => $userEmail,
-                'mobile' => $validated['mobile'],
-                'password' => Hash::make($validated['mobile']),
-                'role' => 'student',
-                'is_active' => true,
-            ]);
+                // 1. Create or Find User Login
+                $userEmail = !empty($validated['email']) ? $validated['email'] : "student_{$rollNo}@techeracomputer.in";
+                $studentUser = User::create([
+                    'name' => $validated['full_name'],
+                    'email' => $userEmail,
+                    'mobile' => $validated['mobile'],
+                    'password' => Hash::make($validated['mobile']),
+                    'role' => 'student',
+                    'is_active' => true,
+                ]);
 
-            $studentRole = Role::where('name', 'student')->first();
-            if ($studentRole) {
-                $studentUser->roles()->syncWithoutDetaching([$studentRole->id]);
-            }
+                $studentRole = Role::where('name', 'student')->first();
+                if ($studentRole) {
+                    $studentUser->roles()->syncWithoutDetaching([$studentRole->id]);
+                }
 
-            // 2. Create Student Profile
-            $student = Student::create([
-                'user_id' => $studentUser->id,
-                'centre_id' => $centre->id,
-                'registration_no' => $regNo,
-                'roll_no' => $rollNo,
-                'full_name' => $validated['full_name'],
-                'father_name' => $validated['father_name'],
-                'mother_name' => $validated['mother_name'] ?? null,
-                'dob' => $validated['dob'],
-                'gender' => $validated['gender'],
-                'mobile' => $validated['mobile'],
-                'alternate_mobile' => $validated['alternate_mobile'] ?? null,
-                'email' => $validated['email'] ?? null,
-                'state_id' => $validated['state_id'],
-                'district_id' => $validated['district_id'],
-                'city' => $validated['city'],
-                'address' => $validated['address'],
-                'pincode' => $validated['pincode'],
-                'highest_qualification' => $validated['highest_qualification'] ?? null,
-                'photo_path' => $photoPath,
-                'signature_path' => $sigPath,
-                'id_proof_doc' => $docPath,
-                'status' => 'enrolled',
-            ]);
+                // 2. Create Student Profile
+                $student = Student::create([
+                    'user_id' => $studentUser->id,
+                    'centre_id' => $centre->id,
+                    'registration_no' => $regNo,
+                    'roll_no' => $rollNo,
+                    'full_name' => $validated['full_name'],
+                    'father_name' => $validated['father_name'],
+                    'mother_name' => $validated['mother_name'] ?? null,
+                    'dob' => $validated['dob'],
+                    'gender' => $validated['gender'],
+                    'mobile' => $validated['mobile'],
+                    'alternate_mobile' => $validated['alternate_mobile'] ?? null,
+                    'email' => $validated['email'] ?? null,
+                    'state_id' => $validated['state_id'],
+                    'district_id' => $validated['district_id'],
+                    'city' => $validated['city'],
+                    'address' => $validated['address'],
+                    'pincode' => $validated['pincode'],
+                    'highest_qualification' => $validated['highest_qualification'] ?? null,
+                    'photo_path' => $photoPath,
+                    'signature_path' => $sigPath,
+                    'id_proof_doc' => $docPath,
+                    'status' => 'enrolled',
+                ]);
 
-            // 3. Create Admission Record
-            $courseFee = (float) $validated['course_fee'];
-            $discount = (float) ($validated['discount_amount'] ?? 0);
-            $netFee = max(0, $courseFee - $discount);
+                // 3. Create Admission Record
+                $courseFee = (float) $validated['course_fee'];
+                $discount = (float) ($validated['discount_amount'] ?? 0);
+                $netFee = max(0, $courseFee - $discount);
 
-            $admission = Admission::create([
-                'student_id' => $student->id,
-                'centre_id' => $centre->id,
-                'course_id' => $validated['course_id'],
-                'batch_id' => $validated['batch_id'] ?? null,
-                'admission_date' => now()->toDateString(),
-                'course_fee' => $courseFee,
-                'discount_amount' => $discount,
-                'net_fee' => $netFee,
-                'total_paid' => 0.00,
-                'status' => 'active',
-                'remarks' => "Direct admission registered by Centre [{$centre->centre_code}]",
-            ]);
+                $admission = Admission::create([
+                    'student_id' => $student->id,
+                    'centre_id' => $centre->id,
+                    'course_id' => $validated['course_id'],
+                    'batch_id' => $validated['batch_id'] ?? null,
+                    'admission_date' => now()->toDateString(),
+                    'course_fee' => $courseFee,
+                    'discount_amount' => $discount,
+                    'net_fee' => $netFee,
+                    'total_paid' => 0.00,
+                    'status' => 'active',
+                    'remarks' => "Direct admission registered by Centre [{$centre->centre_code}]",
+                ]);
 
-            // 4. Assign Fee Schedule
-            if ($netFee > 0) {
-                FeeService::assignAdmissionFees($admission, $discount);
-            }
+                // 4. Assign Fee Schedule
+                if ($netFee > 0) {
+                    FeeService::assignAdmissionFees($admission, $discount);
+                }
 
-            // 5. Deduct Franchise Admission Fee (₹200) for this eligible admission
-            WalletService::processAdmissionFeeDeduction($admission);
+                // 5. Strictly Deduct Franchise Admission Fee from Wallet (Rolls back if balance insufficient)
+                WalletService::processAdmissionFeeDeduction($admission, true);
 
-            // 6. Audit Log
-            AuditLog::record('centre_student_registered', $student, null, [
-                'registration_no' => $regNo,
-                'roll_no' => $rollNo,
-                'centre_id' => $centre->id,
-                'course_id' => $admission->course_id,
-                'net_fee' => $netFee,
-            ]);
+                // 6. Audit Log
+                AuditLog::record('centre_student_registered', $student, null, [
+                    'registration_no' => $regNo,
+                    'roll_no' => $rollNo,
+                    'centre_id' => $centre->id,
+                    'course_id' => $admission->course_id,
+                    'net_fee' => $netFee,
+                ]);
 
-            // 6. Notification Dispatch
-            try {
-                NotificationDispatchService::dispatchAdmissionApproval($student);
-            } catch (\Throwable $e) {
-                \Illuminate\Support\Facades\Log::warning("Notification dispatch failed for centre student {$rollNo}: " . $e->getMessage());
-            }
+                // 7. Notification Dispatch
+                try {
+                    NotificationDispatchService::dispatchAdmissionApproval($student);
+                } catch (\Throwable $e) {
+                    \Illuminate\Support\Facades\Log::warning("Notification dispatch failed for centre student {$rollNo}: " . $e->getMessage());
+                }
 
-            return redirect()->route('centre.students.show', $student->id)
-                ->with('success', "Candidate {$student->full_name} admitted successfully! Roll No: {$rollNo}, Reg No: {$regNo}. Default portal password set to mobile number.");
-        });
+                return redirect()->route('centre.students.show', $student->id)
+                    ->with('success', "Candidate {$student->full_name} admitted successfully! Roll No: {$rollNo}, Reg No: {$regNo}. Default portal password set to mobile number.");
+            });
+        } catch (\RuntimeException $e) {
+            return redirect()->back()
+                ->withInput()
+                ->with('error', $e->getMessage());
+        }
     }
 
     public function show($student)

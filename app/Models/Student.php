@@ -122,6 +122,17 @@ class Student extends Model
         return now()->addYear();
     }
 
+    public function getCalculatedIssueDateAttribute(): string
+    {
+        $admission = $this->admissions->first() ?? $this->admissions()->latest('admission_date')->first();
+        if ($admission && $admission->admission_date) {
+            $course = $admission->course;
+            $months = $course ? $course->duration_months : 6;
+            return \Illuminate\Support\Carbon::parse($admission->admission_date)->addMonths($months)->toDateString();
+        }
+        return now()->toDateString();
+    }
+
     /**
      * Determine effective status of ID card (valid, expired, revoked, invalid).
      */

@@ -152,8 +152,27 @@ class CentreDownloadController extends Controller
             'grade'           => 'nullable|string|max:10',
             'certificate_no'  => 'nullable|string|max:60|unique:certificates,certificate_no',
             'marksheet_no'    => 'nullable|string|max:60|unique:marksheets,marksheet_no',
-            'issue_date'      => 'required|date',
+            'issue_date'      => 'nullable|date',
         ]);
+
+        if (empty($validated['issue_date'])) {
+            if (!empty($validated['student_id'])) {
+                $candidate = Student::with(['admissions.course'])->find($validated['student_id']);
+                $targetCourseId = !empty($validated['course_id']) ? $validated['course_id'] : null;
+                $adm = $targetCourseId 
+                    ? ($candidate?->admissions()->where('course_id', $targetCourseId)->latest('admission_date')->first() ?? $candidate?->admissions()->latest('admission_date')->first())
+                    : $candidate?->admissions()->latest('admission_date')->first();
+
+                $crs = ($targetCourseId ? Course::find($targetCourseId) : null) ?? $adm?->course;
+                if ($adm && $adm->admission_date && $crs) {
+                    $validated['issue_date'] = \Carbon\Carbon::parse($adm->admission_date)->addMonths($crs->duration_months)->toDateString();
+                } else {
+                    $validated['issue_date'] = now()->toDateString();
+                }
+            } else {
+                $validated['issue_date'] = now()->toDateString();
+            }
+        }
 
         $year = date('Y', strtotime($validated['issue_date']));
 

@@ -2915,5 +2915,128 @@ img {
     }
 }
 
+/* ==========================================================================
+   Government & National Accreditations Marquee (Clean, Modern, Responsive)
+   ========================================================================== */
+.gov-accred-marquee-container {
+    background: linear-gradient(180deg, #f8fafc 0%, #f1f5f9 100%);
+    border: 1px solid #e2e8f0 !important;
+    position: relative;
+    overflow: hidden;
+}
+
+.gov-accred-fade {
+    position: absolute;
+    top: 0;
+    bottom: 0;
+    width: 60px;
+    z-index: 2;
+    pointer-events: none;
+}
+
+.gov-accred-fade-left {
+    left: 0;
+    background: linear-gradient(to right, #f1f5f9 25%, rgba(241, 245, 249, 0) 100%);
+}
+
+.gov-accred-fade-right {
+    right: 0;
+    background: linear-gradient(to left, #f1f5f9 25%, rgba(241, 245, 249, 0) 100%);
+}
+
+.gov-accred-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #ffffff;
+    border: 1px solid #e2e8f0;
+    border-radius: 12px;
+    padding: 10px 24px;
+    height: 72px;
+    min-width: 155px;
+    max-width: 210px;
+    flex-shrink: 0;
+    box-shadow: 0 2px 6px rgba(15, 23, 42, 0.04);
+    transition: transform 0.2s ease, box-shadow 0.2s ease, border-color 0.2s ease;
+    white-space: nowrap;
+    user-select: none;
+    cursor: default;
+}
+
+.gov-accred-card:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 6px 16px rgba(15, 23, 42, 0.08);
+    border-color: #cbd5e1;
+    background: #ffffff;
+}
+
+.gov-accred-card img {
+    height: 48px;
+    max-height: 48px;
+    width: auto;
+    max-width: 100%;
+    object-fit: contain;
+    display: block;
+    filter: drop-shadow(0 1px 2px rgba(0, 0, 0, 0.04));
+}
+
+/* Header Top Marquee (Subpages) */
+.govt-topbar-card {
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    background: #f8fafc;
+    border: 1px solid #e2e8f0;
+    border-radius: 8px;
+    padding: 4px 14px;
+    height: 38px;
+    flex-shrink: 0;
+    white-space: nowrap;
+    transition: all 0.2s ease;
+}
+
+.govt-topbar-card:hover {
+    background: #ffffff;
+    border-color: #cbd5e1;
+}
+
+.govt-topbar-card img {
+    height: 28px;
+    max-height: 28px;
+    width: auto;
+    object-fit: contain;
+    display: block;
+}
+
+@media (max-width: 768px) {
+    .gov-accred-fade {
+        width: 32px;
+    }
+
+    .gov-accred-card {
+        height: 56px;
+        min-width: 120px;
+        max-width: 155px;
+        padding: 6px 14px;
+        border-radius: 8px;
+    }
+
+    .gov-accred-card img {
+        height: 36px;
+        max-height: 36px;
+    }
+
+    .govt-topbar-card {
+        height: 34px;
+        padding: 3px 10px;
+    }
+
+    .govt-topbar-card img {
+        height: 24px;
+        max-height: 24px;
+    }
+}
+
+
 
 

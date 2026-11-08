@@ -6,6 +6,7 @@ use App\Models\Admission;
 use App\Models\Attendance;
 use App\Models\Batch;
 use App\Models\Certificate;
+use App\Models\Marksheet;
 use App\Models\Centre;
 use App\Models\CentreWallet;
 use App\Models\CentreWalletTransaction;
@@ -246,6 +247,56 @@ class CentrePortalModuleTest extends TestCase
             'discount_amount' => 500.00,
             'net_fee' => 7000.00,
         ]);
+
+        // Required admission fee (₹200) must be deducted from wallet
+        $this->assertDatabaseHas('centre_wallet_transactions', [
+            'centre_id' => $this->centreA->id,
+            'type' => 'debit',
+            'amount' => 200.00,
+            'status' => 'approved',
+        ]);
+
+        $this->assertEquals(4800.00, (float) $this->centreA->wallet->fresh()->balance);
+    }
+
+    public function test_admission_is_blocked_when_centre_wallet_has_insufficient_balance(): void
+    {
+        // Set Centre A wallet balance to less than required ₹200
+        $this->centreA->wallet->update(['balance' => 50.00]);
+
+        $mobile = '98' . rand(10000000, 99999999);
+
+        $payload = [
+            'full_name' => 'Blocked Candidate',
+            'father_name' => 'Father Name',
+            'dob' => '2004-01-01',
+            'gender' => 'male',
+            'mobile' => $mobile,
+            'state_id' => $this->state->id,
+            'district_id' => $this->district->id,
+            'city' => 'Patna',
+            'address' => 'Sample Address',
+            'pincode' => '800001',
+            'course_id' => $this->course->id,
+            'course_fee' => 5000.00,
+        ];
+
+        $response = $this->actingAs($this->centreUserA)->post(route('centre.students.store'), $payload);
+
+        $response->assertSessionHas('error');
+        $this->assertStringContainsString('Insufficient Wallet Balance', session('error'));
+
+        // Ensure no student or admission was created
+        $this->assertDatabaseMissing('students', [
+            'mobile' => $mobile,
+        ]);
+
+        $this->assertDatabaseMissing('users', [
+            'mobile' => $mobile,
+        ]);
+
+        // Ensure balance remains untouched at 50.00
+        $this->assertEquals(50.00, (float) $this->centreA->wallet->fresh()->balance);
     }
 
     public function test_centre_director_can_view_student_dossier_id_card_and_admission_form(): void
@@ -696,6 +747,74 @@ class CentrePortalModuleTest extends TestCase
         ]);
     }
 
+    public function test_centre_can_initiate_and_verify_online_wallet_recharge_via_razorpay(): void
+    {
+        \App\Models\Setting::set('payment_gateway_mode', 'sandbox');
+        \App\Models\Setting::set('razorpay_key_id', 'rzp_test_sample_key');
+        \App\Models\Setting::set('razorpay_key_secret', 'test_secret_abc123');
+
+        // 1. Initiate online recharge
+        $initiatePayload = [
+            'amount' => 2500.00,
+            'payment_method' => 'UPI',
+        ];
+
+        $initiateResponse = $this->actingAs($this->centreUserA)
+            ->postJson(route('centre.wallet.recharge.initiate'), $initiatePayload);
+
+        $initiateResponse->assertStatus(200);
+        $initiateData = $initiateResponse->json();
+
+        $this->assertArrayHasKey('order_id', $initiateData);
+        $this->assertEquals(2500.00, $initiateData['amount']);
+        $orderId = $initiateData['order_id'];
+
+        $this->assertDatabaseHas('online_transactions', [
+            'order_id' => $orderId,
+            'centre_id' => $this->centreA->id,
+            'amount' => 2500.00,
+            'status' => 'pending',
+        ]);
+
+        $initialBalance = (float) ($this->centreA->wallet->fresh()->balance ?? 0.00);
+
+        // 2. Authoritatively verify signature & credit wallet
+        $paymentId = 'pay_' . \Illuminate\Support\Str::random(14);
+        $secret = \App\Services\PaymentGatewayService::getKeySecret();
+        $validSignature = hash_hmac('sha256', $orderId . '|' . $paymentId, $secret);
+
+        $verifyPayload = [
+            'order_id' => $orderId,
+            'gateway_payment_id' => $paymentId,
+            'gateway_signature' => $validSignature,
+        ];
+
+        $verifyResponse = $this->actingAs($this->centreUserA)
+            ->post(route('centre.wallet.recharge.verify'), $verifyPayload);
+
+        $verifyResponse->assertRedirect(route('centre.wallet.index'));
+        $verifyResponse->assertSessionHas('success');
+
+        // Check wallet transaction created & status approved
+        $this->assertDatabaseHas('centre_wallet_transactions', [
+            'centre_id' => $this->centreA->id,
+            'amount' => 2500.00,
+            'type' => 'credit',
+            'status' => 'approved',
+        ]);
+
+        // Check wallet balance incremented by exactly 2500.00
+        $newBalance = (float) $this->centreA->wallet->fresh()->balance;
+        $this->assertEquals($initialBalance + 2500.00, $newBalance);
+
+        // Check online transaction status updated to success
+        $this->assertDatabaseHas('online_transactions', [
+            'order_id' => $orderId,
+            'status' => 'success',
+            'gateway_payment_id' => $paymentId,
+        ]);
+    }
+
     public function test_centre_director_can_view_affiliation_certificate(): void
     {
         $response = $this->actingAs($this->centreUserA)->get(route('centre.downloads.certificate'));
@@ -1100,5 +1219,102 @@ class CentrePortalModuleTest extends TestCase
 
         $response->assertStatus(404);
         $this->assertFalse(Certificate::where('student_id', $studentB->id)->exists());
+    }
+
+    /**
+     * Test franchise can issue 1-year backdated certificate with auto-calculated issue date.
+     */
+    public function test_franchise_can_issue_backdated_certificate_auto_calculated_for_one_year_course(): void
+    {
+        // 1 Year Course (12 Months)
+        $course1Year = Course::create([
+            'course_code' => 'ADCA-TEST-' . rand(100, 999),
+            'course_name' => 'Advance Diploma in Computer Application',
+            'slug' => 'adca-test-' . rand(1000, 9999),
+            'duration' => '12 Months',
+            'eligibility' => '10th/12th Pass',
+            'default_course_fee' => 9000,
+            'status' => true,
+        ]);
+
+        $student = $this->createStudentForCentre($this->centreA);
+        // Student took admission 1 year ago (e.g. 2025-01-10)
+        $student->admissions()->create([
+            'centre_id' => $this->centreA->id,
+            'course_id' => $course1Year->id,
+            'admission_date' => '2025-01-10',
+            'course_fee' => 9000,
+            'discount_amount' => 0,
+            'net_fee' => 9000,
+            'status' => 'active',
+        ]);
+
+        // Submit without issue_date to test auto-calculation
+        $postData = [
+            'student_id' => $student->id,
+            'course_id'  => $course1Year->id,
+            'percentage' => 82.5,
+            'grade'      => 'A',
+        ];
+
+        $response = $this->actingAs($this->centreUserA)
+            ->post(route('centre.downloads.student-certificates.store'), $postData);
+
+        $cert = Certificate::where('student_id', $student->id)->first();
+        $this->assertNotNull($cert, 'Certificate should be issued.');
+        // Issue date should be 2025-01-10 + 12 months = 2026-01-10
+        $this->assertEquals('2026-01-10', $cert->issue_date->format('Y-m-d'));
+
+        $marksheet = Marksheet::where('student_id', $student->id)->first();
+        $this->assertNotNull($marksheet, 'Marksheet should be issued.');
+        $this->assertEquals('2026-01-10', $marksheet->issue_date->format('Y-m-d'));
+    }
+
+    /**
+     * Test franchise can issue 6-month backdated certificate with auto-calculated issue date.
+     */
+    public function test_franchise_can_issue_backdated_certificate_auto_calculated_for_six_month_course(): void
+    {
+        // 6 Month Course (DCA)
+        $course6Month = Course::create([
+            'course_code' => 'DCA-TEST-' . rand(100, 999),
+            'course_name' => 'Diploma in Computer Application',
+            'slug' => 'dca-test-' . rand(1000, 9999),
+            'duration' => '6 Months',
+            'eligibility' => '10th Pass',
+            'default_course_fee' => 5000,
+            'status' => true,
+        ]);
+
+        $student = $this->createStudentForCentre($this->centreA);
+        // Student took admission on 2025-01-15
+        $student->admissions()->create([
+            'centre_id' => $this->centreA->id,
+            'course_id' => $course6Month->id,
+            'admission_date' => '2025-01-15',
+            'course_fee' => 5000,
+            'discount_amount' => 0,
+            'net_fee' => 5000,
+            'status' => 'active',
+        ]);
+
+        $postData = [
+            'student_id' => $student->id,
+            'course_id'  => $course6Month->id,
+            'percentage' => 78.0,
+            'grade'      => 'A',
+        ];
+
+        $response = $this->actingAs($this->centreUserA)
+            ->post(route('centre.downloads.student-certificates.store'), $postData);
+
+        $cert = Certificate::where('student_id', $student->id)->first();
+        $this->assertNotNull($cert, 'Certificate should be issued.');
+        // Issue date should be 2025-01-15 + 6 months = 2025-07-15
+        $this->assertEquals('2025-07-15', $cert->issue_date->format('Y-m-d'));
+
+        $marksheet = Marksheet::where('student_id', $student->id)->first();
+        $this->assertNotNull($marksheet, 'Marksheet should be issued.');
+        $this->assertEquals('2025-07-15', $marksheet->issue_date->format('Y-m-d'));
     }
 }

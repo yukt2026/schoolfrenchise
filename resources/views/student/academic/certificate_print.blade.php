@@ -41,6 +41,25 @@
 <body>
 
 <!-- Student Portal Action Bar -->
+@php
+    $studentName = $certificate->student->full_name ?? 'Student';
+    $rollNo = $certificate->student->roll_no ?? 'N/A';
+    $certNo = $certificate->certificate_no;
+    $courseName = $certificate->course->course_name ?? 'Course';
+    $issueDate = $certificate->issue_date ? \Carbon\Carbon::parse($certificate->issue_date)->format('d M, Y') : date('d M, Y');
+    $instituteName = $instituteSettings['institute_name'] ?? 'TECH ERA COMPUTER';
+    $verifyUrl = $certificate->verification_url ?? route('verify.cert.direct', ['cert_no' => $certificate->certificate_no]);
+
+    $waCertMsg = "🎓 *My Official Course Completion Certificate!*\n\n"
+        . "🏛️ *Institution:* {$instituteName}\n"
+        . "👤 *Student Name:* {$studentName}\n"
+        . "🆔 *Roll No:* {$rollNo}\n"
+        . "🏷️ *Certificate No:* {$certNo}\n"
+        . "📚 *Course:* {$courseName}\n"
+        . "📅 *Issue Date:* {$issueDate}\n\n"
+        . "✅ *Verify Certificate Online (Live QR Link):*\n{$verifyUrl}\n\n"
+        . "Check out my verified certification from {$instituteName}! 🎉";
+@endphp
 <div class="no-print-bar">
     <div class="d-flex align-items-center gap-2">
         <a href="{{ route('student.certificates') }}" class="btn btn-outline-light btn-sm">
@@ -52,6 +71,9 @@
     <div class="d-flex gap-2">
         <a href="{{ $certificate->verification_url }}" target="_blank" class="btn btn-outline-info btn-sm fw-bold">
             <i class="fa-solid fa-qrcode me-1"></i> Check Public Verification
+        </a>
+        <a href="https://api.whatsapp.com/send?text={{ urlencode($waCertMsg) }}" target="_blank" class="btn btn-success px-3 fw-bold shadow-sm" style="background-color: #16a34a; border-color: #16a34a;" title="Share Certificate on WhatsApp">
+            <i class="fa-brands fa-whatsapp me-1 fs-5 align-middle"></i> Share on WhatsApp
         </a>
         <button onclick="window.print()" class="btn btn-primary px-4 fw-bold shadow-sm" style="background-color: #2563eb; border-color: #2563eb;">
             <i class="fa-solid fa-print me-1"></i> Print / Download PDF

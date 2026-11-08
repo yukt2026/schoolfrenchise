@@ -90,7 +90,24 @@ class CentreWalletController extends Controller
         $upiUri = "upi://pay?pa=" . rawurlencode($adminUpiId) . "&pn=" . rawurlencode($adminUpiName) . "&am=" . number_format($defaultAmount, 2, '.', '') . "&cu=INR&tn=" . rawurlencode("Recharge " . $centre->centre_code);
         $qrSvg = QrCodeService::generateSvg($upiUri, 220);
 
-        return view('centre.wallet.topup', compact('centre', 'wallet', 'adminUpiId', 'adminUpiName', 'adminQrCode', 'adminBank', 'defaultAmount', 'upiUri', 'qrSvg'));
+        $razorpayKeyId = PaymentGatewayService::getPublicKey();
+        $razorpayEnabled = Setting::get('razorpay_wallet_recharge_enabled', '1') == '1';
+        $isSandbox = PaymentGatewayService::isSandbox();
+
+        return view('centre.wallet.topup', compact(
+            'centre',
+            'wallet',
+            'adminUpiId',
+            'adminUpiName',
+            'adminQrCode',
+            'adminBank',
+            'defaultAmount',
+            'upiUri',
+            'qrSvg',
+            'razorpayKeyId',
+            'razorpayEnabled',
+            'isSandbox'
+        ));
     }
 
     /**

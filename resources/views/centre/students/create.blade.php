@@ -13,6 +13,32 @@
     <p class="text-muted small mb-0">Direct admission enrollment for Study Centre {{ $centre->centre_name }} ({{ $centre->centre_code }}). Roll Number and Registration Number will be generated automatically.</p>
 </div>
 
+@if(!$hasSufficientBalance)
+    <div class="alert alert-danger border-0 shadow-sm rounded-4 p-4 mb-4">
+        <div class="d-flex flex-wrap align-items-center justify-content-between gap-3">
+            <div class="d-flex align-items-start gap-3">
+                <div class="p-3 bg-danger bg-opacity-10 text-danger rounded-circle fs-4">
+                    <i class="fa-solid fa-triangle-exclamation"></i>
+                </div>
+                <div>
+                    <h5 class="fw-bold text-danger mb-1">Insufficient Wallet Balance for Student Admission!</h5>
+                    <p class="mb-0 text-dark">
+                        Candidate admission requires a wallet deduction of <strong>₹{{ number_format($requiredAdmissionFee, 2) }}</strong>. 
+                        Your current wallet balance is <strong class="text-danger font-monospace">₹{{ number_format($walletBalance, 2) }}</strong>.
+                        Admissions are blocked until your wallet is recharged.
+                    </p>
+                </div>
+            </div>
+            <div>
+                <a href="{{ route('centre.wallet.topup') }}" class="btn btn-success fw-bold px-4 py-2 rounded-3 shadow-sm d-flex align-items-center gap-2">
+                    <i class="fa-solid fa-bolt"></i>
+                    <span>Recharge Wallet via Razorpay</span>
+                </a>
+            </div>
+        </div>
+    </div>
+@endif
+
 <form method="POST" action="{{ route('centre.students.store') }}" enctype="multipart/form-data">
     @csrf
 
@@ -179,21 +205,59 @@
                 </div>
             </div>
 
-            <!-- Centre Affiliation Badge & Submission -->
-            <div class="card border-0 rounded-4 shadow-sm bg-light">
+            <!-- Centre Affiliation Badge & Wallet Balance Validation Card -->
+            <div class="card border-0 rounded-4 shadow-sm mb-4 {{ $hasSufficientBalance ? 'bg-light' : 'border-start border-4 border-danger bg-danger-subtle' }}">
                 <div class="card-body p-4">
-                    <div class="small text-muted mb-2">Admitting Study Centre:</div>
-                    <div class="fw-bold text-dark">{{ $centre->centre_name }}</div>
-                    <div class="font-monospace text-primary small mb-3">CODE: {{ $centre->centre_code }}</div>
+                    <div class="d-flex justify-content-between align-items-center mb-2">
+                        <span class="small text-muted">Study Centre:</span>
+                        <span class="badge bg-primary font-monospace">{{ $centre->centre_code }}</span>
+                    </div>
+                    <div class="fw-bold text-dark small mb-3">{{ $centre->centre_name }}</div>
 
-                    <div class="alert alert-info py-2 px-3 small rounded-3 mb-3">
-                        <i class="fa-solid fa-shield-halved me-1"></i>
-                        The student login credentials will be generated immediately. Default password is the mobile number.
+                    <!-- Wallet Balance & Deduction Breakdown -->
+                    <div class="p-3 bg-white rounded-3 border mb-3">
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-muted">Current Wallet Balance:</span>
+                            <span class="fw-bold font-monospace {{ $hasSufficientBalance ? 'text-success' : 'text-danger' }}">
+                                ₹{{ number_format($walletBalance, 2) }}
+                            </span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center mb-1">
+                            <span class="small text-muted">Required Admission Fee:</span>
+                            <span class="fw-bold font-monospace text-danger">-₹{{ number_format($requiredAdmissionFee, 2) }}</span>
+                        </div>
+                        <div class="d-flex justify-content-between align-items-center pt-2 border-top">
+                            <span class="small fw-semibold text-dark">Projected Balance:</span>
+                            <span class="fw-bold font-monospace {{ $hasSufficientBalance ? 'text-primary' : 'text-danger' }}">
+                                ₹{{ number_format($walletBalance - $requiredAdmissionFee, 2) }}
+                            </span>
+                        </div>
                     </div>
 
-                    <button type="submit" class="btn btn-primary btn-lg w-100 rounded-2 fw-bold shadow-sm">
-                        <i class="fa-solid fa-check-circle me-1"></i>Confirm & Register Candidate
-                    </button>
+                    @if(!$hasSufficientBalance)
+                        <div class="alert alert-danger py-2 px-3 small rounded-3 mb-3">
+                            <i class="fa-solid fa-circle-exclamation me-1"></i>
+                            <strong>Admission Blocked:</strong> Balance insufficient. Please recharge your wallet with at least ₹{{ number_format(max(0, $requiredAdmissionFee - $walletBalance), 2) }}.
+                        </div>
+
+                        <a href="{{ route('centre.wallet.topup') }}" class="btn btn-success w-100 rounded-3 fw-bold shadow-sm mb-2 py-2 d-flex align-items-center justify-content-center gap-2">
+                            <i class="fa-solid fa-bolt"></i>
+                            <span>Recharge Wallet via Razorpay</span>
+                        </a>
+
+                        <button type="button" class="btn btn-secondary btn-lg w-100 rounded-3 fw-bold" disabled title="Insufficient Wallet Balance">
+                            <i class="fa-solid fa-lock me-1"></i>Admission Disabled
+                        </button>
+                    @else
+                        <div class="alert alert-success bg-success-subtle text-success py-2 px-3 small rounded-3 mb-3 border-0">
+                            <i class="fa-solid fa-circle-check me-1"></i>
+                            <strong>Wallet Verified:</strong> ₹{{ number_format($requiredAdmissionFee, 2) }} will be automatically deducted upon admission.
+                        </div>
+
+                        <button type="submit" class="btn btn-primary btn-lg w-100 rounded-3 fw-bold shadow-sm">
+                            <i class="fa-solid fa-check-circle me-1"></i>Confirm & Register Candidate
+                        </button>
+                    @endif
                 </div>
             </div>
         </div>

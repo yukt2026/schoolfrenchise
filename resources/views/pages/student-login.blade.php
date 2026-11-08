@@ -37,8 +37,11 @@
                                     <a href="{{ route('password.request') }}" class="text-primary small text-decoration-none">Forgot Password?</a>
                                 </div>
                                 <div class="input-group">
-                                    <span class="input-group-text bg-light"><i class="fa-solid fa-lock text-muted"></i></span>
-                                    <input type="password" name="password" class="form-control" placeholder="••••••••" required>
+                                    <span class="input-group-text bg-light border-end-0"><i class="fa-solid fa-lock text-muted"></i></span>
+                                    <input type="password" name="password" id="studentPasswordInput" class="form-control border-start-0 border-end-0" placeholder="••••••••" required>
+                                    <button class="btn btn-outline-secondary border-start-0 bg-light text-muted" type="button" id="toggleStudentPassword" style="border-color: #dee2e6;" title="Show/Hide Password">
+                                        <i class="fa-solid fa-eye" id="toggleStudentIcon"></i>
+                                    </button>
                                 </div>
                             </div>
 
@@ -64,3 +67,22 @@
         </div>
     </section>
 @endsection
+
+@push('scripts')
+<script>
+document.addEventListener('DOMContentLoaded', function () {
+    const toggleBtn = document.getElementById('toggleStudentPassword');
+    const pwdInput = document.getElementById('studentPasswordInput');
+    const icon = document.getElementById('toggleStudentIcon');
+
+    if (toggleBtn && pwdInput && icon) {
+        toggleBtn.addEventListener('click', function () {
+            const isPassword = pwdInput.type === 'password';
+            pwdInput.type = isPassword ? 'text' : 'password';
+            icon.classList.toggle('fa-eye', !isPassword);
+            icon.classList.toggle('fa-eye-slash', isPassword);
+        });
+    }
+});
+</script>
+@endpush
