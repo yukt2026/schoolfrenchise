@@ -8,6 +8,7 @@ use App\Http\Controllers\Admin\AdminCertificateController;
 use App\Http\Controllers\Admin\AdminCentreController;
 use App\Http\Controllers\Admin\AdminCmsController;
 use App\Http\Controllers\Admin\AdminCourseController;
+use App\Http\Controllers\Admin\AdminCourseSubjectController;
 use App\Http\Controllers\Admin\AdminDashboardController;
 use App\Http\Controllers\Admin\AdminDownloadController;
 use App\Http\Controllers\Admin\AdminExamController;
@@ -212,6 +213,9 @@ Route::middleware(['role:super_admin,admin'])->prefix('admin')->name('admin.')->
     Route::delete('/admissions/{admission}', [AdminAdmissionController::class, 'destroy'])->name('admissions.destroy');
 
     // Module 4: Courses & Curriculum
+    Route::post('/courses/{course}/subjects', [AdminCourseSubjectController::class, 'store'])->name('courses.subjects.store');
+    Route::put('/courses/{course}/subjects/{subject}', [AdminCourseSubjectController::class, 'update'])->name('courses.subjects.update');
+    Route::delete('/courses/{course}/subjects/{subject}', [AdminCourseSubjectController::class, 'destroy'])->name('courses.subjects.destroy');
     Route::resource('courses', AdminCourseController::class);
 
     // Module 5: Batches & Attendance

@@ -26,6 +26,21 @@ class CourseSubject extends Model
         return $this->belongsTo(Course::class);
     }
 
+    public function examResults()
+    {
+        return $this->hasMany(ExamResultSubject::class, 'course_subject_id');
+    }
+
+    public function questions()
+    {
+        return $this->hasMany(Question::class, 'course_subject_id');
+    }
+
+    public function studyMaterials()
+    {
+        return $this->hasMany(StudyMaterial::class, 'course_subject_id');
+    }
+
     public function getTheoryMarksAttribute()
     {
         return $this->theory_max;

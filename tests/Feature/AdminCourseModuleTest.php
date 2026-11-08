@@ -154,4 +154,129 @@ class AdminCourseModuleTest extends TestCase
         $this->assertSoftDeleted('courses', ['id' => $course->id]);
         $response->assertRedirect(route('admin.courses.index'));
     }
+
+    public function test_admin_can_add_subject_with_marks_to_course(): void
+    {
+        $course = Course::first();
+        $this->assertNotNull($course);
+
+        $postData = [
+            'subject_code'   => 'SUB-T1',
+            'subject_name'   => 'Information Technology Fundamentals',
+            'theory_max'     => 70,
+            'practical_max'  => 20,
+            'viva_max'       => 10,
+            'min_pass_marks' => 40,
+            'sort_order'     => 1,
+        ];
+
+        $response = $this->actingAs($this->superAdmin)->post(
+            route('admin.courses.subjects.store', $course->id),
+            $postData
+        );
+
+        $response->assertRedirect(route('admin.courses.show', $course->id));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseHas('course_subjects', [
+            'course_id'       => $course->id,
+            'subject_code'    => 'SUB-T1',
+            'subject_name'    => 'Information Technology Fundamentals',
+            'theory_max'      => 70,
+            'practical_max'   => 20,
+            'viva_max'        => 10,
+            'total_max'       => 100,
+            'min_pass_marks'  => 40,
+        ]);
+    }
+
+    public function test_admin_can_update_subject_and_marks(): void
+    {
+        $course = Course::first();
+        $subject = $course->subjects()->create([
+            'subject_code'   => 'OLD-01',
+            'subject_name'   => 'Old Subject Name',
+            'theory_max'     => 50,
+            'practical_max'  => 50,
+            'viva_max'       => 0,
+            'total_max'      => 100,
+            'min_pass_marks' => 35,
+            'sort_order'     => 2,
+        ]);
+
+        $updateData = [
+            'subject_code'   => 'NEW-01',
+            'subject_name'   => 'Revised Subject Name',
+            'theory_max'     => 60,
+            'practical_max'  => 30,
+            'viva_max'       => 10,
+            'min_pass_marks' => 40,
+            'sort_order'     => 3,
+        ];
+
+        $response = $this->actingAs($this->superAdmin)->put(
+            route('admin.courses.subjects.update', [$course->id, $subject->id]),
+            $updateData
+        );
+
+        $response->assertRedirect(route('admin.courses.show', $course->id));
+        $response->assertSessionHas('success');
+
+        $subject->refresh();
+        $this->assertEquals('NEW-01', $subject->subject_code);
+        $this->assertEquals('Revised Subject Name', $subject->subject_name);
+        $this->assertEquals(60, $subject->theory_max);
+        $this->assertEquals(30, $subject->practical_max);
+        $this->assertEquals(10, $subject->viva_max);
+        $this->assertEquals(100, $subject->total_max);
+        $this->assertEquals(40, $subject->min_pass_marks);
+    }
+
+    public function test_admin_can_delete_course_subject(): void
+    {
+        $course = Course::first();
+        $subject = $course->subjects()->create([
+            'subject_code'   => 'DEL-SUB',
+            'subject_name'   => 'Subject to be Deleted',
+            'theory_max'     => 100,
+            'practical_max'  => 0,
+            'viva_max'       => 0,
+            'total_max'      => 100,
+            'min_pass_marks' => 40,
+            'sort_order'     => 5,
+        ]);
+
+        $response = $this->actingAs($this->superAdmin)->delete(
+            route('admin.courses.subjects.destroy', [$course->id, $subject->id])
+        );
+
+        $response->assertRedirect(route('admin.courses.show', $course->id));
+        $response->assertSessionHas('success');
+
+        $this->assertDatabaseMissing('course_subjects', [
+            'id' => $subject->id,
+        ]);
+    }
+
+    public function test_subject_validation_rejects_pass_marks_exceeding_total(): void
+    {
+        $course = Course::first();
+
+        $postData = [
+            'subject_code'   => 'INV-01',
+            'subject_name'   => 'Invalid Passing Marks',
+            'theory_max'     => 50,
+            'practical_max'  => 20,
+            'viva_max'       => 0, // total_max = 70
+            'min_pass_marks' => 80, // > 70
+            'sort_order'     => 1,
+        ];
+
+        $response = $this->actingAs($this->superAdmin)->post(
+            route('admin.courses.subjects.store', $course->id),
+            $postData
+        );
+
+        $response->assertSessionHasErrors(['min_pass_marks']);
+    }
 }

@@ -25,6 +25,19 @@
     </div>
 </div>
 
+<div class="alert alert-info border-0 shadow-sm d-flex justify-content-between align-items-center mb-4">
+    <div class="d-flex align-items-center">
+        <i class="fa-solid fa-book-bookmark fs-4 text-primary me-3"></i>
+        <div>
+            <div class="fw-bold text-dark">Course Curriculum Subjects & Marking Scheme</div>
+            <div class="small text-muted">This course currently has <strong>{{ $course->subjects->count() }}</strong> configured subjects (Total Marks: {{ $course->subjects->sum('total_max') }}).</div>
+        </div>
+    </div>
+    <a href="{{ route('admin.courses.show', $course->id) }}#subjects-section" class="btn btn-sm btn-primary shadow-sm text-nowrap">
+        <i class="fa-solid fa-list-check me-1"></i> Manage Subjects & Marks
+    </a>
+</div>
+
 <form method="POST" action="{{ route('admin.courses.update', $course->id) }}" enctype="multipart/form-data">
     @csrf
     @method('PUT')

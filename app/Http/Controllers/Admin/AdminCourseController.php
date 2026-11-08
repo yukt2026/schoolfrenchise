@@ -123,7 +123,7 @@ class AdminCourseController extends Controller
         ]);
 
         return redirect()->route('admin.courses.show', $course->id)
-            ->with('success', "Course [{$course->course_code} - {$course->course_name}] created successfully.");
+            ->with('success', "Course [{$course->course_code} - {$course->course_name}] created successfully. You can now configure curriculum subjects and marking scheme below.");
     }
 
     public function show(Course $course)
